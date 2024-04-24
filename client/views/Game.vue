@@ -15,7 +15,7 @@
                 :card="card"
                 :key="card"
                 :class="{
-                    'absolute cursor-pointer -bottom-16': true,
+                    'absolute cursor-pointer -bottom-14': true,
                     '-translate-y-[10vh]': clickedCard === card,
                 }"
                 :style="cards.includes(card) ? `left: ${i * 5.5}vw` : ''"
@@ -316,8 +316,6 @@ watch([teammate, me, leftOpp, rightOpp], (user, old) => {
     }
 });
 
-const lastPlayed = ref("");
-
 const setValues = async (r: Room) => {
     const oldRoom = { ...room.value };
 
@@ -358,26 +356,8 @@ const setValues = async (r: Room) => {
         startRoom();
     }
 
-    lastPlayed.value =
-        r.card_position_4 ||
-        r.card_position_3 ||
-        r.card_position_2 ||
-        r.card_position_1 ||
-        lastPlayed.value;
-
-    if (
-        !(
-            r.card_position_1 &&
-            r.card_position_2 &&
-            r.card_position_3 &&
-            r.card_position_4
-        )
-    ) {
-        if (r.turn == me.value?.position) {
-            playSound({ id: "turn" });
-        } else if (r.turn) {
-            playSound({ id: "turnChange" });
-        }
+    if (r.turn && (r.turn_rung || r.turn == me.value?.position)) {
+        playSound({ id: r.turn == me.value?.position ? "turn" : "turnChange" });
     }
 };
 
@@ -480,10 +460,11 @@ const startTurn = () => {
 const reseting = ref(false);
 const resetRoom = async () => {
     reseting.value = true;
-    lastPlayed.value = "";
 
     try {
         await updateRoom({
+            latest_turn: null,
+            latest_turn_position: null,
             ended_at: null,
             started_at: null,
             rung: null,
@@ -617,8 +598,14 @@ const hasTurnRungCard = computed(() =>
 
 const isCardBeingPlayed = ref(false);
 const canPlayCard = (card: string) => {
+    if (!me.value || !room.value) return;
+
     if (!isMyTurn.value || isCardBeingPlayed.value) return false;
-    if (cardNum(card) === 14 && cardNum(lastPlayed.value) === 14) {
+    if (
+        cardNum(card) === 14 &&
+        cardNum(me.value.latest_turn) === 14 &&
+        room.value.last_highest_card_position == me.value.position
+    ) {
         return false;
     }
 
@@ -717,9 +704,10 @@ const playCard = async (e: any, card: string) => {
     cards.value = newCards;
     sirs.value = newSirs;
 
-    const roomUsers = {
+    const roomUsers: any = {
         [me.value.position]: {
             cards: newCards,
+            latest_turn: card,
             sir_count: iAmWinner
                 ? me.value.sir_count + (oldSirs + 1)
                 : me.value.sir_count,
@@ -743,15 +731,17 @@ const playCard = async (e: any, card: string) => {
                 card_position_2: cardPositionsWithNull[2],
                 card_position_3: cardPositionsWithNull[3],
                 card_position_4: cardPositionsWithNull[4],
-                roomUsers: mapValues(roomUsers, (u) => {
-                    cards: u.cards;
-                }),
+                roomUsers: mapValues(roomUsers, (u) => ({
+                    cards: u.cards,
+                })),
             });
 
             await new Promise((resolve) => setTimeout(resolve, 1000));
         }
 
         await updateRoom({
+            latest_turn: card,
+            latest_turn_position: me.value.position,
             turn: newTurn,
             room_users: roomUsers,
             card_position_1: newCardsOnTable[1],

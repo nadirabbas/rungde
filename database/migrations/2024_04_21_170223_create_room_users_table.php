@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('position');
             $table->json('cards')->nullable();
             $table->integer('sir_count')->default(0);
+            $table->string('latest_turn')->nullable();
             $table->timestamps();
         });
     }

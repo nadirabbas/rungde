@@ -29,6 +29,8 @@ return new class extends Migration
             $table->timestamp('started_at')->nullable();
             $table->timestamp('ended_at')->nullable();
             $table->integer('last_highest_card_position')->nullable();
+            $table->string('latest_turn')->nullable();
+            $table->integer('latest_turn_position')->nullable();
             $table->timestamps();
         });
     }

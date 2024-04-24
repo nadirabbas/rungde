@@ -16,7 +16,8 @@ class RoomUser extends Pivot
         'user_id',
         'position',
         'cards',
-        'sir_count'
+        'sir_count',
+        'latest_turn'
     ];
 
     protected $casts = [

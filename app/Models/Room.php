@@ -24,7 +24,9 @@ class Room extends Model
         'rung_selector',
         'turn_rung',
         'total_turns',
-        'last_highest_card_position'
+        'last_highest_card_position',
+        'latest_turn',
+        'latest_turn_position'
     ];
 
     protected $appends = [

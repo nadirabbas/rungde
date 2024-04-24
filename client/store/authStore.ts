@@ -6,6 +6,7 @@ export interface RoomUser {
     position: 1 | 2 | 3 | 4;
     cards: string[];
     sir_count: number;
+    latest_turn: string;
 }
 
 export interface Room {
@@ -27,6 +28,8 @@ export interface Room {
     folded_deck_count: number;
     total_turns: number;
     last_highest_card_position: number;
+    latest_turn: string;
+    latest_turn_position: number;
 }
 
 export interface User {

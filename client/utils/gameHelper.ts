@@ -1,7 +1,6 @@
 import { maxBy, groupBy, mapValues } from "lodash-es";
-import { Ref } from "vue";
-
-export const cardNum = (card: string) => parseInt(card.substring(1));
+export const cardNum = (card?: string) =>
+    card ? parseInt(card.substring(1)) : 0;
 
 export const getHighestCard = (
     cards: string[],
