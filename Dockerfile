@@ -16,6 +16,4 @@ RUN npm run build
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
-RUN service nginx start
-
 CMD php artisan queue:work
