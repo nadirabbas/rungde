@@ -203,12 +203,20 @@
             class="fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 bg-black bg-opacity-90 rounded p-5 w-[70vw] h-[70vh] flex flex-col items-center justify-center text-white text-2xl"
             v-if="victory !== null || roomClosed"
         >
-            <span class="mb-5">
+            <span class="mb-10">
                 <template v-if="roomClosed">
-                    Room has been closed by the host...
+                    The room has been closed by the host.
                 </template>
+
+                <span v-if="goonCourt !== null">
+                    {{
+                        goonCourt
+                            ? "Nice! it's a GOON COURT 🎉!"
+                            : "Well...this is embarrassing, it's a GOON COURT 😔"
+                    }}
+                </span>
                 <template v-else>
-                    {{ victory ? "You won" : "You lost" }}
+                    {{ victory ? "You have won!" : "You lost the game" }}
                 </template>
             </span>
 
@@ -285,6 +293,16 @@ const cards = ref<string[]>([]);
 const teammate = ref<RoomUser | null>();
 const opponents = ref<RoomUser[]>([]);
 
+const goonCourt = computed(() => {
+    if (ourScore.value === 13) {
+        return true;
+    } else if (theirScore.value === 13) {
+        return false;
+    }
+
+    return null;
+});
+
 const isHost = computed(() => me.value?.position == 1);
 
 const getOpp = (pos: "right" | "left") => {
@@ -324,7 +342,7 @@ const { play: playSound } = useSound("/audio/sprite.opus", {
             turnLost: [7327, 8128],
             wonSir: [8251, 9911],
             lostSir: [10079, 13512],
-            victory: [13648, 170300],
+            victory: [13648, 16560],
             defeat: [17155, 21484],
             cardPlayed: [22651, 23348],
         },
@@ -628,6 +646,12 @@ const initSocket = async () => {
                 leftPos: string;
             }) => {
                 if (leftPos) {
+                    if (leftPos == me.value?.position.toString()) {
+                        alert("You have been removed by the host.");
+                        goHome();
+                        return;
+                    }
+
                     setParticipants(r.participants);
                     resetRoom();
                     return;
@@ -722,7 +746,10 @@ const cardUnhovered = (e: any) => {
 };
 
 const userMostSirs = computed(() => {
-    return maxBy(room.value?.participants, (p) => p.sir_count) as RoomUser;
+    return maxBy(
+        room.value?.participants || [],
+        (p) => p.sir_count
+    ) as RoomUser;
 });
 
 const playCard = async (e: any, card: string) => {
