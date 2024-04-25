@@ -1,5 +1,4 @@
-FROM php:8.2-fpm-alpine
-FROM node:20.11.0-alpine
+FROM officialnadir/php-gerty:2.0
 
 RUN apk add nginx
 
