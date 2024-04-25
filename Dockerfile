@@ -15,4 +15,4 @@ RUN npm run build
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
-CMD nginx && php artisan queue:work
+CMD nginx && php-fpm
