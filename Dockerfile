@@ -3,7 +3,7 @@ RUN apk add nginx php8-fpm
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-WORKDIR /user/src/app
+WORKDIR /usr/src/app
 
 COPY package*.json ./
 RUN npm install
