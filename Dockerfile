@@ -7,14 +7,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 WORKDIR /var/www/html
 
 COPY package*.json ./
-RUN yarn install
+RUN npm install
 
 
 COPY composer.* ./
 RUN composer install
 
 COPY . . 
-RUN yarn build
+RUN npm run build
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
