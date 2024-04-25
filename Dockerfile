@@ -1,4 +1,5 @@
 FROM officialnadir/php-gerty:2.0
+RUN apk add nginx
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
@@ -11,5 +12,7 @@ COPY . .
 RUN composer install
 
 RUN npm run build
+
+COPY nginx.conf /etc/nginx/nginx.conf
 
 CMD nginx
