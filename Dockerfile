@@ -1,5 +1,5 @@
 FROM officialnadir/php-gerty:2.0
-RUN apk add nginx
+RUN apk add nginx php8-fpm
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
