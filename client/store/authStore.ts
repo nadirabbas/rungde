@@ -30,6 +30,7 @@ export interface Room {
     last_highest_card_position: number;
     latest_turn: string;
     latest_turn_position: number;
+    last_winner_id: number | null;
 }
 
 export interface User {

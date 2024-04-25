@@ -443,8 +443,12 @@ const startRoom = async () => {
 
     starting.value = true;
     setTimeout(async () => {
+        const mostSirUser = room.value?.last_winner_id
+            ? getUserById(room.value?.last_winner_id)
+            : null;
+
         const rungSelector =
-            room.value?.turn || Math.floor(Math.random() * 4) + 1;
+            mostSirUser?.position || Math.floor(Math.random() * 4) + 1;
 
         await updateRoom({
             started_at: moment().toISOString(),
@@ -704,6 +708,10 @@ const getUserByPosition = (position: number) => {
     return room.value?.participants.find((u) => u?.position == position);
 };
 
+const getUserById = (id: number) => {
+    return room.value?.participants.find((u) => u?.user.id == id);
+};
+
 const cardHovered = (e: any, card: string) => {
     if (!canPlayCard(card)) return;
     clickedCard.value = card;
@@ -713,9 +721,8 @@ const cardUnhovered = (e: any) => {
     clickedCard.value = null;
 };
 
-const userPositionWithMostSirs = computed(() => {
-    return maxBy(room.value?.participants, (p) => p.sir_count)
-        ?.position as number;
+const userMostSirs = computed(() => {
+    return maxBy(room.value?.participants, (p) => p.sir_count) as RoomUser;
 });
 
 const playCard = async (e: any, card: string) => {
@@ -770,7 +777,7 @@ const playCard = async (e: any, card: string) => {
           }
         : cardPositionsWithNull;
     const newTurn = isVeryLastTurn
-        ? userPositionWithMostSirs.value
+        ? 0
         : isLastTurn
         ? newHighestCardPosition
         : turnPos.value === 4
@@ -839,6 +846,7 @@ const playCard = async (e: any, card: string) => {
                     : newHighestCardPosition
                 : undefined,
             ended_at: isVeryLastTurn ? moment().toISOString() : undefined,
+            last_winner_id: userMostSirs.value?.user.id,
         });
     } catch (err) {
         cards.value = oldCards;
