@@ -19,4 +19,4 @@ RUN cp -r /user/src/app/* /var/www/html
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
-CMD nginx
+CMD nginx && php artisan queue:work
