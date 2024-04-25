@@ -3,7 +3,7 @@ RUN apk add nginx
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-WORKDIR /usr/src/app
+WORKDIR /var/www/html
 
 COPY package*.json ./
 RUN npm install
