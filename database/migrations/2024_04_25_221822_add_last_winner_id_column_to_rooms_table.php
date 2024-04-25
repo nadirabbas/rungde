@@ -13,7 +13,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('rooms', function (Blueprint $table) {
-            $table->foreignIdFor(User::class, 'last_winner_id')->nullable()->constrained()->nullOnDelete();
+            $table->unsignedBigInteger('last_winner_id')->nullable();
+            $table->foreign('last_winner_id')->references('id')->on('users')->nullOnDelete();
         });
     }
 
