@@ -1,4 +1,5 @@
 FROM officialnadir/php-gerty:2.0
+RUN apk add openrc --no-cache
 RUN apk add nginx php8-fpm
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
@@ -15,4 +16,6 @@ RUN npm run build
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
-CMD nginx && php-fpm
+RUN service nginx start
+
+CMD php artisan queue:work
