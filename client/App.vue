@@ -1,26 +1,22 @@
 <template>
     <div>
-        <template v-if="generalStore.started">
-            <div
-                class="z-10 fixed w-full h-full left-0 top-0 flex items-center justify-center bg-white"
-                v-show="generalStore.loading"
-            >
-                <Spinner />
-            </div>
+        <div
+            class="z-10 fixed w-full h-full left-0 top-0 flex items-center justify-center bg-white"
+            v-show="generalStore.loading"
+        >
+            <Spinner />
+        </div>
 
-            <div
-                class="portrait-only w-full min-h-screen items-center justify-center"
-            >
-                <p class="text-2xl">Please rotate your device</p>
-            </div>
-            <div class="landscape-only">
-                <component :is="layout">
-                    <router-view />
-                </component>
-            </div>
-        </template>
-
-        <Start @start="generalStore.started = true" v-else />
+        <div
+            class="portrait-only w-full min-h-screen items-center justify-center"
+        >
+            <p class="text-2xl">Please rotate your device</p>
+        </div>
+        <div class="landscape-only">
+            <component :is="layout">
+                <router-view />
+            </component>
+        </div>
     </div>
 </template>
 

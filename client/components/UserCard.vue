@@ -1,33 +1,28 @@
 <template>
-    <div class="flex items-center">
+    <button class="flex items-center">
         <span
             :class="{
-                'w-8 h-8 rounded-full text-white text-sm flex items-center justify-center ': true,
-                ' bg-green-500': friend,
-                ' bg-red-500': !friend,
-                'border-[3px] border-white shadow-lg golden-glow': active,
+                'py-1 rounded-full  text-sm flex text-white items-center justify-center ': true,
+                ' bg-green-500': friend && name,
+                ' bg-red-500': !friend && name,
+                'bg-gray-500': !name,
+                'border-[3px] border-[#ffd700]': active,
+                'px-3': !showMenu,
+                'pl-3 pr-2': showMenu,
             }"
         >
-            {{ capital(name ? name[0] : "?") }}
-        </span>
-
-        <div class="flex-1 ml-1">
-            <h3
-                :class="{
-                    'font-semibold': true,
-                    'text-green-500': friend,
-                    'text-red-500': !friend,
-                }"
-            >
+            <span>
                 {{ name || "Waiting for user..." }}
-            </h3>
-        </div>
-    </div>
+            </span>
+
+            <ChevronDownIcon class="ml-1 w-4" v-if="showMenu" />
+        </span>
+    </button>
 </template>
 
 <script setup lang="ts">
 import { capital } from "case";
-import { ArrowRightIcon, ArrowLeftIcon } from "heroicons-vue3/solid";
+import { ChevronDownIcon } from "heroicons-vue3/solid";
 
 const turnArrow = (c: string) => `p-1 rounded-full bg-white ${c}`;
 
@@ -35,6 +30,7 @@ const props = defineProps({
     name: String,
     friend: Boolean,
     active: null,
+    showMenu: Boolean,
 });
 </script>
 

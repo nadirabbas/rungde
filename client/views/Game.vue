@@ -31,26 +31,34 @@
             :name="authStore.user.username"
             class="fixed right-5 bottom-5"
             friend
-            :active="room.started_at && turnPos == me.position && 'left'"
+            :active="turnPos && turnPos == me.position && 'left'"
+            show-menu
+            @click="openMenu(me)"
         />
 
         <UserCard
             :name="teammate?.user.username"
             friend
             class="fixed left-1/2 -translate-x-1/2 top-5"
-            :active="room.started_at && turnPos == teammate?.position && 'left'"
+            :active="turnPos && turnPos == teammate?.position && 'left'"
+            :show-menu="isHost && !!teammate"
+            @click="isHost && openMenu(teammate)"
         />
 
         <UserCard
             :name="rightOpp?.user.username"
             class="fixed top-1/2 -translate-y-1/2 right-5"
-            :active="room.started_at && turnPos == rightOpp?.position && 'left'"
+            :active="turnPos && turnPos == rightOpp?.position && 'left'"
+            :show-menu="isHost && !!rightOpp"
+            @click="isHost && openMenu(rightOpp)"
         />
 
         <UserCard
             :name="leftOpp?.user.username"
             class="fixed top-1/2 -translate-y-1/2 left-5"
-            :active="room.started_at && turnPos == leftOpp?.position && 'right'"
+            :active="turnPos && turnPos == leftOpp?.position && 'right'"
+            :show-menu="isHost && !!leftOpp"
+            @click="isHost && openMenu(leftOpp)"
         />
 
         <div class="fixed top-5 right-5 flex items-center justify-center gap-2">
@@ -79,10 +87,13 @@
             class="fixed left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2"
             v-if="!room.started_at || !room.rung || rungSelected"
         >
-            <template v-if="!room.started_at">
+            <template v-if="!room.started_at || roomPaused">
                 <div
                     class="flex flex-col"
-                    v-if="!starting && room.participants.length !== 4"
+                    v-if="
+                        (!starting && room.participants.length !== 4) ||
+                        roomPaused
+                    "
                 >
                     <div
                         class="bg-red-500 text-sm text-center rounded-t text-white"
@@ -99,7 +110,13 @@
                 </div>
             </template>
 
-            <template v-if="room.started_at && (!room.rung || rungSelected)">
+            <template
+                v-if="
+                    room.started_at &&
+                    !roomPaused &&
+                    (!room.rung || rungSelected)
+                "
+            >
                 <div class="bg-white rounded p-2 min-w-[20vw]">
                     <template v-if="!room.rung">
                         <template v-if="me.position === rungSelector">
@@ -183,25 +200,43 @@
         </div>
 
         <div
-            class="fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 bg-black bg-opacity-70 rounded p-5 w-[70vw] h-[70vh] flex flex-col items-center justify-center text-white text-2xl golden-glow"
-            v-if="victory !== null"
+            class="fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 bg-black bg-opacity-90 rounded p-5 w-[70vw] h-[70vh] flex flex-col items-center justify-center text-white text-2xl"
+            v-if="victory !== null || roomClosed"
         >
             <span class="mb-5">
-                {{ victory ? "You won" : "You lost" }}
+                <template v-if="roomClosed">
+                    Room has been closed by the host...
+                </template>
+                <template v-else>
+                    {{ victory ? "You won" : "You lost" }}
+                </template>
             </span>
 
             <Button
-                v-if="isHost"
+                v-if="isHost || roomClosed"
                 class="rd-bg"
-                @click="resetRoom"
-                :disabled="!room.is_ended || reseting"
-                >{{ reseting ? "Starting..." : "Start new game" }}</Button
+                @click="roomClosed ? goHome() : resetRoom()"
+                :disabled="!roomClosed && (!room.is_ended || reseting)"
             >
+                <template v-if="roomClosed">Leave room</template>
+                <template v-else>
+                    {{ reseting ? "Starting..." : "Start new game" }}
+                </template>
+            </Button>
         </div>
+
+        <GameMenu
+            :user="openMenuFor"
+            :is-self="openMenuFor.position == me.position"
+            :is-host="me.position == 1"
+            @close="openMenuFor = null"
+            v-if="openMenuFor"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
+import GameMenu from "../components/GameMenu.vue";
 import { usePusher } from "../composables/usePusher";
 import FullscreenLoader from "../components/FullscreenLoader.vue";
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
@@ -291,7 +326,7 @@ const { play: playSound } = useSound("/audio/sprite.opus", {
             lostSir: [10079, 13512],
             victory: [13648, 170300],
             defeat: [17155, 21484],
-            turnChange: [22651, 23348],
+            cardPlayed: [22651, 23348],
         },
         ([s, e]: [number, number]) => [s, e - s]
     ),
@@ -316,6 +351,18 @@ watch([teammate, me, leftOpp, rightOpp], (user, old) => {
     }
 });
 
+const roomPaused = computed(() => (room.value?.participants.length || 0) < 4);
+
+const setParticipants = (participants: RoomUser[]) => {
+    room.value!.participants = participants;
+    me.value = participants.find(
+        (p: RoomUser) => p.user.id === authStore.user?.id
+    );
+    teammate.value = participants.find(
+        (p) => !isOpponent(p.position) && p.position !== me.value?.position
+    );
+    opponents.value = participants.filter((p) => isOpponent(p.position));
+};
 const setValues = async (r: Room) => {
     const oldRoom = { ...room.value };
 
@@ -356,10 +403,18 @@ const setValues = async (r: Room) => {
         startRoom();
     }
 
-    if (r.turn && (r.turn_rung || r.turn == me.value?.position)) {
-        playSound({ id: r.turn == me.value?.position ? "turn" : "turnChange" });
+    if (r.turn == me.value?.position) {
+        playSound({ id: "turn" });
+    }
+
+    if (r.turn && r.turn_rung) {
+        playSound({ id: "cardPlayed" });
     }
 };
+
+const isDevelopment = computed(
+    () => import.meta.env.NODE_ENV === "development"
+);
 
 const verifyRoom = async () => {
     loading.value = true;
@@ -459,6 +514,8 @@ const startTurn = () => {
 
 const reseting = ref(false);
 const resetRoom = async () => {
+    if (!isHost.value) return false;
+
     reseting.value = true;
 
     try {
@@ -510,6 +567,8 @@ const resetHandler = (e: any) => {
     }
 };
 
+const roomClosed = ref(false);
+
 onMounted(() => {
     try {
         window.removeEventListener("keydown", resetHandler);
@@ -541,6 +600,7 @@ const victory = computed(() => {
         return false;
     }
 });
+const goHome = () => (window.location.href = "/");
 const initSocket = async () => {
     loading.value = true;
 
@@ -552,18 +612,40 @@ const initSocket = async () => {
         window.channel = window.pusher.subscribe(
             `private-room.${room.value?.id}`
         );
-        window.channel.bind("updated", ({ room: r }: { room: Room }) => {
-            if (r.rung && !rung.value) {
-                rungSelected.value = r.rung;
-                playSound({ id: "rungSelected" });
-                rung.value = r.rung;
-                setTimeout(() => {
-                    rungSelected.value = "";
-                    startTurn();
-                }, 5000);
+        window.channel.bind(
+            "updated",
+            ({
+                room: r,
+                closed,
+                leftPos,
+            }: {
+                room: Room;
+                closed: Boolean;
+                leftPos: string;
+            }) => {
+                if (leftPos) {
+                    setParticipants(r.participants);
+                    resetRoom();
+                    return;
+                }
+
+                if (closed) {
+                    roomClosed.value = true;
+                    return;
+                }
+
+                if (r.rung && !rung.value) {
+                    rungSelected.value = r.rung;
+                    playSound({ id: "rungSelected" });
+                    rung.value = r.rung;
+                    setTimeout(() => {
+                        rungSelected.value = "";
+                        startTurn();
+                    }, 5000);
+                }
+                setValues(r);
             }
-            setValues(r);
-        });
+        );
 
         loadAssets();
     } catch (err) {
@@ -598,7 +680,7 @@ const hasTurnRungCard = computed(() =>
 
 const isCardBeingPlayed = ref(false);
 const canPlayCard = (card: string) => {
-    if (!me.value || !room.value) return;
+    if (!me.value || !room.value || roomPaused.value) return;
 
     if (!isMyTurn.value || isCardBeingPlayed.value) return false;
     if (
@@ -813,5 +895,10 @@ const confirmRung = async () => {
     }
 
     selectingRung.value = false;
+};
+
+const openMenuFor = ref<RoomUser>();
+const openMenu = (user: RoomUser) => {
+    openMenuFor.value = user;
 };
 </script>

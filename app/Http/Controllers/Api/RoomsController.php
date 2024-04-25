@@ -45,7 +45,7 @@ class RoomsController extends Controller
         $room->update($request->all());
 
         if ($request->input('room_users')) {
-            collect($request->room_users)->each(fn ($users, $position) => $room->participants()->where('position', $position)->first()->update($users));
+            collect($request->room_users)->each(fn ($users, $position) => $room->participants()->where('position', $position)->first()?->update($users));
         }
 
         broadcast(new RoomUpdatedEvent($room->fresh()->load('participants')));
@@ -73,13 +73,12 @@ class RoomsController extends Controller
             ];
         }
 
-        if ($room->participants()->count() === 4) {
+        $joined = $this->joinRoom($room, $request->user());
+        if (!$joined) {
             return response()->json([
                 'message' => 'Room is full'
             ], 422);
         }
-
-        $this->joinRoom($room, $request->user());
 
         return [
             'room' => $room
@@ -88,12 +87,67 @@ class RoomsController extends Controller
 
     protected function joinRoom(Room $room, User $user)
     {
-        $room->participants()->create([
+        // get availabe position
+        $position = $room->participants()->pluck('position')->toArray();
+        $position = array_diff([1, 2, 3, 4], $position);
+        $position = array_values($position);
+
+        if (!count($position)) return false;
+
+        $roomUser = $room->participants()->create([
             'room_id' => $room->id,
             'user_id' => $user->id,
-            'position' => $room->participants()->count() + 1
+            'position' => $position[0]
         ]);
 
         broadcast(new RoomUpdatedEvent($room->fresh()->load('participants')));
+
+        return $roomUser;
+    }
+
+    public function leave(Request $request)
+    {
+        $user = $request->user();
+        $room = $user->room;
+        $roomUser = $room->participants()->where('user_id', $user->id)->first();
+
+        if ($room) {
+            $room->participants()->where('user_id', $request->user()->id)->delete();
+            broadcast(new RoomUpdatedEvent($room->fresh()->load('participants'), false, $roomUser->position));
+        }
+
+        return [
+            'message' => 'You have left the room'
+        ];
+    }
+
+    public function close(Request $request)
+    {
+        $room = $request->user()->room;
+
+        if ($room) {
+            $room->delete();
+            broadcast(new RoomUpdatedEvent($room, true));
+        }
+
+        return [
+            'message' => 'Room has been closed'
+        ];
+    }
+
+    public function kick(Request $request)
+    {
+        $user = $request->user();
+        $room = $user->room;
+
+        if ($room) {
+            $roomUser = $room->participants()->where('position', $request->position)->first();
+            $roomUser->delete();
+            broadcast(new RoomUpdatedEvent($room->fresh()->load('participants'), false, $roomUser->position));
+        }
+
+        return [
+            'message' => 'User has been kicked'
+        ];
     }
 }

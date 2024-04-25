@@ -1080,6 +1080,13 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.20.2.tgz#9c907b21e30a52db959ba4f80bb01a0cc403d5cc"
   integrity sha512-N49X4lJX27+l9jbLKSqZ6bKNjzQvHaT8IIFUy+YIqmXQdjYCToGWwOItDrfby14c78aDd5NHQl29xingXfCdLQ==
 
+"@headlessui/vue@^1.7.20":
+  version "1.7.20"
+  resolved "https://registry.yarnpkg.com/@headlessui/vue/-/vue-1.7.20.tgz#4108e27c9bd8f06d5ef6d83f33c740a874938dec"
+  integrity sha512-y83833wFo/+0FOrblgESiuvGwcHnfu8T2XQHb3iVA9GVSUVs3VLptp2bXlF5IR4IFD3Klr+jQEfreF6bSJNdOA==
+  dependencies:
+    "@tanstack/vue-virtual" "^3.0.0-beta.60"
+
 "@isaacs/cliui@^8.0.2":
   version "8.0.2"
   resolved "https://registry.yarnpkg.com/@isaacs/cliui/-/cliui-8.0.2.tgz#b37667b7bc181c168782259bab42474fbf52b550"
@@ -1302,6 +1309,18 @@
     json5 "^2.2.0"
     magic-string "^0.25.0"
     string.prototype.matchall "^4.0.6"
+
+"@tanstack/virtual-core@3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/virtual-core/-/virtual-core-3.4.0.tgz#afd72bc5a839b71c2cda87a738eb4eb18451b80a"
+  integrity sha512-75jXqXxqq5M5Veb9KP1STi8kA5u408uOOAefk2ftHDGCpUk3RP6zX++QqfbmHJTBiU72NQ+ghgCZVts/Wocz8Q==
+
+"@tanstack/vue-virtual@^3.0.0-beta.60":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/vue-virtual/-/vue-virtual-3.4.0.tgz#8f320277cbd08280df4a12508ce050632e39c095"
+  integrity sha512-OHZGsmE89rpouVDGDOCtJTu64gLUzVq5FGkL2YY/wtZXu5QRSi5ep3T25Ivd53HQI3A169H01uwVPD0mEXKm9A==
+  dependencies:
+    "@tanstack/virtual-core" "3.4.0"
 
 "@types/estree@0.0.39":
   version "0.0.39"

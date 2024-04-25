@@ -22,6 +22,11 @@ Route::post('/auth/logout', [AuthController::class, 'logout']);
 Route::middleware('auth')->group(function () {
     Route::get('/me', [UsersController::class, 'me']);
 
+    Route::put('/room/leave', [RoomsController::class, 'leave']);
+    Route::put('/room/close', [RoomsController::class, 'close']);
+    Route::put('/room/kick', [RoomsController::class, 'kick']);
+
+
     Route::get('/rooms/current', [RoomsController::class, 'current']);
     Route::put('/rooms/join', [RoomsController::class, 'join']);
     Route::resource('rooms', RoomsController::class);

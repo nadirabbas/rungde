@@ -15,10 +15,14 @@ class RoomUpdatedEvent implements ShouldBroadcastNow
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public Room $room;
+    public bool $closed;
+    public string $leftPos;
 
-    public function __construct(Room $room)
+    public function __construct(Room $room, ?bool $closed = null, ?string $leftPos = null)
     {
         $this->room = $room;
+        $this->closed = $closed ?? false;
+        $this->leftPos = $leftPos ?? '';
     }
 
     /**
