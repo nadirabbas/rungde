@@ -24,6 +24,7 @@ export default defineConfig({
             outDir: 'public',
             registerType: 'autoUpdate', manifest: {
                 theme_color: '#004e92',
+                start_url: '/',
                 icons: [
                     {
                         src: '/images/pwa-192x192.png',
