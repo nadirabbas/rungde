@@ -1,5 +1,8 @@
 version: "3"
 
+networks:
+    mysql:
+
 services:
     rungde:
         build:
@@ -8,6 +11,8 @@ services:
         container_name: rungde
         ports:
             - "80:80"
+        networks:
+            - mysql
 
     mysql:
         image: mysql:8.3
@@ -25,3 +30,5 @@ services:
             SERVICE_NAME: mysql
         volumes:
             - /home/meemalifaaeenforwork/rungde-data:/var/lib/mysql
+        networks:
+            - mysql
