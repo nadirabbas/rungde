@@ -9,12 +9,13 @@ WORKDIR /var/www/html
 
 COPY package*.json ./
 RUN yarn install
-RUN yarn build
+
 
 COPY composer.* ./
 RUN composer install
 
 COPY . . 
+RUN yarn build
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
