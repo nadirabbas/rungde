@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/auth/oauth', [AuthController::class, 'oauth']);
+Route::get('/auth/callback', [AuthController::class, 'callback']);
+
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/logout', [AuthController::class, 'logout']);
 

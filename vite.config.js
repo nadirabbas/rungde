@@ -21,7 +21,9 @@ export default defineConfig({
             outDir: 'public',
             registerType: 'autoUpdate', manifest: {
                 theme_color: '#004e92',
+                orientation: 'landscape',
                 start_url: '/',
+                display: 'fullscreen',
                 icons: [
                     {
                         src: '/images/pwa-192x192.png',
