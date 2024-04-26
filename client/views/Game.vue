@@ -185,7 +185,8 @@
 
                     <template v-if="rungSelected">
                         <p class="text-center font-medium text-sm mb-3">
-                            Rung selected!
+                            Rung selected by
+                            {{ rungSelectorUser?.user.username }}!
                         </p>
 
                         <div class="flex justify-center w-full">
@@ -200,7 +201,7 @@
         </div>
 
         <div
-            class="fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 bg-black bg-opacity-90 rounded p-5 w-[70vw] h-[70vh] flex flex-col items-center justify-center text-white text-2xl"
+            class="fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 bg-black bg-opacity-95 rounded p-5 w-[70vw] h-[70vh] flex flex-col items-center justify-center text-white text-2xl"
             v-if="victory !== null || roomClosed"
         >
             <span class="mb-10">
@@ -215,7 +216,7 @@
                             : "Well...this is embarrassing, it's a GOON COURT 😔"
                     }}
                 </span>
-                <template v-else>
+                <template v-else-if="victory !== null">
                     {{ victory ? "You have won!" : "You lost the game" }}
                 </template>
             </span>
@@ -421,12 +422,15 @@ const setValues = async (r: Room) => {
         startRoom();
     }
 
-    if (r.turn == me.value?.position) {
-        playSound({ id: "turn" });
-    }
+    const myTurnColumn = `card_position_${me.value?.position}`;
 
     if (r.turn && r.turn_rung) {
         playSound({ id: "cardPlayed" });
+    }
+
+    if (r.turn == me.value?.position) {
+        if (!oldRoom[myTurnColumn] && r[myTurnColumn]) return;
+        playSound({ id: "turn" });
     }
 };
 
@@ -640,13 +644,15 @@ const initSocket = async () => {
                 room: r,
                 closed,
                 leftPos,
+                removedPos,
             }: {
                 room: Room;
                 closed: Boolean;
                 leftPos: string;
+                removedPos: string;
             }) => {
-                if (leftPos) {
-                    if (leftPos == me.value?.position.toString()) {
+                if (leftPos || removedPos) {
+                    if (removedPos === me.value?.position.toString()) {
                         alert("You have been removed by the host.");
                         goHome();
                         return;
@@ -847,12 +853,12 @@ const playCard = async (e: any, card: string) => {
                 card_position_2: cardPositionsWithNull[2],
                 card_position_3: cardPositionsWithNull[3],
                 card_position_4: cardPositionsWithNull[4],
-                roomUsers: mapValues(roomUsers, (u) => ({
+                room_users: mapValues(roomUsers, (u) => ({
                     cards: u.cards,
                 })),
             });
 
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 3000));
         }
 
         await updateRoom({

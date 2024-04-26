@@ -17,12 +17,14 @@ class RoomUpdatedEvent implements ShouldBroadcastNow
     public Room $room;
     public bool $closed;
     public string $leftPos;
+    public string $removedPos;
 
-    public function __construct(Room $room, ?bool $closed = null, ?string $leftPos = null)
+    public function __construct(Room $room, ?bool $closed = null, ?string $leftPos = null, ?string $removedPos = null)
     {
         $this->room = $room;
         $this->closed = $closed ?? false;
         $this->leftPos = $leftPos ?? '';
+        $this->removedPos = $removedPos ?? '';
     }
 
     /**

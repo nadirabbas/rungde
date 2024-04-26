@@ -143,7 +143,7 @@ class RoomsController extends Controller
         if ($room) {
             $roomUser = $room->participants()->where('position', $request->position)->first();
             $roomUser->delete();
-            broadcast(new RoomUpdatedEvent($room->load('participants'), false, $roomUser->position));
+            broadcast(new RoomUpdatedEvent($room->load('participants'), false, '', $roomUser->position));
         }
 
         return [

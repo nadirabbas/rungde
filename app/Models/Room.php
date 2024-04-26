@@ -27,7 +27,9 @@ class Room extends Model
         'last_highest_card_position',
         'latest_turn',
         'latest_turn_position',
-        'last_winner_id'
+        'last_winner_id',
+        'team_1_3_wins',
+        'team_2_4_wins',
     ];
 
     protected $appends = [

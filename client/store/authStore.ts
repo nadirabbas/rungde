@@ -31,6 +31,8 @@ export interface Room {
     latest_turn: string;
     latest_turn_position: number;
     last_winner_id: number | null;
+    team_1_3_wins: number;
+    team_2_4_wins: number;
 }
 
 export interface User {
