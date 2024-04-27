@@ -37,7 +37,7 @@
             show-menu
             @click="openMenu(me)"
             :score="me?.sir_count"
-            :score-diff="turnPos == me.position && sirWinDiff"
+            :score-diff="turnPos == me?.position && sirWinDiff"
         />
 
         <UserCard
@@ -49,7 +49,7 @@
             :show-menu="isHost && !!teammate"
             @click="isHost && openMenu(teammate)"
             :score="teammate?.sir_count"
-            :score-diff="turnPos == teammate.position && sirWinDiff"
+            :score-diff="turnPos == teammate?.position && sirWinDiff"
         />
 
         <UserCard
@@ -60,7 +60,7 @@
             :show-menu="isHost && !!rightOpp"
             @click="isHost && openMenu(rightOpp)"
             :score="rightOpp?.sir_count"
-            :score-diff="turnPos == rightOpp.position && sirWinDiff"
+            :score-diff="turnPos == rightOpp?.position && sirWinDiff"
         />
 
         <UserCard
@@ -71,7 +71,7 @@
             :show-menu="isHost && !!leftOpp"
             @click="isHost && openMenu(leftOpp)"
             :score="leftOpp?.sir_count"
-            :score-diff="turnPos == leftOpp.position && sirWinDiff"
+            :score-diff="turnPos == leftOpp?.position && sirWinDiff"
         />
 
         <button
