@@ -8,7 +8,7 @@
         }"
     >
         <img
-            :src="`/cards/${card}.svg`"
+            :src="`/cards/${hidden ? 'back' : card}.svg`"
             :style="`min-width: ${width}vw; max-width: ${width}vw`"
             :class="{
                 rounded: true,
@@ -29,6 +29,7 @@ defineProps({
     high: Boolean,
     inactive: Boolean,
     highlighted: Boolean,
+    hidden: Boolean,
 });
 </script>
 

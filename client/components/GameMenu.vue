@@ -16,7 +16,7 @@
         <button
             :class="buttonClass('rd-bg mb-2 text-white')"
             @click="restartRoom"
-            v-if="isHost"
+            v-if="isHost && isSelf"
         >
             Restart room
         </button>

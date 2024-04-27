@@ -59,20 +59,34 @@ export const sortCardsByAlternateColor = (
     const sortedByRank = mapValues(groupedBySuite, (cards) =>
         cards.sort((a, b) => cardNum(b) - cardNum(a))
     );
-    const getCardsByColor = (color: string) => {
-        let suite;
-        if (color === "red") {
-            suite = sortedByRank.h ? "h" : "d";
-        } else {
-            suite = sortedByRank.c ? "c" : "s";
-        }
-
+    const getCardsBySuite = (suite: string) => {
         const cards = sortedByRank[suite] || [];
         delete sortedByRank[suite];
         return cards;
     };
 
-    return ["red", "black", "red", "black"].map(getCardsByColor).flat();
+    const order = rung
+        ? [0, 0, 0]
+              .reduce(
+                  (acc) => {
+                      const lastRung = acc[acc.length - 1];
+                      acc.push(
+                          //   @ts-ignore
+                          {
+                              h: "c",
+                              c: "d",
+                              d: "s",
+                              s: "h",
+                          }[lastRung]
+                      );
+                      return acc;
+                  },
+                  [rung]
+              )
+              .reverse()
+        : ["d", "c", "h", "s"];
+
+    return order.map(getCardsBySuite).flat();
 };
 
 export const pickRandomCards = (

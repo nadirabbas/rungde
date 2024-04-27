@@ -24,6 +24,7 @@
                 @click="playCard($event, card)"
                 :inactive="turnPos == me.position && !canPlayCard(card)"
                 :highlighted="card[0] === rung"
+                :hidden="!rung && rungSelector != me.position"
             />
         </div>
 
@@ -282,9 +283,7 @@ import Button from "../components/Button.vue";
 import Totals from "../components/Totals.vue";
 import {
     allCards,
-    getHighestCard,
     getHighCardPos,
-    pickRandomCards,
     sortCardsByAlternateColor,
     cardNum,
 } from "../utils/gameHelper";
@@ -295,6 +294,9 @@ import CardsOnTable from "../components/CardsOnTable.vue";
 import { useSound } from "@vueuse/sound";
 import { maxBy } from "lodash-es";
 import { mapValues } from "lodash-es";
+import { useDealer } from "../composables/useDealer";
+
+const dealer = useDealer();
 
 const router = useRouter();
 const render = ref(false);
@@ -468,6 +470,7 @@ const verifyRoom = async () => {
     try {
         const res = await api.get("/rooms/current");
         const r = res.data.room;
+        dealer._drawPile = r.deck;
         setValues(r);
 
         await initSocket();
@@ -487,6 +490,9 @@ const updateRoom = (data: any) => {
 const startRoom = async () => {
     if (!isHost.value) return;
 
+    dealer.reset();
+    dealer.shuffle();
+
     starting.value = true;
     setTimeout(async () => {
         const mostSirUser = room.value?.last_winner_id
@@ -499,11 +505,8 @@ const startRoom = async () => {
         await updateRoom({
             started_at: moment().toISOString(),
             rung_selector: rungSelector,
-            room_users: {
-                [rungSelector]: {
-                    cards: pickRandomCards(5),
-                },
-            },
+            room_users: distributeCards(rungSelector),
+            deck: dealer._drawPile,
         });
 
         starting.value = false;
@@ -512,53 +515,49 @@ const startRoom = async () => {
 
 const rungSelectorUser = computed(() => getUserByPosition(rungSelector.value));
 
+const distributeCards = (rungSelectorPos) => {
+    const positionOrder = [0, 0, 0].reduce(
+        (acc) => {
+            const nextValue = acc[acc.length - 1] + 1;
+            acc.push(nextValue > 4 ? nextValue - 4 : nextValue);
+            return acc;
+        },
+        [parseInt(rungSelectorPos)]
+    );
+
+    const roomUsers = rung.value
+        ? positionOrder.reduce((acc, pos) => {
+              acc[pos] = {
+                  cards: getUserByPosition(pos)?.cards || [],
+              };
+              return acc;
+          }, {})
+        : {};
+
+    const d = (p, n) => {
+        roomUsers[p] = {
+            cards: (roomUsers[p]?.cards || []).concat(dealer.draw(n)),
+        };
+    };
+
+    for (let i = 0; i < (rung.value ? 2 : 1); i++) {
+        positionOrder.forEach((pos) => {
+            d(pos, rung.value ? 4 : 5);
+        });
+    }
+
+    return mapValues(roomUsers, (u) => ({
+        cards: sortCardsByAlternateColor(u.cards, rung.value),
+    }));
+};
+
 const startTurn = () => {
     if (!isHost.value) return;
 
-    const rungSelectorCards = sortCardsByAlternateColor(
-        (rungSelectorUser.value?.cards || []).concat(
-            pickRandomCards(8, rungSelectorUser.value?.cards || [])
-        ),
-        rung.value
-    );
-    const secondSetOfCards = pickRandomCards(
-        13,
-        rungSelectorCards,
-        rung.value || ""
-    );
-    const thirdSetOfCards = pickRandomCards(
-        13,
-        secondSetOfCards.concat(rungSelectorCards)
-    );
-    const fourthSetOfCards = pickRandomCards(
-        13,
-        thirdSetOfCards.concat(secondSetOfCards).concat(rungSelectorCards)
-    );
-    const cardsArr = [secondSetOfCards, thirdSetOfCards, fourthSetOfCards];
-
-    const rungSelectorPos = parseInt(rungSelector.value.toString());
-
-    const roomUsers = {
-        [rungSelectorPos]: {
-            cards: rungSelectorCards,
-        },
-    };
-
-    let i = 1;
-    cardsArr.forEach((cards) => {
-        const pos =
-            rungSelectorPos + i > 4
-                ? rungSelectorPos + i - 4
-                : rungSelectorPos + i;
-        roomUsers[pos] = {
-            cards,
-        };
-        i++;
-    });
-
     return updateRoom({
         turn: rungSelector.value,
-        room_users: roomUsers,
+        room_users: distributeCards(rungSelector.value),
+        deck: dealer._drawPile,
     });
 };
 
@@ -566,6 +565,7 @@ const reseting = ref(false);
 const resetRoom = async (resetScore = false) => {
     if (!isHost.value) return false;
 
+    dealer.reset();
     reseting.value = true;
 
     try {
@@ -605,6 +605,7 @@ const resetRoom = async (resetScore = false) => {
             last_highest_card_position: null,
             team_1_3_wins: resetScore ? 0 : undefined,
             team_2_4_wins: resetScore ? 0 : undefined,
+            deck: dealer._drawPile,
         });
     } catch (error) {
         console.error(error);

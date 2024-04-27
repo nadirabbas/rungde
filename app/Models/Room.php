@@ -30,6 +30,7 @@ class Room extends Model
         'last_winner_id',
         'team_1_3_wins',
         'team_2_4_wins',
+        'deck'
     ];
 
     protected $appends = [
@@ -38,7 +39,8 @@ class Room extends Model
 
     protected $casts = [
         'started_at' => 'datetime',
-        'ended_at' => 'datetime'
+        'ended_at' => 'datetime',
+        'deck' => 'array'
     ];
 
     public function user()

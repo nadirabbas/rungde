@@ -33,6 +33,7 @@ export interface Room {
     last_winner_id: number | null;
     team_1_3_wins: number;
     team_2_4_wins: number;
+    deck: string[];
 }
 
 export interface User {

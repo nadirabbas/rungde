@@ -18,6 +18,7 @@
     "dependencies": {
         "@headlessui/vue": "^1.7.20",
         "@morev/vue-transitions": "^3.0.2",
+        "@nadir2k/card-dealer": "^2.0.0",
         "@vueuse/components": "^10.9.0",
         "@vueuse/core": "^10.9.0",
         "@vueuse/sound": "^2.0.1",
