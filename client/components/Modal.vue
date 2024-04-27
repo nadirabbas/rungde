@@ -2,17 +2,18 @@
     <TransitionFade>
         <div
             class="fixed top-0 left-0 w-screen h-screen flex items-center justify-center backdrop-blur-sm bg-black bg-opacity-70"
-            @click.self="$emit('close')"
+            @click.self="close"
             v-if="modelValue"
         >
             <div
-                class="bg-white rounded p-5 min-w-[25vw] flex flex-col items-center text-2xl"
+                :class="`bg-white rounded p-5 min-w-[25vw] flex flex-col items-center text-2xl max-h-[75vh] overflow-y-auto  ${bodyClass}`"
             >
                 <h1
                     :class="{
                         'w-full text-black text-center text-lg': true,
                         'mb-6': !loading,
                     }"
+                    v-if="!hideTitle"
                 >
                     <template v-if="loading">Please wait...</template>
                     <template v-else>{{ title }}</template>
@@ -27,9 +28,18 @@
 <script setup lang="ts">
 import { TransitionFade } from "@morev/vue-transitions";
 
+const emit = defineEmits(["update:modelValue", "close"]);
+
 defineProps({
     title: String,
     loading: Boolean,
     modelValue: Boolean,
+    bodyClass: String,
+    hideTitle: Boolean,
 });
+
+const close = () => {
+    emit("update:modelValue", false);
+    emit("close");
+};
 </script>

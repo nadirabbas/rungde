@@ -280,6 +280,13 @@
             :model-value="showTotals"
             @close="showTotals = false"
         />
+
+        <Chat
+            v-if="room"
+            :room="room"
+            :channel="channel"
+            :username="me?.user.username"
+        />
     </div>
 </template>
 
@@ -317,6 +324,9 @@ import { mapValues } from "lodash-es";
 import { useDealer } from "../composables/useDealer";
 import { TransitionFade } from "@morev/vue-transitions";
 import { useToast } from "vue-toast-notification";
+
+import Chat from "../components/Chat.vue";
+import { Channel } from "pusher-js";
 
 const dealer = useDealer();
 const toast = useToast({
@@ -530,6 +540,7 @@ const setValues = async (r: Room) => {
 };
 
 const isDevelopment = computed(
+    // @ts-ignore
     () => import.meta.env.NODE_ENV === "development"
 );
 
@@ -696,23 +707,8 @@ const resetHandler = (e: any) => {
 };
 
 const roomClosed = ref(false);
-
-onMounted(() => {
-    try {
-        window.removeEventListener("keydown", resetHandler);
-    } catch (err) {}
-    window.addEventListener("keydown", resetHandler);
-
-    if (window.pusher) {
-        try {
-            window.pusher.disconnect();
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    window.pusher = usePusher();
-});
+const pusher = usePusher();
+const channel = ref<Channel>();
 
 const victory = computed(() => {
     const ourScore =
@@ -733,14 +729,8 @@ const initSocket = async () => {
     loading.value = true;
 
     try {
-        if (window.channel) {
-            window.channel.unsubscribe();
-        }
-
-        window.channel = window.pusher.subscribe(
-            `private-room.${room.value?.id}`
-        );
-        window.channel.bind(
+        channel.value = pusher.subscribe(`private-room.${room.value?.id}`);
+        channel.value.bind(
             "updated",
             ({
                 room: r,

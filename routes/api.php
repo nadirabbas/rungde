@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\RoomChatController;
 use App\Http\Controllers\Api\RoomsController;
 use App\Http\Controllers\Api\UsersController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/room/close', [RoomsController::class, 'close']);
     Route::put('/room/kick', [RoomsController::class, 'kick']);
 
+
+    Route::put('/room/chat', [RoomChatController::class, 'newChat']);
 
     Route::get('/rooms/current', [RoomsController::class, 'current']);
     Route::put('/rooms/join', [RoomsController::class, 'join']);
