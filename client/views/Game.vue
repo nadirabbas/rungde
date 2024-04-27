@@ -971,7 +971,6 @@ const playCard = async (e: any, card: string) => {
                     : newHighestCardPosition
                 : undefined,
             ended_at: isVeryLastTurn ? moment().toISOString() : undefined,
-            last_winner_id: userMostSirs.value?.user.id,
         };
 
         if (room.value && isVeryLastTurn && winnerPosition) {
@@ -1005,6 +1004,16 @@ const playCard = async (e: any, card: string) => {
             data[winColumn + "_courts"] =
                 room.value[winColumn + "_courts"] +
                 (is_court && is_goon_court ? 1 : 0);
+
+            const winningParticipants = room.value.participants.filter((p) => {
+                const pos = parseInt(p.position.toString());
+                return pos % 2 !== (team_1_3_score > team_2_4_score ? 0 : 1);
+            });
+
+            data["last_winner_id"] = maxBy(
+                winningParticipants,
+                (p) => p.sir_count
+            )?.user.id;
         }
 
         await updateRoom(data);

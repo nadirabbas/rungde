@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { toRefs } from "vue";
+import { computed, toRefs } from "vue";
 import { scoreSpan } from "../views/Game.vue";
 import Modal from "./Modal.vue";
 const props = defineProps({
@@ -40,7 +40,7 @@ const props = defineProps({
 
 const refs = toRefs(props);
 
-const totals = [
+const totals = computed(() => [
     {
         name: "Courts",
         our: refs.ourCourts?.value,
@@ -52,5 +52,5 @@ const totals = [
         their: refs.theirGoonCourts?.value,
     },
     { name: "Overall", our: refs.ourWins?.value, their: refs.theirWins?.value },
-];
+]);
 </script>
