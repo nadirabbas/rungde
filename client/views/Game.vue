@@ -34,6 +34,7 @@
             :active="turnPos && turnPos == me.position && 'left'"
             show-menu
             @click="openMenu(me)"
+            :score="me?.sir_count"
         />
 
         <UserCard
@@ -43,6 +44,7 @@
             :active="turnPos && turnPos == teammate?.position && 'left'"
             :show-menu="isHost && !!teammate"
             @click="isHost && openMenu(teammate)"
+            :score="teammate?.sir_count"
         />
 
         <UserCard
@@ -51,6 +53,7 @@
             :active="turnPos && turnPos == rightOpp?.position && 'left'"
             :show-menu="isHost && !!rightOpp"
             @click="isHost && openMenu(rightOpp)"
+            :score="rightOpp?.sir_count"
         />
 
         <UserCard
@@ -59,12 +62,21 @@
             :active="turnPos && turnPos == leftOpp?.position && 'right'"
             :show-menu="isHost && !!leftOpp"
             @click="isHost && openMenu(leftOpp)"
+            :score="leftOpp?.sir_count"
         />
 
-        <div class="fixed top-5 right-5 flex items-center justify-center gap-2">
-            <span :class="scoreSpan('bg-green-500')">{{ ourScore }}</span>
-            <span :class="scoreSpan('bg-red-500')">{{ theirScore }}</span>
-        </div>
+        <button
+            class="fixed top-5 right-5 flex items-center justify-center"
+            @click="showTotals = true"
+        >
+            <span :class="scoreSpan('bg-green-600 rounded mr-1.5')">{{
+                ourScore
+            }}</span>
+            <span :class="scoreSpan('bg-red-600 rounded')">{{
+                theirScore
+            }}</span>
+            <ChevronDownIcon class="w-5 text-white ml-1" />
+        </button>
 
         <CardsOnTable
             :cards="cardsOnTable"
@@ -96,7 +108,7 @@
                     "
                 >
                     <div
-                        class="bg-red-500 text-sm text-center rounded-t text-white"
+                        class="bg-red-600 text-sm text-center rounded-t text-white"
                     >
                         Join code
                     </div>
@@ -153,7 +165,7 @@
                                     class="flex items-stretch w-full gap-2 mt-6"
                                 >
                                     <button
-                                        class="rounded bg-red-500 text-white py-2 px-3"
+                                        class="rounded bg-red-600 text-white py-2 px-3"
                                         @click="rungToConfrim = ''"
                                     >
                                         <XIcon class="w-4" />
@@ -205,7 +217,7 @@
             v-if="victory !== null || roomClosed"
         >
             <span class="mb-10">
-                <template v-if="roomClosed">
+                <template v-if="roomClosed && !isHost">
                     The room has been closed by the host.
                 </template>
 
@@ -236,10 +248,20 @@
 
         <GameMenu
             :user="openMenuFor"
-            :is-self="openMenuFor.position == me.position"
+            :is-self="openMenuFor?.position == me?.position"
             :is-host="me.position == 1"
             @close="openMenuFor = null"
-            v-if="openMenuFor"
+            :restart-fn="resetRoom"
+            :model-value="!!openMenuFor"
+        />
+
+        <Totals
+            :our-score="ourScore"
+            :their-score="theirScore"
+            :our-wins="ourTeamWins"
+            :their-wins="theirTeamWins"
+            :model-value="showTotals"
+            @close="showTotals = false"
         />
     </div>
 </template>
@@ -257,6 +279,7 @@ import { preloadImages } from "../utils/preloadImages";
 import { useRouter } from "vue-router";
 import Card from "../components/Card.vue";
 import Button from "../components/Button.vue";
+import Totals from "../components/Totals.vue";
 import {
     allCards,
     getHighestCard,
@@ -265,7 +288,7 @@ import {
     sortCardsByAlternateColor,
     cardNum,
 } from "../utils/gameHelper";
-import { XIcon } from "heroicons-vue3/solid";
+import { ChevronDownIcon, XIcon } from "heroicons-vue3/solid";
 import moment from "moment";
 
 import CardsOnTable from "../components/CardsOnTable.vue";
@@ -287,6 +310,7 @@ const suites = ["c", "s", "h", "d"];
 const rungToConfrim = ref("");
 const rungSelector = ref(0);
 const totalTurns = ref(0);
+const showTotals = ref(false);
 
 const me = ref<RoomUser>();
 const clickedCard = ref<string | null>(null);
@@ -539,7 +563,7 @@ const startTurn = () => {
 };
 
 const reseting = ref(false);
-const resetRoom = async () => {
+const resetRoom = async (resetScore = false) => {
     if (!isHost.value) return false;
 
     reseting.value = true;
@@ -579,6 +603,8 @@ const resetRoom = async () => {
             folded_deck_count: 0,
             turn_rung: null,
             last_highest_card_position: null,
+            team_1_3_wins: resetScore ? 0 : undefined,
+            team_2_4_wins: resetScore ? 0 : undefined,
         });
     } catch (error) {
         console.error(error);
@@ -659,7 +685,7 @@ const initSocket = async () => {
                     }
 
                     setParticipants(r.participants);
-                    resetRoom();
+                    resetRoom(true);
                     return;
                 }
 
@@ -757,6 +783,9 @@ const userMostSirs = computed(() => {
         (p) => p.sir_count
     ) as RoomUser;
 });
+
+const getTeamWinsColumn = (pos: string) =>
+    parseInt(pos) % 2 === 0 ? "team_2_4_wins" : "team_1_3_wins";
 
 const playCard = async (e: any, card: string) => {
     if (!canPlayCard(card) || !me.value) return;
@@ -861,6 +890,11 @@ const playCard = async (e: any, card: string) => {
             await new Promise((resolve) => setTimeout(resolve, 3000));
         }
 
+        const myTeamWinColumn =
+            parseInt(me.value.position.toString()) % 2 === 0
+                ? "team_2_4_wins"
+                : "team_1_3_wins";
+
         await updateRoom({
             latest_turn: card,
             latest_turn_position: me.value.position,
@@ -880,6 +914,9 @@ const playCard = async (e: any, card: string) => {
                 : undefined,
             ended_at: isVeryLastTurn ? moment().toISOString() : undefined,
             last_winner_id: userMostSirs.value?.user.id,
+            [getTeamWinsColumn(me.value?.position.toString())]: isVeryLastTurn
+                ? ourTeamWins.value + 1
+                : undefined,
         });
     } catch (err) {
         cards.value = oldCards;
@@ -895,6 +932,22 @@ const playCard = async (e: any, card: string) => {
     isCardBeingPlayed.value = false;
 };
 
+const getTeamWins = (playerPosition: string) => {
+    if (!room.value || !playerPosition) return 0;
+    const ourTeamWinsColumn = getTeamWinsColumn(playerPosition);
+    return room.value[ourTeamWinsColumn] || 0;
+};
+
+const ourTeamWins = computed(() => {
+    return getTeamWins(me.value?.position.toString() || "0");
+});
+
+const theirTeamWins = computed(() => {
+    return getTeamWins(
+        parseInt(me.value?.position.toString() || "0") % 2 === 0 ? "1" : "2"
+    );
+});
+
 onMounted(verifyRoom);
 
 const ourScore = computed(
@@ -903,9 +956,6 @@ const ourScore = computed(
 const theirScore = computed(
     () => (rightOpp.value?.sir_count || 0) + (leftOpp.value?.sir_count || 0)
 );
-
-const scoreSpan = (c: string) =>
-    `${c} rounded w-8 h-8 flex items-center justify-center text-white font-medium`;
 
 const turnPos = ref(0);
 
@@ -942,4 +992,9 @@ const openMenuFor = ref<RoomUser>();
 const openMenu = (user: RoomUser) => {
     openMenuFor.value = user;
 };
+</script>
+
+<script lang="ts">
+export const scoreSpan = (c: string) =>
+    `${c} w-8 h-8 flex items-center justify-center text-white font-medium`;
 </script>

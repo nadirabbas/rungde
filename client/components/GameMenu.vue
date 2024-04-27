@@ -1,43 +1,34 @@
 <template>
-    <div
-        class="fixed top-0 left-0 w-screen h-screen flex items-center justify-center"
-        @click.self="loading ? null : $emit('close')"
+    <Modal
+        @close="loading ? null : $emit('close')"
+        :title="isSelf ? 'Options' : 'Player: ' + user?.user.username"
+        :loading="loading"
+        :model-value="modelValue"
     >
-        <div
-            class="bg-black bg-opacity-90 rounded p-5 w-[25vw] flex flex-col items-center text-white text-2xl"
+        <button
+            :class="buttonClass('bg-red-600 text-white')"
+            @click="kickUser"
+            v-if="!isSelf"
         >
-            <div
-                :class="{
-                    'w-full text-white text-center text-lg': true,
-                    'mb-6': !loading,
-                }"
-            >
-                <template v-if="loading">Please wait...</template>
+            Kick user
+        </button>
 
-                <template v-else>{{
-                    isSelf ? "Options" : "Player: " + user.user.username
-                }}</template>
-            </div>
+        <button
+            :class="buttonClass('rd-bg mb-2 text-white')"
+            @click="restartRoom"
+            v-if="isHost"
+        >
+            Restart room
+        </button>
 
-            <template v-if="!loading">
-                <button
-                    :class="buttonClass('bg-red-500')"
-                    @click="kickUser"
-                    v-if="!isSelf"
-                >
-                    Kick user
-                </button>
-
-                <button
-                    :class="buttonClass('bg-red-500')"
-                    @click="isHost ? closeRoom() : leaveRoom()"
-                    v-if="isSelf"
-                >
-                    {{ isHost ? "Close" : "Leave" }} room
-                </button>
-            </template>
-        </div>
-    </div>
+        <button
+            :class="buttonClass('bg-red-600 text-white')"
+            @click="isHost ? closeRoom() : leaveRoom()"
+            v-if="isSelf"
+        >
+            {{ isHost ? "Close" : "Leave" }} room
+        </button>
+    </Modal>
 </template>
 
 <script setup lang="ts">
@@ -45,18 +36,24 @@ import { PropType, ref, toRefs } from "vue";
 import { RoomUser } from "../store/authStore";
 import { api } from "../api";
 import { useRouter } from "vue-router";
+import Modal from "./Modal.vue";
 
-const emit = defineEmits(["close"]);
+const emit = defineEmits(["close", "restart"]);
 
-const buttonClass = (c: string) => `py-1 px-8 rounded text-base ${c}`;
+const buttonClass = (c: string) => `py-1 px-8 rounded text-base ${c} w-full`;
 
 const props = defineProps({
     user: {
-        type: Object as PropType<RoomUser>,
+        type: null as any as PropType<RoomUser>,
         required: true,
     },
     isSelf: Boolean,
     isHost: Boolean,
+    modelValue: Boolean,
+    restartFn: {
+        type: Function,
+        required: true,
+    },
 });
 
 const { user } = toRefs(props);
@@ -84,6 +81,7 @@ const leaveRoom = async () => {
 };
 const closeRoom = async () => {
     apiReq("/room/close", {}, () => {
+        emit("close");
         window.location.href = "/";
     });
 };
@@ -91,5 +89,12 @@ const kickUser = async () => {
     apiReq("/room/kick", { position: user.value.position }, () => {
         emit("close");
     });
+};
+
+const restartRoom = async () => {
+    loading.value = true;
+    await props.restartFn();
+    emit("close");
+    loading.value = false;
 };
 </script>

@@ -2,7 +2,7 @@
     <div
         :class="{
             'bg-white rounded': true,
-            'border-[3px] border-green-500': high,
+            'border-[3px] border-green-600': high,
             'shadow-sm shadow-black': !highlighted,
             'highlighted-card': highlighted && !inactive,
         }"

@@ -1,5 +1,6 @@
 $primary: #004e92;
 $secondary: #022c50;
+$yellow: #ffd700;
 $alpha: 1;
 
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap");
@@ -9,7 +10,7 @@ body {
 }
 
 .golden-glow {
-    box-shadow: 0 0 5px 1px #ffd700;
+    box-shadow: 0 0 5px 1px $yellow;
 }
 
 .rd-bg {
@@ -34,6 +35,7 @@ body {
 :root {
     --color-primary: #004e92;
     --color-secondary: #022c50;
+    --color-yellow: #ffd700;
 }
 
 .rd-text {
