@@ -42,6 +42,17 @@ body {
     @apply text-xl lg:text-base;
 }
 
+// yellow color glowing box shadow
+@keyframes glow {
+    50% {
+        background: var(--color-yellow);
+    }
+}
+
+.glow-animation {
+    animation: glow 1s ease-in-out 3 alternate;
+}
+
 @media only screen and (orientation: landscape) {
     .portrait-only {
         display: none;

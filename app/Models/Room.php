@@ -30,7 +30,11 @@ class Room extends Model
         'last_winner_id',
         'team_1_3_wins',
         'team_2_4_wins',
-        'deck'
+        'deck',
+        'team_1_3_goon_courts',
+        'team_2_4_goon_courts',
+        'team_1_3_courts',
+        'team_2_4_courts',
     ];
 
     protected $appends = [

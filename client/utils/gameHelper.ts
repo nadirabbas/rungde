@@ -37,7 +37,7 @@ export const getHighCardPos = (
     // @ts-ignore
     return Object.entries(cards).find(
         ([position, card]) => card === highestCard
-    )[0] as number;
+    )?.[0] as number;
 };
 
 export const allCards = () => {

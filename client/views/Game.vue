@@ -29,6 +29,7 @@
         </div>
 
         <UserCard
+            :senior="isSenior(me)"
             :name="authStore.user.username"
             class="fixed right-5 bottom-5"
             friend
@@ -39,6 +40,7 @@
         />
 
         <UserCard
+            :senior="isSenior(teammate)"
             :name="teammate?.user.username"
             friend
             class="fixed left-1/2 -translate-x-1/2 top-5"
@@ -49,6 +51,7 @@
         />
 
         <UserCard
+            :senior="isSenior(rightOpp)"
             :name="rightOpp?.user.username"
             class="fixed top-1/2 -translate-y-1/2 right-5"
             :active="turnPos && turnPos == rightOpp?.position && 'left'"
@@ -58,6 +61,7 @@
         />
 
         <UserCard
+            :senior="isSenior(leftOpp)"
             :name="leftOpp?.user.username"
             class="fixed top-1/2 -translate-y-1/2 left-5"
             :active="turnPos && turnPos == leftOpp?.position && 'right'"
@@ -70,12 +74,26 @@
             class="fixed top-5 right-5 flex items-center justify-center"
             @click="showTotals = true"
         >
-            <span :class="scoreSpan('bg-green-600 rounded mr-1.5')">{{
-                ourScore
-            }}</span>
-            <span :class="scoreSpan('bg-red-600 rounded')">{{
-                theirScore
-            }}</span>
+            <span
+                :class="
+                    scoreSpan(
+                        `bg-green-600 rounded mr-1.5 ${
+                            glow === true && 'glow-animation'
+                        }`
+                    )
+                "
+                >{{ glow === true ? "+" + glowNumber : ourScore }}</span
+            >
+            <span
+                :class="
+                    scoreSpan(
+                        `bg-red-600 rounded ${
+                            glow === false && 'glow-animation'
+                        }`
+                    )
+                "
+                >{{ glow === false ? "+" + glowNumber : theirScore }}</span
+            >
             <ChevronDownIcon class="w-5 text-white ml-1" />
         </button>
 
@@ -90,7 +108,7 @@
         <div class="fixed left-[23vw] top-1/2 -translate-y-1/2" v-if="sirs">
             <Card :width="8" card="back" />
             <div
-                class="-top-2 -left-2 absolute rounded-full w-5 h-5 text-white font-medium flex items-center justify-center bg-pink-500 text-sm"
+                class="-top-2 -left-2 absolute rounded-full w-6 h-6 text-black font-black shadow-xl shadow-black flex items-center justify-center bg-yellow text-sm"
             >
                 {{ sirs }}
             </div>
@@ -229,6 +247,13 @@
                             : "Well...this is embarrassing, it's a GOON COURT 😔"
                     }}
                 </span>
+                <span v-else-if="court !== null">
+                    {{
+                        court
+                            ? "Nice! it's a COURT 🎉!"
+                            : "Well...this is embarrassing, it's a COURT 😔"
+                    }}
+                </span>
                 <template v-else-if="victory !== null">
                     {{ victory ? "You have won!" : "You lost the game" }}
                 </template>
@@ -261,6 +286,10 @@
             :their-score="theirScore"
             :our-wins="ourTeamWins"
             :their-wins="theirTeamWins"
+            :our-courts="ourCourts"
+            :their-courts="theirCourts"
+            :our-goon-courts="ourGoonCourts"
+            :their-goon-courts="theirGoonCourts"
             :model-value="showTotals"
             @close="showTotals = false"
         />
@@ -286,6 +315,7 @@ import {
     getHighCardPos,
     sortCardsByAlternateColor,
     cardNum,
+    getTeamMatePosition,
 } from "../utils/gameHelper";
 import { ChevronDownIcon, XIcon } from "heroicons-vue3/solid";
 import moment from "moment";
@@ -320,10 +350,33 @@ const cards = ref<string[]>([]);
 const teammate = ref<RoomUser | null>();
 const opponents = ref<RoomUser[]>([]);
 
-const goonCourt = computed(() => {
+const court = computed(() => {
     if (ourScore.value === 13) {
         return true;
     } else if (theirScore.value === 13) {
+        return false;
+    }
+
+    return null;
+});
+
+const theySelected = computed(() => {
+    if (!leftOpp.value || !rightOpp.value) return null;
+
+    const theirPositions = {
+        [leftOpp.value.position.toString()]: true,
+        [rightOpp.value.position.toString()]: true,
+    };
+
+    return theirPositions[rungSelector.value.toString()];
+});
+
+const goonCourt = computed(() => {
+    if (!leftOpp.value || !rightOpp.value) return null;
+
+    if (ourScore.value === 13 && theySelected.value) {
+        return true;
+    } else if (theirScore.value === 13 && !theySelected.value) {
         return false;
     }
 
@@ -377,6 +430,9 @@ const { play: playSound } = useSound("/audio/sprite.opus", {
     ),
 });
 
+const glow = ref<boolean | null>(null);
+const glowNumber = ref(0);
+
 watch([teammate, me, leftOpp, rightOpp], (user, old) => {
     if (victory.value !== null) {
         playSound({ id: victory.value ? "victory" : "defeat" });
@@ -386,12 +442,28 @@ watch([teammate, me, leftOpp, rightOpp], (user, old) => {
     const hasWon = (idx) =>
         old[idx] && (old[idx]?.sir_count || 0) < (user[idx]?.sir_count || 0);
 
+    const diff = (idx) =>
+        (old[idx] &&
+            (user[idx]?.sir_count || 0) - (old[idx]?.sir_count || 0)) ||
+        0;
+
     const weWon = hasWon(0) || hasWon(1);
     const weLost = hasWon(2) || hasWon(3);
 
+    const g = (v: boolean) => {
+        glow.value = v;
+        glowNumber.value = weWon ? diff(0) + diff(1) : diff(2) + diff(3);
+        setTimeout(() => {
+            glow.value = null;
+            glowNumber.value = 0;
+        }, 5000);
+    };
+
     if (weWon) {
+        g(true);
         playSound({ id: "wonSir" });
     } else if (weLost) {
+        g(false);
         playSound({ id: "lostSir" });
     }
 });
@@ -470,7 +542,7 @@ const verifyRoom = async () => {
     try {
         const res = await api.get("/rooms/current");
         const r = res.data.room;
-        dealer._drawPile = [...r.deck];
+        dealer._drawPile = [...(r.deck || [])];
         setValues(r);
 
         await initSocket();
@@ -607,6 +679,10 @@ const resetRoom = async (resetScore = false) => {
             last_highest_card_position: null,
             team_1_3_wins: resetScore ? 0 : undefined,
             team_2_4_wins: resetScore ? 0 : undefined,
+            team_1_3_goon_courts: resetScore ? 0 : undefined,
+            team_2_4_goon_courts: resetScore ? 0 : undefined,
+            team_1_3_courts: resetScore ? 0 : undefined,
+            team_2_4_courts: resetScore ? 0 : undefined,
             deck: [],
         });
     } catch (error) {
@@ -787,9 +863,6 @@ const userMostSirs = computed(() => {
     ) as RoomUser;
 });
 
-const getTeamWinsColumn = (pos: string) =>
-    parseInt(pos) % 2 === 0 ? "team_2_4_wins" : "team_1_3_wins";
-
 const playCard = async (e: any, card: string) => {
     if (!canPlayCard(card) || !me.value) return;
 
@@ -893,12 +966,7 @@ const playCard = async (e: any, card: string) => {
             await new Promise((resolve) => setTimeout(resolve, 1500));
         }
 
-        const myTeamWinColumn =
-            parseInt(me.value.position.toString()) % 2 === 0
-                ? "team_2_4_wins"
-                : "team_1_3_wins";
-
-        await updateRoom({
+        const data = {
             latest_turn: card,
             latest_turn_position: me.value.position,
             turn: newTurn,
@@ -917,10 +985,42 @@ const playCard = async (e: any, card: string) => {
                 : undefined,
             ended_at: isVeryLastTurn ? moment().toISOString() : undefined,
             last_winner_id: userMostSirs.value?.user.id,
-            [getTeamWinsColumn(me.value?.position.toString())]: isVeryLastTurn
-                ? ourTeamWins.value + 1
-                : undefined,
-        });
+        };
+
+        if (room.value && isVeryLastTurn && winnerPosition) {
+            const scoreByPos = [1, 2, 3, 4].reduce((acc, pos) => {
+                const user = getUserByPosition(pos);
+                if (user?.position == winnerPosition) {
+                    acc[pos] = user.sir_count + oldSirs + 1;
+                } else {
+                    acc[pos] = user?.sir_count;
+                }
+
+                return acc;
+            }, {});
+
+            const team_1_3_score = scoreByPos[1] + scoreByPos[3];
+            const team_2_4_score = scoreByPos[2] + scoreByPos[4];
+            const did_1_3_select =
+                rungSelector.value == 1 || rungSelector.value == 3;
+            const is_goon_court = did_1_3_select
+                ? team_2_4_score === 13
+                : team_1_3_score === 13;
+            const is_court = team_1_3_score === 13 || team_2_4_score === 13;
+
+            const winColumn =
+                team_1_3_score > team_2_4_score ? "team_1_3" : "team_2_4";
+
+            data[winColumn + "_wins"] = room.value[winColumn + "_wins"] + 1;
+            data[winColumn + "_goon_courts"] =
+                room.value[winColumn + "_goon_courts"] +
+                (is_goon_court ? 1 : 0);
+            data[winColumn + "_courts"] =
+                room.value[winColumn + "_courts"] +
+                (is_court && is_goon_court ? 1 : 0);
+        }
+
+        await updateRoom(data);
     } catch (err) {
         cards.value = oldCards;
         cardsOnTable.value = oldCardsOnTable;
@@ -935,20 +1035,44 @@ const playCard = async (e: any, card: string) => {
     isCardBeingPlayed.value = false;
 };
 
-const getTeamWins = (playerPosition: string) => {
-    if (!room.value || !playerPosition) return 0;
-    const ourTeamWinsColumn = getTeamWinsColumn(playerPosition);
-    return room.value[ourTeamWinsColumn] || 0;
-};
-
 const ourTeamWins = computed(() => {
-    return getTeamWins(me.value?.position.toString() || "0");
+    return parseInt(me.value?.position.toString() || "0") % 2 === 0
+        ? room.value?.team_2_4_wins
+        : room.value?.team_1_3_wins;
 });
 
 const theirTeamWins = computed(() => {
-    return getTeamWins(
-        parseInt(me.value?.position.toString() || "0") % 2 === 0 ? "1" : "2"
-    );
+    return parseInt(me.value?.position.toString() || "0") % 2 === 0
+        ? room.value?.team_1_3_wins
+        : room.value?.team_2_4_wins;
+});
+
+const ourGoonCourts = computed(() => {
+    if (!room.value) return 0;
+    return parseInt(me.value?.position.toString() || "0") % 2 === 0
+        ? room.value.team_2_4_goon_courts
+        : room.value.team_1_3_goon_courts;
+});
+
+const theirGoonCourts = computed(() => {
+    if (!room.value) return 0;
+    return parseInt(me.value?.position.toString() || "0") % 2 === 0
+        ? room.value.team_1_3_goon_courts
+        : room.value.team_2_4_goon_courts;
+});
+
+const ourCourts = computed(() => {
+    if (!room.value) return 0;
+    return parseInt(me.value?.position.toString() || "0") % 2 === 0
+        ? room.value.team_2_4_courts
+        : room.value.team_1_3_courts;
+});
+
+const theirCourts = computed(() => {
+    if (!room.value) return 0;
+    return parseInt(me.value?.position.toString() || "0") % 2 === 0
+        ? room.value.team_1_3_courts
+        : room.value.team_2_4_courts;
 });
 
 onMounted(verifyRoom);
@@ -959,6 +1083,24 @@ const ourScore = computed(
 const theirScore = computed(
     () => (rightOpp.value?.sir_count || 0) + (leftOpp.value?.sir_count || 0)
 );
+
+const isSenior = (user: RoomUser) => {
+    const highCardPosString = getHighCardPos(
+        cardsOnTable.value,
+        turnRung.value,
+        rung.value
+    );
+
+    const pos = parseInt(user.position.toString());
+    const highCardPos = parseInt(highCardPosString?.toString());
+    const posCardOnTable = cardsOnTable.value[pos];
+
+    if (room.value?.last_highest_card_position == pos) {
+        return !posCardOnTable || highCardPos === pos;
+    } else {
+        return highCardPos === pos;
+    }
+};
 
 const turnPos = ref(0);
 

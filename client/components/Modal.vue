@@ -6,7 +6,7 @@
             v-if="modelValue"
         >
             <div
-                class="bg-white rounded p-5 w-[25vw] flex flex-col items-center text-2xl"
+                class="bg-white rounded p-5 min-w-[25vw] flex flex-col items-center text-2xl"
             >
                 <h1
                     :class="{
