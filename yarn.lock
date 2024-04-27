@@ -1163,9 +1163,9 @@
     "@nuxt/kit" "^3.10.3"
 
 "@nadir2k/card-dealer@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@nadir2k/card-dealer/-/card-dealer-2.0.0.tgz#42e9d9cc75c83ffeb75ddca7f2b8345eee199ce7"
-  integrity sha512-sQKxrhHXKjiKnze3/FhKmWe+vHjSCagzTEH51RmF1Xzdvuo+vePS3PrbFiHLVw/F5R0Oq0YqIul97K6GgpoGwQ==
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@nadir2k/card-dealer/-/card-dealer-2.0.1.tgz#0f52a459aede5f7bc6db53d8d07eebf7f55a1b88"
+  integrity sha512-jl6pIOPz5WGX2hkwSTmlRl2O/9vUB1cyjMQCfKUdYtQfo/qLBhIQ4UzYvia4JYi5epfvAtNC54437aCqEjYOXA==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"

@@ -51,6 +51,18 @@ export const allCards = () => {
     return cards;
 };
 
+export const shuffledCards = () => {
+    const cards = allCards();
+    const shuffled: string[] = [];
+    for (let i = 0; i < 52; i++) {
+        const randomIndex = Math.floor(Math.random() * cards.length);
+        shuffled.push(cards[randomIndex]);
+        cards.splice(randomIndex, 1);
+    }
+
+    return shuffled;
+};
+
 export const sortCardsByAlternateColor = (
     cards: string[],
     rung?: string | null

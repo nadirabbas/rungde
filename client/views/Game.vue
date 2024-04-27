@@ -470,7 +470,7 @@ const verifyRoom = async () => {
     try {
         const res = await api.get("/rooms/current");
         const r = res.data.room;
-        dealer._drawPile = r.deck;
+        dealer._drawPile = [...r.deck];
         setValues(r);
 
         await initSocket();
@@ -491,7 +491,11 @@ const startRoom = async () => {
     if (!isHost.value) return;
 
     dealer.reset();
-    dealer.shuffle();
+
+    // shuffle 100 times
+    // for (let i = 0; i < 100; i++) {
+    //     dealer.shuffle();
+    // }
 
     starting.value = true;
     setTimeout(async () => {
@@ -565,7 +569,6 @@ const reseting = ref(false);
 const resetRoom = async (resetScore = false) => {
     if (!isHost.value) return false;
 
-    dealer.reset();
     reseting.value = true;
 
     try {
@@ -605,7 +608,7 @@ const resetRoom = async (resetScore = false) => {
             last_highest_card_position: null,
             team_1_3_wins: resetScore ? 0 : undefined,
             team_2_4_wins: resetScore ? 0 : undefined,
-            deck: dealer._drawPile,
+            deck: [],
         });
     } catch (error) {
         console.error(error);
@@ -888,7 +891,7 @@ const playCard = async (e: any, card: string) => {
                 })),
             });
 
-            await new Promise((resolve) => setTimeout(resolve, 3000));
+            await new Promise((resolve) => setTimeout(resolve, 1500));
         }
 
         const myTeamWinColumn =
