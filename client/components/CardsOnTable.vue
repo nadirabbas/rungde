@@ -1,12 +1,12 @@
 <template>
     <div
-        class="fixed left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 tablecards"
+        class="fixed left-1/2 -translate-x-1/2 top-[48%] -translate-y-1/2 tablecards"
     >
         <Card
             v-for="{ card, position } in availableCards"
             :key="position"
             :card="card"
-            :width="7"
+            :width="8"
             :high="highCard === card"
             :class="{
                 absolute: true,

@@ -35,6 +35,6 @@ defineProps({
 
 <style lang="scss">
 .highlighted-card {
-    box-shadow: 0 0 1px 2px #ffd700;
+    box-shadow: 0 0 1px 3px #ffd700;
 }
 </style>

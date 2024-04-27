@@ -31,6 +31,11 @@
     </Modal>
 </template>
 
+<script lang="ts">
+export const buttonClass = (c: string) =>
+    `py-2 shadow-xl px-8 rounded text-base ${c} w-full`;
+</script>
+
 <script setup lang="ts">
 import { PropType, ref, toRefs } from "vue";
 import { RoomUser } from "../store/authStore";
@@ -39,8 +44,6 @@ import { useRouter } from "vue-router";
 import Modal from "./Modal.vue";
 
 const emit = defineEmits(["close", "restart"]);
-
-const buttonClass = (c: string) => `py-1 px-8 rounded text-base ${c} w-full`;
 
 const props = defineProps({
     user: {
@@ -71,8 +74,6 @@ const apiReq = async (uri: string, data: any, cb: () => void) => {
 
     loading.value = false;
 };
-
-const router = useRouter();
 
 const leaveRoom = async () => {
     apiReq("/room/leave", {}, () => {

@@ -3,10 +3,19 @@ $secondary: #022c50;
 $yellow: #ffd700;
 $alpha: 1;
 
+@font-face {
+    font-family: "King Arthur Legend";
+    src: url("../fonts/King Arthur Legend.ttf");
+}
+
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap");
 
 body {
     font-family: "Roboto Condensed", sans-serif;
+}
+
+.kal {
+    font-family: "King Arthur Legend", sans-serif;
 }
 
 .golden-glow {

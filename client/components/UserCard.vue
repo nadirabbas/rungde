@@ -5,9 +5,9 @@
                 'py-1 rounded-full  text-sm flex items-center justify-center transition border-[3px]': true,
                 ' bg-green-600': friend && name,
                 ' bg-red-600': !friend && name,
-                'bg-gray-500': !name,
-                'border-green-600': friend && !senior,
-                'border-red-600': !friend && !senior,
+                'bg-gray-500 border-gray-500': !name,
+                'border-green-600': friend && !senior && name,
+                'border-red-600': !friend && !senior && name,
                 'user-card-border': active && !senior,
                 'user-card-border-senior': active && senior,
                 'px-3': !showMenu,
@@ -18,7 +18,11 @@
                 'bg-yellow font-bold text-black border-yellow': senior,
             }"
         >
-            <UserCardScore :score="score" class="mr-2" v-if="score" />
+            <UserCardScore
+                :score="scoreDiff ? `+${scoreDiff}` : score"
+                class="mr-2"
+                v-if="score"
+            />
 
             <span>
                 {{ name || "Waiting for user..." }}
@@ -39,6 +43,7 @@ const props = defineProps({
     active: null,
     showMenu: Boolean,
     score: Number,
+    scoreDiff: Number,
     senior: Boolean,
 });
 </script>

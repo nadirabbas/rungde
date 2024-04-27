@@ -15,10 +15,10 @@
                 :card="card"
                 :key="card"
                 :class="{
-                    'absolute cursor-pointer -bottom-14': true,
+                    'absolute cursor-pointer -bottom-16': true,
                     '-translate-y-[10vh]': clickedCard === card,
                 }"
-                :style="cards.includes(card) ? `left: ${i * 5.5}vw` : ''"
+                :style="cards.includes(card) ? `left: ${i * 5.6}vw` : ''"
                 :width="12"
                 @mouseleave="cardUnhovered"
                 @click="playCard($event, card)"
@@ -37,6 +37,7 @@
             show-menu
             @click="openMenu(me)"
             :score="me?.sir_count"
+            :score-diff="turnPos == me.position && sirWinDiff"
         />
 
         <UserCard
@@ -48,6 +49,7 @@
             :show-menu="isHost && !!teammate"
             @click="isHost && openMenu(teammate)"
             :score="teammate?.sir_count"
+            :score-diff="turnPos == teammate.position && sirWinDiff"
         />
 
         <UserCard
@@ -58,6 +60,7 @@
             :show-menu="isHost && !!rightOpp"
             @click="isHost && openMenu(rightOpp)"
             :score="rightOpp?.sir_count"
+            :score-diff="turnPos == rightOpp.position && sirWinDiff"
         />
 
         <UserCard
@@ -68,6 +71,7 @@
             :show-menu="isHost && !!leftOpp"
             @click="isHost && openMenu(leftOpp)"
             :score="leftOpp?.sir_count"
+            :score-diff="turnPos == leftOpp.position && sirWinDiff"
         />
 
         <button
@@ -82,7 +86,7 @@
                         }`
                     )
                 "
-                >{{ glow === true ? "+" + glowNumber : ourScore }}</span
+                >{{ glow === true ? "+" + sirWinDiff : ourScore }}</span
             >
             <span
                 :class="
@@ -92,7 +96,7 @@
                         }`
                     )
                 "
-                >{{ glow === false ? "+" + glowNumber : theirScore }}</span
+                >{{ glow === false ? "+" + sirWinDiff : theirScore }}</span
             >
             <ChevronDownIcon class="w-5 text-white ml-1" />
         </button>
@@ -231,9 +235,21 @@
             </template>
         </div>
 
+        <TransitionFade>
+            <Victory
+                :victory="victory"
+                :defeat="!victory"
+                :goon-court="goonCourt"
+                :court="court"
+                :is-host="isHost"
+                :restart-fn="restartRoom"
+                v-if="victory !== null"
+            />
+        </TransitionFade>
+
         <div
             class="fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 bg-black bg-opacity-95 rounded p-5 w-[70vw] h-[70vh] flex flex-col items-center justify-center text-white text-2xl"
-            v-if="victory !== null || roomClosed"
+            v-if="roomClosed"
         >
             <span class="mb-10">
                 <template v-if="roomClosed && !isHost">
@@ -262,7 +278,7 @@
             <Button
                 v-if="isHost || roomClosed"
                 class="rd-bg"
-                @click="roomClosed ? goHome() : resetRoom()"
+                @click="roomClosed ? goHome() : restartRoom()"
                 :disabled="!roomClosed && (!room.is_ended || reseting)"
             >
                 <template v-if="roomClosed">Leave room</template>
@@ -277,7 +293,7 @@
             :is-self="openMenuFor?.position == me?.position"
             :is-host="me.position == 1"
             @close="openMenuFor = null"
-            :restart-fn="resetRoom"
+            :restart-fn="restartRoom"
             :model-value="!!openMenuFor"
         />
 
@@ -297,6 +313,7 @@
 </template>
 
 <script setup lang="ts">
+import Victory from "../components/Victory.vue";
 import GameMenu from "../components/GameMenu.vue";
 import { usePusher } from "../composables/usePusher";
 import FullscreenLoader from "../components/FullscreenLoader.vue";
@@ -325,6 +342,7 @@ import { useSound } from "@vueuse/sound";
 import { maxBy } from "lodash-es";
 import { mapValues } from "lodash-es";
 import { useDealer } from "../composables/useDealer";
+import { TransitionFade } from "@morev/vue-transitions";
 
 const dealer = useDealer();
 
@@ -431,10 +449,12 @@ const { play: playSound } = useSound("/audio/sprite.opus", {
 });
 
 const glow = ref<boolean | null>(null);
-const glowNumber = ref(0);
+const sirWinDiff = ref(0);
 
 watch([teammate, me, leftOpp, rightOpp], (user, old) => {
-    if (victory.value !== null) {
+    if (!room.value) return;
+
+    if (victory.value !== null && room.value.participants.length === 4) {
         playSound({ id: victory.value ? "victory" : "defeat" });
         return;
     }
@@ -452,10 +472,10 @@ watch([teammate, me, leftOpp, rightOpp], (user, old) => {
 
     const g = (v: boolean) => {
         glow.value = v;
-        glowNumber.value = weWon ? diff(0) + diff(1) : diff(2) + diff(3);
+        sirWinDiff.value = weWon ? diff(0) + diff(1) : diff(2) + diff(3);
         setTimeout(() => {
             glow.value = null;
-            glowNumber.value = 0;
+            sirWinDiff.value = 0;
         }, 5000);
     };
 
@@ -637,7 +657,7 @@ const startTurn = () => {
 };
 
 const reseting = ref(false);
-const resetRoom = async (resetScore = false) => {
+const restartRoom = async (resetScore = false) => {
     if (!isHost.value) return false;
 
     reseting.value = true;
@@ -694,7 +714,7 @@ const resetRoom = async (resetScore = false) => {
 
 const resetHandler = (e: any) => {
     if (e.key === "`") {
-        resetRoom();
+        restartRoom();
     }
 };
 
@@ -764,7 +784,7 @@ const initSocket = async () => {
                     }
 
                     setParticipants(r.participants);
-                    resetRoom(true);
+                    restartRoom(true);
                     return;
                 }
 
@@ -1085,6 +1105,8 @@ const theirScore = computed(
 );
 
 const isSenior = (user: RoomUser) => {
+    if (!user) return false;
+
     const highCardPosString = getHighCardPos(
         cardsOnTable.value,
         turnRung.value,
