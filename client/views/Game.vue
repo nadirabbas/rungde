@@ -1003,7 +1003,7 @@ const playCard = async (e: any, card: string) => {
                 (is_goon_court ? 1 : 0);
             data[winColumn + "_courts"] =
                 room.value[winColumn + "_courts"] +
-                (is_court && is_goon_court ? 1 : 0);
+                (is_court && !is_goon_court ? 1 : 0);
 
             const winningParticipants = room.value.participants.filter((p) => {
                 const pos = parseInt(p.position.toString());

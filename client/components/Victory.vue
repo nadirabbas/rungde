@@ -58,11 +58,11 @@ const props = defineProps({
 const refs = toRefs(props);
 
 const text = computed(() => {
-    if (refs.goonCourt.value) {
+    if (refs.goonCourt.value !== null) {
         return "Goon Court!";
-    } else if (refs.court.value) {
+    } else if (refs.court.value !== null) {
         return "Court!";
-    } else if (refs.victory.value) {
+    } else if (refs.victory.value !== null) {
         return "Victory!";
     } else {
         return "Defeat!";
