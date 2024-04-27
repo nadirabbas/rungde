@@ -1033,8 +1033,7 @@ const playCard = async (e: any, card: string) => {
 
 const ourTeamWins = computed(() => {
     return parseInt(me.value?.position.toString() || "0") % 2 === 0
-        ? room.value?.team
-        _2_4_wins
+        ? room.value?.team_2_4_wins
         : room.value?.team_1_3_wins;
 });
 
