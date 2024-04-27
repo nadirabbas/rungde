@@ -62,7 +62,7 @@ const text = computed(() => {
         return "Goon Court!";
     } else if (refs.court.value !== null) {
         return "Court!";
-    } else if (refs.victory.value !== null) {
+    } else if (refs.victory.value) {
         return "Victory!";
     } else {
         return "Defeat!";
