@@ -492,10 +492,9 @@ const startRoom = async () => {
 
     dealer.reset();
 
-    // shuffle 100 times
-    // for (let i = 0; i < 100; i++) {
-    //     dealer.shuffle();
-    // }
+    for (let i = 0; i < 100; i++) {
+        dealer.shuffle();
+    }
 
     starting.value = true;
     setTimeout(async () => {
