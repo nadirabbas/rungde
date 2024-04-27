@@ -43,7 +43,7 @@ const props = defineProps({
     active: null,
     showMenu: Boolean,
     score: Number,
-    scoreDiff: Number,
+    scoreDiff: null,
     senior: Boolean,
 });
 </script>

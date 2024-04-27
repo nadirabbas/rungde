@@ -123,22 +123,26 @@
             v-if="!room.started_at || !room.rung || rungSelected"
         >
             <template v-if="!room.started_at || roomPaused">
-                <div
+                <button
                     class="flex flex-col"
                     v-if="
                         (!starting && room.participants.length !== 4) ||
                         roomPaused
                     "
+                    @click="copyCode"
                 >
                     <div
-                        class="bg-red-600 text-sm text-center rounded-t text-white"
+                        class="bg-red-600 w-full text-sm flex justify-center items-center gap-2 text-center rounded-t text-white p-1"
                     >
-                        Join code
+                        <span>Join code</span>
                     </div>
-                    <div class="bg-white text-dark rounded-b p-2">
+                    <div
+                        class="bg-white flex items-center gap-1 text-dark rounded-b px-2 py-5"
+                    >
                         <strong>{{ room.code }}</strong>
+                        <DuplicateIcon class="w-5" />
                     </div>
-                </div>
+                </button>
 
                 <div class="font-medium text-white" v-else>
                     Starting game...
@@ -302,7 +306,9 @@ import {
     getTeamMatePosition,
 } from "../utils/gameHelper";
 import { ChevronDownIcon, XIcon } from "heroicons-vue3/solid";
+import { DuplicateIcon } from "heroicons-vue3/outline";
 import moment from "moment";
+import copy from "copy-to-clipboard";
 
 import CardsOnTable from "../components/CardsOnTable.vue";
 import { useSound } from "@vueuse/sound";
@@ -310,8 +316,12 @@ import { maxBy } from "lodash-es";
 import { mapValues } from "lodash-es";
 import { useDealer } from "../composables/useDealer";
 import { TransitionFade } from "@morev/vue-transitions";
+import { useToast } from "vue-toast-notification";
 
 const dealer = useDealer();
+const toast = useToast({
+    position: "bottom",
+});
 
 const router = useRouter();
 const render = ref(false);
@@ -1134,6 +1144,15 @@ const confirmRung = async () => {
 const openMenuFor = ref<RoomUser>();
 const openMenu = (user: RoomUser) => {
     openMenuFor.value = user;
+};
+const copyCode = () => {
+    try {
+        if (!room.value) return;
+        copy(room.value.code);
+        toast.success("Code copied to clipboard");
+    } catch (error) {
+        toast.error("There was a problem copying the code");
+    }
 };
 </script>
 

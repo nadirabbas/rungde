@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useToast } from "vue-toast-notification";
 
 export const api = axios.create({
     baseURL: "/api",
@@ -11,11 +12,14 @@ export const api = axios.create({
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response) {
-            alert(
-                error.response?.data.message || error.response?.data || error
-            );
-        }
+        const toast = useToast({
+            position: "bottom",
+        });
+
+        const message =
+            error.response?.data.message || error.response?.data || error;
+
+        toast.error(message);
         return Promise.reject(error);
     }
 );
