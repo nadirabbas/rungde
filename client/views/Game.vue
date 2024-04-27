@@ -249,43 +249,10 @@
 
         <div
             class="fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 bg-black bg-opacity-95 rounded p-5 w-[70vw] h-[70vh] flex flex-col items-center justify-center text-white text-2xl"
-            v-if="roomClosed"
+            v-if="roomClosed && !isHost"
         >
-            <span class="mb-10">
-                <template v-if="roomClosed && !isHost">
-                    The room has been closed by the host.
-                </template>
-
-                <span v-if="goonCourt !== null">
-                    {{
-                        goonCourt
-                            ? "Nice! it's a GOON COURT 🎉!"
-                            : "Well...this is embarrassing, it's a GOON COURT 😔"
-                    }}
-                </span>
-                <span v-else-if="court !== null">
-                    {{
-                        court
-                            ? "Nice! it's a COURT 🎉!"
-                            : "Well...this is embarrassing, it's a COURT 😔"
-                    }}
-                </span>
-                <template v-else-if="victory !== null">
-                    {{ victory ? "You have won!" : "You lost the game" }}
-                </template>
-            </span>
-
-            <Button
-                v-if="isHost || roomClosed"
-                class="rd-bg"
-                @click="roomClosed ? goHome() : restartRoom()"
-                :disabled="!roomClosed && (!room.is_ended || reseting)"
-            >
-                <template v-if="roomClosed">Leave room</template>
-                <template v-else>
-                    {{ reseting ? "Starting..." : "Start new game" }}
-                </template>
-            </Button>
+            <span class="mb-10">The room has been closed by the host.</span>
+            <Button class="rd-bg" @click="goHome">Leave room</Button>
         </div>
 
         <GameMenu
