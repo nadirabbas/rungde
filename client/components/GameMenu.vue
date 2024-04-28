@@ -18,7 +18,7 @@
             @click="restartRoom"
             v-if="isHost && isSelf"
         >
-            Restart room
+            Restart game
         </button>
 
         <button

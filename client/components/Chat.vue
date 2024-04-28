@@ -45,7 +45,7 @@
 
                 <form
                     @submit.prevent="send"
-                    class="flex items-stretch gap-1 mt-4 w-full p-2"
+                    class="flex items-stretch gap-1 w-full p-2 pt-0"
                 >
                     <input
                         ref="messageInput"

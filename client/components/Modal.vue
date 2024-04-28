@@ -1,12 +1,12 @@
 <template>
     <TransitionFade>
         <div
-            class="fixed top-0 left-0 w-screen h-screen flex items-center justify-center backdrop-blur-sm bg-black bg-opacity-70"
+            class="z-50 fixed top-0 left-0 w-screen h-screen flex items-center justify-center backdrop-blur-sm bg-black bg-opacity-70"
             @click.self="close"
             v-if="modelValue"
         >
             <div
-                :class="`bg-white rounded min-w-[25vw] flex flex-col items-center text-2xl max-h-[95vh] overflow-y-auto  ${
+                :class="`bg-white rounded min-w-[30vw] flex flex-col items-center text-2xl max-h-[95vh] overflow-y-auto ${
                     bodyClass || 'p-5'
                 }`"
             >

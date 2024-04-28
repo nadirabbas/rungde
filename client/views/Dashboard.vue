@@ -31,6 +31,7 @@ import { usePusher } from "../composables/usePusher";
 import { onMounted, ref } from "vue";
 import { useAuthStore } from "../store/authStore";
 import { useRouter } from "vue-router";
+import { useToast } from "../composables/useToast";
 
 const authStore = useAuthStore();
 
@@ -59,11 +60,13 @@ const create = async () => {
     creating.value = false;
 };
 
+const toast = useToast();
+
 const join = async () => {
     let error = "";
     if (!roomCode.value) error = "Please enter a room code";
     if (error) {
-        alert(error);
+        toast.error(error);
         return;
     }
 

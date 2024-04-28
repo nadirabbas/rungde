@@ -323,15 +323,13 @@ import { maxBy } from "lodash-es";
 import { mapValues } from "lodash-es";
 import { useDealer } from "../composables/useDealer";
 import { TransitionFade } from "@morev/vue-transitions";
-import { useToast } from "vue-toast-notification";
 
 import Chat from "../components/Chat.vue";
 import { Channel } from "pusher-js";
+import { useToast } from "../composables/useToast";
 
 const dealer = useDealer();
-const toast = useToast({
-    position: "bottom",
-});
+const toast = useToast();
 
 const router = useRouter();
 const render = ref(false);
@@ -745,7 +743,7 @@ const initSocket = async () => {
             }) => {
                 if (leftPos || removedPos) {
                     if (removedPos === me.value?.position.toString()) {
-                        alert("You have been removed by the host.");
+                        toast.error("You have been removed by the host.");
                         goHome();
                         return;
                     }

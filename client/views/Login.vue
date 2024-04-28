@@ -16,6 +16,7 @@ import Button from "../components/Button.vue";
 import { useAuthStore } from "../store/authStore";
 import { useRouter } from "vue-router";
 import { api } from "../api";
+import { useToast } from "../composables/useToast";
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -23,13 +24,15 @@ const router = useRouter();
 const username = ref("");
 const loading = ref(false);
 
+const toast = useToast();
+
 const submit = async () => {
     let error = "";
     if (!username.value) error = "Please enter your username";
     else if (username.value.includes(" "))
         error = "Username cannot contain spaces";
     if (error) {
-        alert(error);
+        toast.error(error);
         return;
     }
 
