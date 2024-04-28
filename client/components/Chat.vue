@@ -107,13 +107,6 @@ const messages = ref<
     }[]
 >([]);
 
-// random 20 messages
-messages.value = Array.from({ length: 20 }, () => ({
-    id: v4(),
-    username: "user",
-    msg: "Hello",
-}));
-
 const { channel, username } = toRefs(props);
 
 const isOpen = ref(false);
