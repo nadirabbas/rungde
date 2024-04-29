@@ -789,7 +789,7 @@ const loadAssets = () => {
     loading.value = true;
 
     preloadImages(
-        [...allCards(), ...suites, "back"].map((p) => `/cards/${p}.svg`),
+        suites.map((p) => `/cards/${p}.svg`),
         () => {
             authStore.assetsLoaded = true;
             loading.value = false;
