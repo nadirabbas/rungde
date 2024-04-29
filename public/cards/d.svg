@@ -1,12 +1,7 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
-  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-
-<svg xmlns="http://www.w3.org/2000/svg"
-     viewBox="0 0 60 60">
-
-  <rect x="10" y="10" width="40" height="40" style="fill:red" 
-	transform="rotate(45,30,30)" />
-
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="60" height="60">
+	<title>d-svg</title>
+	<style>
+		.s0 { fill: #b91c1c } 
+	</style>
+	<path id="Layer" class="s0" d="m30 1.7l28.3 28.3-28.3 28.3-28.3-28.3z"/>
 </svg>

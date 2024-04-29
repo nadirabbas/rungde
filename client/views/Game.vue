@@ -5,7 +5,7 @@
             <Logo class="w-[70px] md:w-[150px]" v-if="!rung" />
             <span class="flex bg-white px-2 py-1 rounded" v-else>
                 <div class="mr-2 font-medium">RUNG</div>
-                <img :src="`/cards/${rung}.svg`" class="w-6" />
+                <img :src="`/cards/${rung}.svg`" class="w-5" />
             </span>
         </div>
 
@@ -15,10 +15,10 @@
                 :card="card"
                 :key="card"
                 :class="{
-                    'absolute cursor-pointer -bottom-16': true,
+                    'absolute cursor-pointer -bottom-3': true,
                     '-translate-y-[10vh]': clickedCard === card,
                 }"
-                :style="cards.includes(card) ? `left: ${i * 5.6}vw` : ''"
+                :style="cards.includes(card) ? `left: ${i * 6.2}vw` : ''"
                 :width="12"
                 @mouseleave="cardUnhovered"
                 @click="playCard($event, card)"

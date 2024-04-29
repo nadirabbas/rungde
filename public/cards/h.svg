@@ -1,15 +1,16 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
-  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-
-<svg xmlns="http://www.w3.org/2000/svg"
-     viewBox="0 0 600 600">
-
-<g transform="rotate(45,300,300)" fill="red">
-  <rect x="150" y="150" height="350" width="350" />
-  <circle cx="150" cy="325" r="175" />
-  <circle cx="325" cy="150" r="175" />
-</g>
-
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+	<title>h-svg</title>
+	<style>
+		.s0 { fill: #ff0000 } 
+	</style>
+	<filter id="f0">
+		<feFlood flood-color="#b91c1c" flood-opacity="1" />
+		<feBlend mode="normal" in2="SourceGraphic"/>
+		<feComposite in2="SourceAlpha" operator="in" />
+	</filter>
+	<g id="Layer" filter="url(#f0)">
+		<path id="Layer" class="s0" d="m300 87.9l247.5 247.5-247.5 247.4-247.5-247.4z"/>
+		<path id="Layer" class="s0" d="m52.5 335.4c-68.4-68.5-68.4-179.1 0-247.5 68.4-68.5 179.1-68.5 247.5 0 68.4 68.4 68.4 179 0 247.5-68.4 68.4-179.1 68.4-247.5 0z"/>
+		<path id="Layer" class="s0" d="m300 335.4c-68.4-68.5-68.4-179.1 0-247.5 68.4-68.5 179.1-68.5 247.5 0 68.4 68.4 68.4 179 0 247.5-68.4 68.4-179.1 68.4-247.5 0z"/>
+	</g>
 </svg>
