@@ -7,6 +7,7 @@
             'text-red-700': suite === 'h' || suite === 'd',
             'text-black': suite === 'c' || suite === 's',
             backside: isBack,
+            'border-[3px] border-green-600': high,
         }"
         :style="`width: 8.2vw`"
     >
@@ -27,28 +28,6 @@
             ></div>
         </template>
     </div>
-
-    <!-- <div
-        :class="{
-            'bg-white rounded': true,
-            'border-[3px] border-green-600': high,
-            'shadow-sm shadow-black': !highlighted,
-            'highlighted-card': highlighted && !inactive,
-        }"
-    >
-        <img
-            :src="`/cards/${hidden ? 'back' : card}.svg`"
-            :style="`min-width: ${width}vw; max-width: ${width}vw`"
-            :class="{
-                rounded: true,
-            }"
-        />
-
-        <div
-            class="absolute top-0 left-0 w-full h-full bg-opacity-40 rounded bg-black"
-            v-if="inactive"
-        ></div>
-    </div> -->
 </template>
 
 <script setup lang="ts">
@@ -67,9 +46,9 @@ const props = defineProps({
     hidden: Boolean,
 });
 
-const { card } = toRefs(props);
+const { card, hidden } = toRefs(props);
 
-const isBack = computed(() => card.value === "back");
+const isBack = computed(() => card.value === "back" || hidden.value);
 const suite = computed(() => card.value[0]);
 const rank = computed(() => {
     const num = cardNum(card.value);
