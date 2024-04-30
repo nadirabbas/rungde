@@ -119,7 +119,7 @@ const init = () => {
             },
         ],
     };
-    signal.value = new IonSFUJSONRPCSignal("ws://34.18.66.124:7000/ws");
+    signal.value = new IonSFUJSONRPCSignal("wss://rungde.lol:8443/ws");
     // @ts-ignore
     client.value = new Client(signal.value, config);
 
