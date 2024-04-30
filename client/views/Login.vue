@@ -4,7 +4,7 @@
             <TextField v-model="username" dark />
         </FieldLabel>
 
-        <Button type="submit" :loading="loading" class="w-full">Play</Button>
+        <Button type="submit" :loading="loading" class="w-full">Play!</Button>
     </form>
 </template>
 
