@@ -7,6 +7,7 @@ php artisan optimize
 
 php artisan queue:work &
 php artisan queue:work &
+php artisan queue:work &
 
 
 php-fpm -D &&  nginx -g "daemon off;"

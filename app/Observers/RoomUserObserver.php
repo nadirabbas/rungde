@@ -9,7 +9,7 @@ class RoomUserObserver
 {
     protected function broadcast(RoomUser $roomUser)
     {
-        broadcast(new RoomUpdatedEvent($roomUser->room->load('participants')));
+        event(new RoomUpdatedEvent($roomUser->room->load('participants')));
     }
 
     public function created(RoomUser $roomUser)

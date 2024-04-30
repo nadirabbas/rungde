@@ -21,6 +21,6 @@ class RoomChatController extends Controller
             ], 400);
         }
 
-        broadcast(new RoomChatEvent($user->room->id, $request->msg, $user->username));
+        event(new RoomChatEvent($user->room->id, $request->msg, $user->username));
     }
 }

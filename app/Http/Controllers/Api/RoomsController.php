@@ -49,7 +49,7 @@ class RoomsController extends Controller
             collect($request->room_users)->each(fn ($users, $position) => $room->participants()->where('position', $position)->first()?->update($users));
         }
 
-        broadcast(new RoomUpdatedEvent($room->fresh()->load('participants')));
+        event(new RoomUpdatedEvent($room->fresh()->load('participants')));
     }
 
     public function show(Room $room)
@@ -101,7 +101,7 @@ class RoomsController extends Controller
             'position' => $position[0]
         ]);
 
-        broadcast(new RoomUpdatedEvent($room->fresh()->load('participants')));
+        event(new RoomUpdatedEvent($room->fresh()->load('participants')));
 
         return $roomUser;
     }
@@ -114,7 +114,7 @@ class RoomsController extends Controller
 
         if ($room) {
             $room->participants()->where('user_id', $request->user()->id)->delete();
-            broadcast(new RoomUpdatedEvent($room->fresh()->load('participants'), false, $roomUser->position));
+            event(new RoomUpdatedEvent($room->fresh()->load('participants'), false, $roomUser->position));
         }
 
         return [
@@ -128,7 +128,7 @@ class RoomsController extends Controller
 
         if ($room) {
             $room->delete();
-            broadcast(new RoomUpdatedEvent($room, true));
+            event(new RoomUpdatedEvent($room, true));
         }
 
         return [
@@ -144,7 +144,7 @@ class RoomsController extends Controller
         if ($room) {
             $roomUser = $room->participants()->where('position', $request->position)->first();
             $roomUser->delete();
-            broadcast(new RoomUpdatedEvent($room->load('participants'), false, '', $roomUser->position));
+            event(new RoomUpdatedEvent($room->load('participants'), false, '', $roomUser->position));
         }
 
         return [
