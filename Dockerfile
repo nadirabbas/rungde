@@ -2,15 +2,21 @@ FROM officialnadir/php-gerty:2.0
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-WORKDIR /usr/src/app
+COPY composer.lock composer.json /var/www/
 
-COPY package*.json ./
-RUN npm install
+WORKDIR /var/www
+
+RUN groupadd -g 1000 www
+RUN useradd -u 1000 -ms /bin/bash -g www www
 
 COPY . . 
 RUN composer install
-
+RUN npm install
 RUN npm run build
 
+COPY --chown=www:www . /var/www
 
-CMD php artisan serve --host=0.0.0.0 --port=80
+USER www
+
+EXPOSE 9000
+CMD ["php-fpm"]

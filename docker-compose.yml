@@ -9,6 +9,12 @@ services:
             context: .
             dockerfile: Dockerfile
         container_name: rungde
+        restart: unless-stopped
+        tty: true
+        working_dir: /var/www
+        volumes:
+            - ./:/var/www
+            - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
         ports:
             - "80:80"
         depends_on:
