@@ -7,7 +7,6 @@ import { Client, LocalStream, RemoteStream } from "ion-sdk-js";
 import { IonSFUJSONRPCSignal } from "ion-sdk-js/lib/signal/json-rpc-impl";
 import { PropType, onMounted, onUnmounted, ref, toRefs, watch } from "vue";
 import { RoomUser } from "../store/authStore";
-import { MicrophoneIcon } from "heroicons-vue3/solid";
 import { useBus } from "../composables/useBus";
 import { api } from "../api";
 import { watchStreamAudioLevel } from "stream-audio-level";
@@ -50,6 +49,14 @@ const updateUserStreamId = (sid: string) => {
     });
 };
 
+const createAudioElementForStream = (stream: MediaStream, muted = false) => {
+    const audioElement = new Audio();
+    audioElement.autoplay = true;
+    audioElement.muted = false;
+    userAudioElements.value[stream.id] = audioElement;
+    return audioElement;
+};
+
 const setMediaStream = (
     isMine: boolean,
     stream: LocalStream | RemoteStream
@@ -62,6 +69,7 @@ const setMediaStream = (
         remoteStreams.value[stream.id] = stream as RemoteStream;
     }
 
+    if (isMine) return;
     mediaStreamAudioWatchers.value[stream.id] = watchStreamAudioLevel(
         stream,
         (v) => {
@@ -73,7 +81,6 @@ const setMediaStream = (
                 }
                 muteTimeouts.value[stream.id] = setTimeout(() => {
                     audio!.muted = true;
-                    console.log("muting again");
                 }, 2000);
                 bus.emit("speaking", stream.id);
             } else {
@@ -92,8 +99,7 @@ const startAudioStream = () => {
     LocalStream.getUserMedia({
         audio: true,
         video: false,
-        resolution: "vga",
-        codec: "vp8",
+        resolution: "qvga",
     }).then((m) => {
         m.mute("audio");
         setMediaStream(true, m);
@@ -132,9 +138,7 @@ const init = () => {
         track.onunmute = () => {
             let audioElement = userAudioElements.value[stream.id];
             if (!audioElement) {
-                audioElement = new Audio();
-                audioElement.autoplay = true;
-                audioElement.muted = false;
+                audioElement = createAudioElementForStream(stream);
                 userAudioElements.value[stream.id] = audioElement;
             }
 
@@ -147,7 +151,6 @@ const init = () => {
 
             const unwatch = mediaStreamAudioWatchers.value[stream.id];
             if (unwatch) {
-                console.log("removing " + stream.id);
                 unwatch();
                 delete mediaStreamAudioWatchers.value[stream.id];
             }

@@ -3,11 +3,12 @@
         <button
             :class="{
                 relative: true,
-                'bg-white text-black p-[8px] rounded-full': isSelf,
+                'bg-white text-black p-[4px] border-[3px] rounded-full': isSelf,
                 'text-white': !isSelf,
                 'text-red-500': muted && isSelf,
                 hidden: !isSpeaking && !isSelf,
-                '': isSpeaking && isSelf,
+                'border-red-500': isSpeaking && isSelf,
+                'border-white': !isSpeaking && isSelf,
             }"
             @click="toggleMute"
             v-if="stream || !isSelf"
@@ -27,9 +28,10 @@
 <script setup lang="ts">
 import { MicrophoneIcon } from "heroicons-vue3/solid";
 import { useBus } from "../composables/useBus";
-import { ref, toRefs } from "vue";
+import { onMounted, ref, toRefs } from "vue";
 import { TransitionFade } from "@morev/vue-transitions";
 import { LocalStream } from "ion-sdk-js";
+import DecibelMeter from "decibel-meter";
 const bus = useBus();
 
 const props = defineProps({
@@ -71,5 +73,22 @@ bus.on("quiet", (sid) => {
     if (sid == streamId.value) {
         isSpeaking.value = false;
     }
+});
+
+const timeout = ref<NodeJS.Timeout>();
+onMounted(() => {
+    if (!isSelf.value) return;
+
+    new DecibelMeter().listenTo(0, (dB, percent, value) => {
+        if (percent > 30 && !muted.value) {
+            isSpeaking.value = true;
+            if (timeout.value) {
+                clearTimeout(timeout.value);
+            }
+            timeout.value = setTimeout(() => {
+                isSpeaking.value = false;
+            }, 300);
+        }
+    });
 });
 </script>
