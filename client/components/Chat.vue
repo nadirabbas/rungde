@@ -1,7 +1,7 @@
 <template>
     <div>
         <button
-            class="fixed right-[185px] top-5 rounded-full bg-yellow text-[#222] p-1"
+            class="fixed right-36 top-5 rounded-full bg-yellow text-[#222] p-1"
             @click="open"
         >
             <ChatAlt2Icon class="w-6 h-6" @click="open" />
