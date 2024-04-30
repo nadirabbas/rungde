@@ -18,7 +18,7 @@
                     'absolute cursor-pointer -bottom-3': true,
                     '-translate-y-[10vh]': clickedCard === card,
                 }"
-                :style="cards.includes(card) ? `left: ${i * 6.2}vw` : ''"
+                :style="cards.includes(card) ? `left: ${i * 5.6}vw` : ''"
                 :width="12"
                 @mouseleave="cardUnhovered"
                 @click="playCard($event, card)"

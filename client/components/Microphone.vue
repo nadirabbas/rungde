@@ -2,8 +2,8 @@
     <div>
         <button
             :class="{
-                relative: true,
-                'bg-white text-black p-[4px] border-[3px] rounded-full': isSelf,
+                'bg-white text-black flex items-center justify-center w-8 h-8 border-[3px] rounded-full z-40 fixed right-36 top-5':
+                    isSelf,
                 'text-white': !isSelf,
                 'text-red-500': muted && isSelf,
                 hidden: !isSpeaking && !isSelf,
