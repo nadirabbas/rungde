@@ -10,10 +10,7 @@ import { RoomUser } from "../store/authStore";
 import { useBus } from "../composables/useBus";
 import { api } from "../api";
 import { watchStreamAudioLevel } from "stream-audio-level";
-import { useGeneralStore } from "../store/generalStore";
-import { storeToRefs } from "pinia";
 const bus = useBus();
-const generalStore = useGeneralStore();
 
 const props = defineProps({
     participants: {
@@ -107,9 +104,7 @@ const startAudioStream = () => {
     });
 };
 
-const { hasUserInteracted } = storeToRefs(generalStore);
 const init = () => {
-    if (!hasUserInteracted.value) return;
     if (signal.value && client.value) return;
 
     const config = {
@@ -176,7 +171,6 @@ bus.on("mute", toggleMute("mute"));
 bus.on("unmute", toggleMute("unmute"));
 
 onMounted(init);
-watch(hasUserInteracted, init);
 
 // Clean up
 onUnmounted(() => {

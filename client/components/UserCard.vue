@@ -36,7 +36,7 @@
             <ChevronDownIcon class="ml-1 w-4" v-if="showMenu" />
         </span>
 
-        <div @click.stop>
+        <div @click.stop v-if="generalStore.hasUserInteracted">
             <AudioChat
                 v-if="isSelf && room && userId"
                 :participants="room.participants"
@@ -62,6 +62,9 @@ import { PropType } from "vue";
 import AudioChat from "./AudioChat.vue";
 import Microphone from "./Microphone.vue";
 import { Room } from "../store/authStore";
+import { useGeneralStore } from "../store/generalStore";
+
+const generalStore = useGeneralStore();
 
 const props = defineProps({
     name: String,
