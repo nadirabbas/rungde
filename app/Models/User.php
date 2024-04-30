@@ -29,4 +29,9 @@ class User extends Authenticatable
     {
         return $this->hasOneThrough(Room::class, RoomUser::class, 'user_id', 'id', 'id', 'room_id');
     }
+
+    public function roomUser()
+    {
+        return $this->hasOne(RoomUser::class);
+    }
 }

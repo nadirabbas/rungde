@@ -17,7 +17,8 @@ class RoomUser extends Pivot
         'position',
         'cards',
         'sir_count',
-        'latest_turn'
+        'latest_turn',
+        'stream_id'
     ];
 
     protected $casts = [

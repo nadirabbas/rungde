@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Events\RoomUpdatedEvent;
+use App\Events\RoomUserChangedEvent;
 use App\Http\Controllers\Controller;
 use App\Models\Room;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class RoomsController extends Controller
 {
+
     public function current(Request $request)
     {
         $room = $request->user()->room;

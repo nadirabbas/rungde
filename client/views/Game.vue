@@ -38,6 +38,10 @@
             @click="openMenu(me)"
             :score="me?.sir_count"
             :score-diff="turnPos == me?.position && sirWinDiff"
+            :room="room"
+            is-self
+            :user-id="me?.user.id"
+            :stream-id="me?.stream_id"
         />
 
         <UserCard
@@ -50,6 +54,9 @@
             @click="isHost && openMenu(teammate)"
             :score="teammate?.sir_count"
             :score-diff="turnPos == teammate?.position && sirWinDiff"
+            :room="room"
+            :user-id="teammate?.user.id"
+            :stream-id="teammate?.stream_id"
         />
 
         <UserCard
@@ -61,6 +68,9 @@
             @click="isHost && openMenu(rightOpp)"
             :score="rightOpp?.sir_count"
             :score-diff="turnPos == rightOpp?.position && sirWinDiff"
+            :room="room"
+            :user-id="rightOpp?.user.id"
+            :stream-id="rightOpp?.stream_id"
         />
 
         <UserCard
@@ -72,6 +82,10 @@
             @click="isHost && openMenu(leftOpp)"
             :score="leftOpp?.sir_count"
             :score-diff="turnPos == leftOpp?.position && sirWinDiff"
+            :room="room"
+            is-left-opp
+            :user-id="leftOpp?.user.id"
+            :stream-id="leftOpp?.stream_id"
         />
 
         <button
@@ -478,13 +492,22 @@ const roomPaused = computed(() => (room.value?.participants.length || 0) < 4);
 const setParticipants = (participants: RoomUser[]) => {
     room.value!.participants = participants;
     me.value = participants.find(
-        (p: RoomUser) => p.user.id === authStore.user?.id
+        (p: RoomUser) => p.user.id == authStore.user?.id
     );
     teammate.value = participants.find(
-        (p) => !isOpponent(p.position) && p.position !== me.value?.position
+        (p) => !isOpponent(p.position) && p.position != me.value?.position
     );
     opponents.value = participants.filter((p) => isOpponent(p.position));
 };
+
+const setParticipantById = (id, user) => {
+    if (!room.value) return;
+    room.value.participants = room.value.participants.map((r) =>
+        r.user_id == id ? user : r
+    );
+    setParticipants(room.value.participants);
+};
+
 const setValues = async (r: Room) => {
     const oldRoom = { ...room.value };
 
@@ -728,6 +751,10 @@ const initSocket = async () => {
 
     try {
         channel.value = pusher.subscribe(`private-room.${room.value?.id}`);
+        channel.value.bind("userchanged", ({ roomUser }) => {
+            setParticipantById(roomUser.user_id, roomUser);
+        });
+
         channel.value.bind(
             "updated",
             ({

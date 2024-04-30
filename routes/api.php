@@ -25,6 +25,7 @@ Route::post('/auth/logout', [AuthController::class, 'logout']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/me', [UsersController::class, 'me']);
+    Route::put('/me/stream', [UsersController::class, 'setStreamId']);
 
     Route::put('/room/leave', [RoomsController::class, 'leave']);
     Route::put('/room/close', [RoomsController::class, 'close']);

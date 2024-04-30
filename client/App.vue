@@ -30,7 +30,6 @@ import AuthLayout from "./layouts/AuthLayout.vue";
 import { api } from "./api";
 import { useRoute, useRouter } from "vue-router";
 import BlankLayout from "./layouts/BlankLayout.vue";
-import Start from "./views/Start.vue";
 
 const generalStore = useGeneralStore();
 const authStore = useAuthStore();
@@ -83,4 +82,12 @@ window.addEventListener("keydown", (e) => {
 onMounted(async () => {
     verifyAuth();
 });
+
+window.addEventListener(
+    "click",
+    () => {
+        generalStore.hasUserInteracted = true;
+    },
+    { once: true }
+);
 </script>

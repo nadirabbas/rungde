@@ -7,6 +7,8 @@ export interface RoomUser {
     cards: string[];
     sir_count: number;
     latest_turn: string;
+    stream_id: null | string;
+    user_id: number;
 }
 
 export interface Room {
