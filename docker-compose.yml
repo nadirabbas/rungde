@@ -13,6 +13,7 @@ services:
             - "80:80"
         depends_on:
             - mysql
+            - redis
         networks:
             - main
     redis:
