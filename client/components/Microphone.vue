@@ -2,13 +2,13 @@
     <div>
         <button
             :class="{
-                'bg-white text-black flex items-center justify-center w-8 h-8 border-[3px] rounded-full z-40 fixed right-[185px] top-5':
+                ' flex items-center justify-center w-8 h-8 rounded-full z-40 fixed right-[185px] top-5':
                     isSelf,
                 'text-white': !isSelf,
                 'text-red-500': muted && isSelf,
                 hidden: !isSpeaking && !isSelf,
-                'border-red-500': isSpeaking && isSelf,
-                'border-white': !isSpeaking && isSelf,
+                'bg-red-500 text-white': isSpeaking && isSelf,
+                'bg-white text-black': !isSpeaking && isSelf,
             }"
             @click="toggleMute"
             v-if="stream || !isSelf"
