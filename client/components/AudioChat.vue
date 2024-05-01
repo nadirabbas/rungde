@@ -110,6 +110,8 @@ const startAudioStream = () => {
         });
 };
 
+const keepAliveInterval = ref<NodeJS.Timeout>();
+
 const init = () => {
     if (signal.value && client.value) return;
 
@@ -129,6 +131,13 @@ const init = () => {
             roomId.value.toString(),
             userId.value.toString()
         );
+
+        keepAliveInterval.value = setInterval(() => {
+            client.value?.join(
+                roomId.value.toString(),
+                userId.value.toString()
+            );
+        }, 1000 * 30);
 
         startAudioStream();
     };
@@ -180,6 +189,8 @@ onMounted(init);
 
 // Clean up
 onUnmounted(() => {
+    if (keepAliveInterval.value) clearInterval(keepAliveInterval.value);
+
     myStream.value?.unpublish();
     client.value?.close();
     signal.value?.close();
