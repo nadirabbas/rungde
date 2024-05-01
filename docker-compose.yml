@@ -23,8 +23,6 @@ services:
             - "6379:6379"
         networks:
             - main
-        environment:
-            - REDIS_PASSWORD=redis
 
     mysql:
         image: mysql:8.3
