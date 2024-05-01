@@ -10,6 +10,8 @@ import { RoomUser } from "../store/authStore";
 import { useBus } from "../composables/useBus";
 import { api } from "../api";
 import { watchStreamAudioLevel } from "stream-audio-level";
+import { v4 as uuid } from "uuid";
+
 const bus = useBus();
 
 const emit = defineEmits(["reinit"]);
@@ -130,16 +132,12 @@ const init = () => {
     client.value = new Client(signal.value, config);
 
     signal.value.onopen = async () => {
-        await client.value?.join(
-            roomId.value.toString(),
-            userId.value.toString()
-        );
+        const newId = uuid();
+
+        await client.value?.join(roomId.value.toString(), newId);
 
         keepAliveInterval.value = setInterval(() => {
-            client.value?.join(
-                roomId.value.toString(),
-                userId.value.toString()
-            );
+            client.value?.join(roomId.value.toString(), newId);
         }, 1000 * 30);
 
         startAudioStream();
