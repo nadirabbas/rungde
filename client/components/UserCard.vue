@@ -38,11 +38,12 @@
 
         <div @click.stop v-if="generalStore.hasUserInteracted">
             <AudioChat
-                v-if="isSelf && room && userId"
+                v-if="isSelf && room && userId && render"
                 :participants="room.participants"
                 :room-id="room.id"
                 :is-self="isSelf"
                 :user-id="userId"
+                @reinit="reinitAudioChat"
             />
 
             <Microphone
@@ -58,7 +59,7 @@
 <script setup lang="ts">
 import { ChevronDownIcon } from "heroicons-vue3/solid";
 import UserCardScore from "./UserCardScore.vue";
-import { PropType } from "vue";
+import { PropType, nextTick, ref } from "vue";
 import AudioChat from "./AudioChat.vue";
 import Microphone from "./Microphone.vue";
 import { Room } from "../store/authStore";
@@ -80,6 +81,14 @@ const props = defineProps({
     userId: Number,
     streamId: String,
 });
+
+const render = ref(true);
+const reinitAudioChat = () => {
+    render.value = false;
+    nextTick(() => {
+        render.value = true;
+    });
+};
 </script>
 
 <style lang="scss">

@@ -12,6 +12,7 @@ import { api } from "../api";
 import { watchStreamAudioLevel } from "stream-audio-level";
 const bus = useBus();
 
+const emit = defineEmits(["reinit"]);
 const props = defineProps({
     participants: {
         type: Array as PropType<RoomUser[]>,
@@ -97,11 +98,16 @@ const startAudioStream = () => {
         audio: true,
         video: false,
         resolution: "qvga",
-    }).then((m) => {
-        m.mute("audio");
-        setMediaStream(true, m);
-        client.value?.publish(m);
-    });
+    })
+        .then((m) => {
+            m.mute("audio");
+            setMediaStream(true, m);
+            client.value?.publish(m);
+        })
+        .catch((err) => {
+            console.error("media devices error", err);
+            emit("reinit");
+        });
 };
 
 const init = () => {
