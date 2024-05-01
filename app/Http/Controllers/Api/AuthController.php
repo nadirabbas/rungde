@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
@@ -13,11 +14,35 @@ class AuthController extends Controller
     {
         $request->validate([
             'username' => 'required|unique:users',
+            'password' => 'required'
         ]);
 
         $user = User::create([
             'username' => $request->username,
+            'password' => Hash::make($request->password)
         ]);
+
+        auth()->login($user, true);
+
+        return [
+            'user' => $user->load('room')
+        ];
+    }
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required'
+        ]);
+
+        $user = User::where('username', $request->username)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'message' => 'The provided credentials are incorrect.'
+            ], 401);
+        }
 
         auth()->login($user, true);
 
