@@ -46,7 +46,7 @@
             />
 
             <Microphone
-                v-if="streamId"
+                v-if="streamId || isSelf"
                 :user-id="userId"
                 :stream-id="streamId"
                 :is-self="isSelf"
