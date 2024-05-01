@@ -97,12 +97,15 @@ const startAudioStream = () => {
     LocalStream.getUserMedia({
         audio: true,
         video: false,
-        resolution: "qvga",
+        resolution: "vga",
     })
         .then((m) => {
             m.mute("audio");
             setMediaStream(true, m);
             client.value?.publish(m);
+
+            console.log("publish local video", m);
+            console.log("local client", client.value);
         })
         .catch((err) => {
             console.error("media devices error", err);
@@ -145,18 +148,22 @@ const init = () => {
     client.value.ontrack = (track, stream) => {
         setMediaStream(false, stream);
 
-        track.onunmute = () => {
-            let audioElement = userAudioElements.value[stream.id];
-            if (!audioElement) {
-                audioElement = createAudioElementForStream(stream);
-                userAudioElements.value[stream.id] = audioElement;
-            }
+        console.log("new track", track);
+        console.log("new stream", stream);
 
-            audioElement.srcObject = new MediaStream([track]);
-            audioElement.play();
-        };
+        let audioElement = userAudioElements.value[stream.id];
+        if (!audioElement) {
+            audioElement = createAudioElementForStream(stream);
+            userAudioElements.value[stream.id] = audioElement;
+        }
+
+        audioElement.srcObject = new MediaStream([track]);
+        audioElement.play();
 
         stream.onremovetrack = () => {
+            console.log("track removed", track);
+            console.log("stream removed", stream);
+
             delete userAudioElements.value[stream.id];
 
             const unwatch = mediaStreamAudioWatchers.value[stream.id];
