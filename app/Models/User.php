@@ -36,4 +36,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(RoomUser::class);
     }
+
+    public function voiceTokens()
+    {
+        return $this->hasMany(VoiceToken::class);
+    }
 }

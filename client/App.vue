@@ -55,7 +55,11 @@ const verifyAuth = async () => {
             const res = await api.get("/me").then((res) => res.data);
             authStore.login(res.user);
 
-            if (res.user.room?.is_ended === false && route.name !== "Game") {
+            if (
+                res.user.room?.is_ended === false &&
+                route.name !== "Game" &&
+                route.path !== "/test"
+            ) {
                 router.push({
                     name: "Game",
                 });

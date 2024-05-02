@@ -7,23 +7,8 @@ use App\Models\RoomUser;
 
 class RoomUserObserver
 {
-    protected function broadcast(RoomUser $roomUser)
-    {
-        event(new RoomUpdatedEvent($roomUser->room->load('participants')));
-    }
-
-    public function created(RoomUser $roomUser)
-    {
-        $this->broadcast($roomUser);
-    }
-
-    public function updated(RoomUser $roomUser)
-    {
-        $this->broadcast($roomUser);
-    }
-
     public function deleted(RoomUser $roomUser)
     {
-        $this->broadcast($roomUser);
+        $roomUser->user?->voiceTokens()->delete();
     }
 }
