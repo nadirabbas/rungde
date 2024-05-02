@@ -341,6 +341,7 @@ import { TransitionFade } from "@morev/vue-transitions";
 import Chat from "../components/Chat.vue";
 import { Channel } from "pusher-js";
 import { useToast } from "../composables/useToast";
+import { useGeneralStore } from "../store/generalStore";
 
 const dealer = useDealer();
 const toast = useToast();
@@ -565,6 +566,8 @@ const isDevelopment = computed(
     () => import.meta.env.NODE_ENV === "development"
 );
 
+const generalStore = useGeneralStore();
+
 const verifyRoom = async () => {
     loading.value = true;
 
@@ -573,6 +576,8 @@ const verifyRoom = async () => {
         const r = res.data.room;
         dealer._drawPile = [...(r.deck || [])];
         setValues(r);
+
+        generalStore.tempRoomId = r.id;
 
         await initSocket();
     } catch (err) {

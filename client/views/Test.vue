@@ -4,14 +4,16 @@
 
 <script setup lang="ts">
 import { Device } from "mediasoup-client";
-import { Socket, io } from "socket.io-client";
-import { onDeactivated, onMounted, onUnmounted, ref } from "vue";
+import { io } from "socket.io-client";
+import { onMounted, ref } from "vue";
 import { useAuthStore } from "../store/authStore";
 import { api } from "../api";
 import { Consumer, Producer, Transport } from "mediasoup-client/lib/types";
+import { useGeneralStore } from "../store/generalStore";
+
+const generalStore = useGeneralStore();
 
 const authStore = useAuthStore();
-const roomId = 2;
 
 const tries = ref(0);
 
@@ -33,7 +35,7 @@ const init = async () => {
 
             // Join room
             socket.emit("joinRoom", {
-                roomId,
+                roomId: generalStore.tempRoomId,
                 userId: authStore.user?.id,
                 token: voiceToken,
             });
@@ -62,7 +64,7 @@ const init = async () => {
                                     "connect-mediasoup-transport",
                                     {
                                         token: voiceToken,
-                                        roomId,
+                                        roomId: generalStore.tempRoomId,
                                         dtlsParameters,
                                         userId: authStore.user?.id,
                                         direction,
@@ -93,7 +95,7 @@ const init = async () => {
                             socket.emit(
                                 "create_producer",
                                 {
-                                    roomId,
+                                    roomId: generalStore.tempRoomId,
                                     userId: authStore.user?.id,
                                     token: voiceToken,
                                     transportId: sendTr.id,
@@ -131,7 +133,7 @@ const init = async () => {
                     connTr(recvTr, "recv");
 
                     socket.emit("get_consumers", {
-                        roomId,
+                        roomId: generalStore.tempRoomId,
                         userId: authStore.user?.id,
                         rtpCapabilities: device.rtpCapabilities,
                         token: voiceToken,
