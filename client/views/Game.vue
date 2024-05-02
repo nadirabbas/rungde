@@ -57,6 +57,7 @@
             :room="room"
             :user-id="teammate?.user.id"
             :stream-id="teammate?.stream_id"
+            is-teammate
         />
 
         <UserCard
@@ -260,7 +261,7 @@
                 :goon-court="goonCourt"
                 :court="court"
                 :is-host="isHost"
-                :restart-fn="restartRoom"
+                :restart-fn="resetRoom"
                 v-if="victory !== null"
             />
         </TransitionFade>
@@ -278,7 +279,7 @@
             :is-self="openMenuFor?.position == me?.position"
             :is-host="me.position == 1"
             @close="openMenuFor = null"
-            :restart-fn="restartRoom"
+            :restart-fn="resetRoom"
             :model-value="!!openMenuFor"
         />
 
@@ -343,7 +344,7 @@ import { Channel } from "pusher-js";
 import { useToast } from "../composables/useToast";
 import { useGeneralStore } from "../store/generalStore";
 
-const dealer = useDealer();
+const { dealer, setDeck } = useDealer();
 const toast = useToast();
 
 const router = useRouter();
@@ -443,6 +444,7 @@ const { play: playSound } = useSound("/audio/sprite.opus", {
             victory: [13648, 16560],
             defeat: [17155, 21484],
             cardPlayed: [22651, 23348],
+            ticking: [25271, 25831],
         },
         ([s, e]: [number, number]) => [s, e - s]
     ),
@@ -509,6 +511,8 @@ const setParticipantById = (id, user) => {
     setParticipants(room.value.participants);
 };
 
+const isTicking = ref(false);
+
 const setValues = async (r: Room) => {
     const oldRoom = { ...room.value };
 
@@ -558,6 +562,26 @@ const setValues = async (r: Room) => {
     if (r.turn == me.value?.position) {
         if (!oldRoom[myTurnColumn] && r[myTurnColumn]) return;
         playSound({ id: "turn" });
+
+        const playTick = async () => {
+            if (!isTicking.value) return;
+            playSound({ id: "ticking" });
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            playTick();
+        };
+        const totalTurns = parseInt(r.total_turns.toString());
+        setTimeout(() => {
+            if (totalTurns == room.value?.total_turns) {
+                isTicking.value = true;
+                playTick();
+                const unwatch = watch(room, (newRoom) => {
+                    if (newRoom?.total_turns != totalTurns) {
+                        unwatch();
+                        isTicking.value = false;
+                    }
+                });
+            }
+        }, 5000);
     }
 };
 
@@ -577,8 +601,6 @@ const verifyRoom = async () => {
         dealer._drawPile = [...(r.deck || [])];
         setValues(r);
 
-        generalStore.tempRoomId = r.id;
-
         await initSocket();
     } catch (err) {
         router.push({
@@ -596,7 +618,9 @@ const updateRoom = (data: any) => {
 const startRoom = async () => {
     if (!isHost.value) return;
 
-    dealer.reset();
+    if (room.value?.new_deck?.length === 52) {
+        setDeck(room.value.new_deck);
+    }
 
     for (let i = 0; i < 100; i++) {
         dealer.shuffle();
@@ -616,6 +640,7 @@ const startRoom = async () => {
             rung_selector: rungSelector,
             room_users: distributeCards(rungSelector),
             deck: dealer._drawPile,
+            new_deck: [],
         });
 
         starting.value = false;
@@ -671,7 +696,7 @@ const startTurn = () => {
 };
 
 const reseting = ref(false);
-const restartRoom = async (resetScore = false) => {
+const resetRoom = async (resetScore = false) => {
     if (!isHost.value) return false;
 
     reseting.value = true;
@@ -726,12 +751,6 @@ const restartRoom = async (resetScore = false) => {
     reseting.value = false;
 };
 
-const resetHandler = (e: any) => {
-    if (e.key === "`") {
-        restartRoom();
-    }
-};
-
 const roomClosed = ref(false);
 const pusher = usePusher();
 const channel = ref<Channel>();
@@ -781,7 +800,7 @@ const initSocket = async () => {
                     }
 
                     setParticipants(r.participants);
-                    restartRoom(true);
+                    resetRoom(true);
                     return;
                 }
 
@@ -1001,6 +1020,7 @@ const playCard = async (e: any, card: string) => {
                     : newHighestCardPosition
                 : undefined,
             ended_at: isVeryLastTurn ? moment().toISOString() : undefined,
+            new_deck: [card, ...(room.value?.new_deck || [])],
         };
 
         if (room.value && isVeryLastTurn && winnerPosition) {

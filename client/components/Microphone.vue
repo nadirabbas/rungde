@@ -7,11 +7,16 @@
                 'text-white': !isSelf,
                 'text-red-500': muted && isSelf,
                 hidden: !isSpeaking && !isSelf,
-                'border-red-500': isSpeaking && isSelf,
+                'border-red-500': isSpeaking && isSelf && !muted,
                 'border-white': !isSpeaking && isSelf,
             }"
-            @click="toggleMute"
-            v-if="stream || !isSelf"
+            @mousedown="unmute"
+            @mouseup="mute"
+            @touchstart="unmute"
+            @touchcancel="mute"
+            @touchmove="mute"
+            @touchend="mute"
+            v-if="connected"
         >
             <MicrophoneIcon class="w-4" />
 
@@ -28,9 +33,8 @@
 <script setup lang="ts">
 import { MicrophoneIcon } from "heroicons-vue3/solid";
 import { useBus } from "../composables/useBus";
-import { onMounted, ref, toRefs } from "vue";
+import { onMounted, onUnmounted, ref, toRefs } from "vue";
 import { TransitionFade } from "@morev/vue-transitions";
-import { LocalStream } from "ion-sdk-js";
 import DecibelMeter from "decibel-meter";
 const bus = useBus();
 
@@ -40,47 +44,63 @@ const props = defineProps({
         type: Number,
         required: true,
     },
-    streamId: {
-        type: String,
-        required: true,
-    },
 });
-const { streamId, isSelf } = toRefs(props);
+const { userId, isSelf } = toRefs(props);
 
+const connected = ref(false);
 const muted = ref(true);
-const stream = ref<LocalStream>();
+const audioTrack = ref<MediaStreamTrack>();
 
-bus.on("mystream", (s: any) => {
-    if (isSelf.value) {
-        stream.value = s;
+const muteTimer = ref();
+
+const mute = () => {
+    muted.value = true;
+    audioTrack.value!.enabled = false;
+};
+
+const unmute = () => {
+    muted.value = false;
+    audioTrack.value!.enabled = true;
+};
+
+const toggleMute = (e: KeyboardEvent) => {
+    if (!(e.key === "V" || e.key === "v") || e.repeat) return;
+
+    if (muted.value) {
+        unmute();
+    } else {
+        mute();
     }
-});
-
-const toggleMute = () => {
-    bus.emit(muted.value ? "unmute" : "mute", { isMine: isSelf.value });
-    muted.value = !muted.value;
 };
 
 const isSpeaking = ref(false);
 
-bus.on("speaking", (sid) => {
-    if (sid == streamId.value) {
+bus.on("speaking", (uid) => {
+    if (uid === userId.value) {
         isSpeaking.value = true;
     }
 });
 
-bus.on("quiet", (sid) => {
-    if (sid == streamId.value) {
+bus.on("quiet", (uid) => {
+    if (uid === userId.value) {
         isSpeaking.value = false;
     }
+});
+
+bus.on("vc_connected", (myAudioTrack) => {
+    connected.value = true;
+    audioTrack.value = myAudioTrack as MediaStreamTrack;
 });
 
 const timeout = ref<NodeJS.Timeout>();
 onMounted(() => {
     if (!isSelf.value) return;
 
+    window.addEventListener("keydown", toggleMute);
+    window.addEventListener("keyup", toggleMute);
+
     new DecibelMeter().listenTo(0, (dB, percent, value) => {
-        if (percent > 30 && !muted.value) {
+        if (percent > 70 && !muted.value) {
             isSpeaking.value = true;
             if (timeout.value) {
                 clearTimeout(timeout.value);
@@ -90,5 +110,12 @@ onMounted(() => {
             }, 300);
         }
     });
+});
+
+onUnmounted(() => {
+    try {
+        window.removeEventListener("keydown", toggleMute);
+        window.removeEventListener("keyup", toggleMute);
+    } catch (error) {}
 });
 </script>

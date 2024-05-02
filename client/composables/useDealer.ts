@@ -3,5 +3,10 @@ import { shuffledCards } from "../utils/gameHelper";
 let dealer = new Dealer<any>(shuffledCards());
 
 export const useDealer = () => {
-    return dealer;
+    return {
+        dealer,
+        setDeck(deck: string[]) {
+            dealer = new Dealer<any>(deck);
+        },
+    };
 };

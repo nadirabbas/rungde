@@ -3,6 +3,7 @@
         :class="{
             'flex items-center gap-1': true,
             'flex-row-reverse': !isLeftOpp,
+            'min-w-[100px]': isTeammate,
         }"
     >
         <span
@@ -47,9 +48,8 @@
             />
 
             <Microphone
-                v-if="render && (streamId || isSelf)"
+                v-if="render && userId"
                 :user-id="userId"
-                :stream-id="streamId || ''"
                 :is-self="isSelf"
             />
         </div>
@@ -80,6 +80,7 @@ const props = defineProps({
     isLeftOpp: Boolean,
     userId: Number,
     streamId: String,
+    isTeammate: Boolean,
 });
 
 const render = ref(true);

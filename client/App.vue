@@ -74,15 +74,6 @@ const verifyAuth = async () => {
         generalStore.loading = false;
     }
 };
-window.addEventListener("keydown", (e) => {
-    if (e.key === "*") {
-        authStore.logout();
-        router.push({
-            name: "Login",
-        });
-    }
-});
-
 onMounted(async () => {
     verifyAuth();
 });

@@ -17,6 +17,8 @@ class VoiceTokensController extends Controller
             ], 400);
         }
 
+        $user->voiceTokens()->delete();
+
         $newVoiceToken = $user->voiceTokens()->create([
             'token' => bin2hex(random_bytes(32)),
             'expires_at' => now()->addHour(),

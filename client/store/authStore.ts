@@ -36,6 +36,7 @@ export interface Room {
     team_1_3_wins: number;
     team_2_4_wins: number;
     deck: string[];
+    new_deck: string[];
     team_1_3_goon_courts: number;
     team_2_4_goon_courts: number;
     team_1_3_courts: number;

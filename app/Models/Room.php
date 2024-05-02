@@ -35,6 +35,7 @@ class Room extends Model
         'team_2_4_goon_courts',
         'team_1_3_courts',
         'team_2_4_courts',
+        'new_deck'
     ];
 
     protected $appends = [
@@ -44,7 +45,8 @@ class Room extends Model
     protected $casts = [
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
-        'deck' => 'array'
+        'deck' => 'array',
+        'new_deck' => 'array'
     ];
 
     public function user()

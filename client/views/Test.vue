@@ -5,17 +5,29 @@
 <script setup lang="ts">
 import { Device } from "mediasoup-client";
 import { io } from "socket.io-client";
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref, toRefs } from "vue";
 import { useAuthStore } from "../store/authStore";
 import { api } from "../api";
-import { Consumer, Producer, Transport } from "mediasoup-client/lib/types";
-import { useGeneralStore } from "../store/generalStore";
+import { Consumer, Producer } from "mediasoup-client/lib/types";
+import { Socket } from "socket.io-client";
+import { useBus } from "../composables/useBus";
+import { watchStreamAudioLevel } from "stream-audio-level";
 
-const generalStore = useGeneralStore();
+const bus = useBus();
 
+const props = defineProps({
+    roomId: {
+        type: Number,
+        required: true,
+    },
+});
+
+const { roomId } = toRefs(props);
 const authStore = useAuthStore();
-
 const tries = ref(0);
+const socket = ref<Socket | null>();
+const mediaStreamAudioWatchers = ref<Record<string, () => void>>({});
+const muteTimeouts = ref<Record<string, NodeJS.Timeout>>({});
 
 const init = async () => {
     let consumers: Consumer[] = [];
@@ -24,9 +36,9 @@ const init = async () => {
     tries.value++;
     try {
         const device = new Device();
-        const socket = io(import.meta.env.VITE_VOICE_SERVER);
-        socket.on("connect", async () => {
-            socket.on("error", (msg) => {
+        socket.value = io(import.meta.env.VITE_VOICE_SERVER);
+        socket.value?.on("connect", async () => {
+            socket.value?.on("error", (msg) => {
                 window.alert(msg);
             });
 
@@ -34,13 +46,13 @@ const init = async () => {
             const voiceToken = res.data.token;
 
             // Join room
-            socket.emit("joinRoom", {
-                roomId: generalStore.tempRoomId,
+            socket.value?.emit("joinRoom", {
+                roomId: roomId.value,
                 userId: authStore.user?.id,
                 token: voiceToken,
             });
 
-            socket.once(
+            socket.value?.once(
                 "room_joined",
                 async ({
                     routerRtpCapabilities,
@@ -60,11 +72,11 @@ const init = async () => {
                         tr.on(
                             "connect",
                             async ({ dtlsParameters }, resolve, reject) => {
-                                socket.emit(
+                                socket.value?.emit(
                                     "connect-mediasoup-transport",
                                     {
                                         token: voiceToken,
-                                        roomId: generalStore.tempRoomId,
+                                        roomId: roomId.value,
                                         dtlsParameters,
                                         userId: authStore.user?.id,
                                         direction,
@@ -76,7 +88,7 @@ const init = async () => {
                                     }
                                 );
 
-                                socket.once(
+                                socket.value?.once(
                                     `${direction}-transport-connected`,
                                     () => {
                                         resolve();
@@ -92,10 +104,10 @@ const init = async () => {
                     sendTr.on(
                         "produce",
                         ({ kind, rtpParameters, appData }, resolve, reject) => {
-                            socket.emit(
+                            socket.value?.emit(
                                 "create_producer",
                                 {
-                                    roomId: generalStore.tempRoomId,
+                                    roomId: roomId.value,
                                     userId: authStore.user?.id,
                                     token: voiceToken,
                                     transportId: sendTr.id,
@@ -111,7 +123,7 @@ const init = async () => {
                                 }
                             );
 
-                            socket.once(
+                            socket.value?.once(
                                 "producer_created",
                                 async ({ producerId }) => {
                                     resolve(producerId);
@@ -132,66 +144,116 @@ const init = async () => {
                         device.createRecvTransport(recvTransportOptions);
                     connTr(recvTr, "recv");
 
-                    socket.emit("get_consumers", {
-                        roomId: generalStore.tempRoomId,
+                    socket.value?.emit("get_consumers", {
+                        roomId: roomId.value,
                         userId: authStore.user?.id,
                         rtpCapabilities: device.rtpCapabilities,
                         token: voiceToken,
                     });
 
-                    const playOutput = (track: MediaStreamTrack) => {
+                    const playOutput = (
+                        track: MediaStreamTrack,
+                        userId: number
+                    ) => {
                         const audio = new Audio();
                         audio.srcObject = new MediaStream([track]);
                         audio.muted = false;
                         audio.autoplay = true;
                         audio.play();
+
+                        mediaStreamAudioWatchers.value[userId.toString()] =
+                            watchStreamAudioLevel(
+                                new MediaStream([track]),
+                                (v) => {
+                                    if (v > 80) {
+                                        audio!.muted = false;
+                                        if (
+                                            muteTimeouts.value[
+                                                userId.toString()
+                                            ]
+                                        ) {
+                                            clearTimeout(
+                                                muteTimeouts.value[
+                                                    userId.toString()
+                                                ]
+                                            );
+                                        }
+                                        muteTimeouts.value[userId.toString()] =
+                                            setTimeout(() => {
+                                                audio!.muted = true;
+                                            }, 2000);
+                                        bus.emit("speaking", userId);
+                                    } else {
+                                        bus.emit("quiet", userId);
+                                    }
+                                },
+                                {
+                                    minHz: 200,
+                                    maxHz: 1000,
+                                }
+                            );
                     };
 
-                    socket.on(
+                    socket.value?.on(
                         "consumers_created",
-                        async ({ consumers: remoteConsumers }) => {
+                        async ({ consumers: remoteConsumers, userId }) => {
                             consumers = await Promise.all(
                                 remoteConsumers.map(({ consumerParameters }) =>
                                     recvTr.consume(consumerParameters)
                                 )
                             );
-                            consumers.forEach((c) => playOutput(c.track));
+                            consumers.forEach((c) =>
+                                playOutput(c.track, userId)
+                            );
                         }
                     );
 
-                    socket.on(
+                    socket.value?.on(
                         "consumer_created",
-                        async ({ consumer: remoteConsumer }) => {
+                        async ({ consumer: remoteConsumer, userId }) => {
                             const consumer = await recvTr.consume(
                                 remoteConsumer.consumerParameters
                             );
-                            playOutput(consumer.track);
+                            playOutput(consumer.track, userId);
                         }
                     );
 
-                    socket.on("consumer_closed", async ({ producerId }) => {
-                        consumers = consumers.filter(
-                            (c) => c.producerId !== producerId
-                        );
-                    });
+                    socket.value?.on(
+                        "consumer_closed",
+                        async ({ producerId, userId }) => {
+                            consumers = consumers.filter(
+                                (c) => c.producerId !== producerId
+                            );
+
+                            const clearWatcher =
+                                mediaStreamAudioWatchers.value[
+                                    userId.toString()
+                                ];
+                            if (clearWatcher) {
+                                clearWatcher();
+                            }
+                        }
+                    );
                 }
             );
         });
 
-        socket.on("disconnect", () => {
-            socket.removeAllListeners();
+        socket.value?.on("disconnect", () => {
+            socket.value?.removeAllListeners();
             init();
         });
     } catch (err) {
+        if (tries.value < 10) {
+            init();
+        }
         console.error(err);
     }
 };
 
-onMounted(() => {
-    window.addEventListener("keydown", (e) => {
-        if (e.key === "`") {
-            init();
-        }
-    });
+onMounted(init);
+onUnmounted(() => {
+    Object.values(mediaStreamAudioWatchers.value).forEach((uw) => uw());
+    socket.value?.removeAllListeners();
+    socket.value?.disconnect();
 });
 </script>
