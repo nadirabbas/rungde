@@ -30,6 +30,7 @@ import AuthLayout from "./layouts/AuthLayout.vue";
 import { api } from "./api";
 import { useRoute, useRouter } from "vue-router";
 import BlankLayout from "./layouts/BlankLayout.vue";
+import { useWakeLock } from "@vueuse/core";
 
 const generalStore = useGeneralStore();
 const authStore = useAuthStore();
@@ -74,8 +75,18 @@ const verifyAuth = async () => {
         generalStore.loading = false;
     }
 };
+
+const { request, release, isSupported } = useWakeLock();
+
 onMounted(async () => {
     verifyAuth();
+    if (isSupported.value) {
+        request("screen");
+    }
+});
+
+onUnmounted(() => {
+    release();
 });
 
 window.addEventListener(
