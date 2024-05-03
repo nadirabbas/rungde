@@ -5,7 +5,7 @@
                 'bg-white text-black border-[3px] flex items-center justify-center  rounded-full z-40 fixed lg:right-[185px] lg:top-5 left-5 lg:left-auto top-[87px] transition':
                     isSelf,
                 'text-white': !isSelf,
-                'text-red-500': muted && isSelf,
+                'text-red-600 opacity-40': muted && isSelf,
                 hidden: !isSpeaking && !isSelf,
                 'ring-8 ring-red-600': isSpeaking && isSelf && !muted,
                 'border-white': !isSpeaking && isSelf,
@@ -29,7 +29,7 @@
 
             <TransitionFade>
                 <span
-                    class="top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-6 h-[2px] bg-red-500 absolute rotate-45"
+                    class="top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-10 h-[3px] bg-red-500 absolute rotate-45"
                     v-if="muted && isSelf"
                 ></span>
             </TransitionFade>
