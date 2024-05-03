@@ -2,13 +2,15 @@
     <div>
         <button
             :class="{
-                'bg-white text-black border-[3px] flex items-center justify-center w-8 h-8 rounded-full z-40 fixed right-[185px] top-5':
+                'bg-white text-black border-[3px] flex items-center justify-center  rounded-full z-40 fixed lg:right-[185px] lg:top-5 left-5 lg:left-auto top-[87px]':
                     isSelf,
                 'text-white': !isSelf,
                 'text-red-500': muted && isSelf,
                 hidden: !isSpeaking && !isSelf,
                 'border-red-500': isSpeaking && isSelf && !muted,
                 'border-white': !isSpeaking && isSelf,
+                'w-8 h-8': !isSelf,
+                'w-16 h-16 lg:w-8 lg:h-8': isSelf,
             }"
             @mousedown="unmute"
             @mouseup="mute"
@@ -18,7 +20,12 @@
             @touchend="mute"
             v-if="connected"
         >
-            <MicrophoneIcon class="w-4" />
+            <MicrophoneIcon
+                :class="{
+                    'w-4': !isSelf,
+                    'w-8 lg:w-4': isSelf,
+                }"
+            />
 
             <TransitionFade>
                 <span
