@@ -619,11 +619,9 @@ const updateRoom = (data: any) => {
 const startRoom = async () => {
     if (!isHost.value) return;
 
-    dealer.reset();
-
-    // if (room.value?.new_deck?.length === 52) {
-    //     setDeck(room.value.new_deck);
-    // }
+    if (room.value?.new_deck?.length === 52) {
+        setDeck(room.value.new_deck);
+    }
 
     for (let i = 0; i < 100; i++) {
         dealer.shuffle();
