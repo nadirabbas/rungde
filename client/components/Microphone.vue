@@ -16,7 +16,6 @@
             @mouseup="mute"
             @touchstart="unmute"
             @touchcancel="mute"
-            @touchmove="mute"
             @touchend="mute"
             v-if="connected"
         >
