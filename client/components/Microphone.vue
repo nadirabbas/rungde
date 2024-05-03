@@ -28,7 +28,7 @@
 
             <TransitionFade>
                 <span
-                    class="top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-10 h-[3px] bg-red-500 absolute rotate-45"
+                    class="top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-10 lg:w-6 h-[3px] bg-red-500 absolute rotate-45"
                     v-if="muted && isSelf"
                 ></span>
             </TransitionFade>
