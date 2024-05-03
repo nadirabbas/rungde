@@ -32,6 +32,7 @@ import { onMounted, ref } from "vue";
 import { useAuthStore } from "../store/authStore";
 import { useRouter } from "vue-router";
 import { useToast } from "../composables/useToast";
+import { useGeneralStore } from "../store/generalStore";
 
 const authStore = useAuthStore();
 

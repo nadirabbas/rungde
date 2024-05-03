@@ -97,3 +97,18 @@ body {
     -ms-user-select: none;
     user-select: none;
 }
+
+::-webkit-scrollbar-track {
+    border-radius: 200px;
+    background-color: #777;
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+    background-color: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 200px;
+    background-color: white;
+}

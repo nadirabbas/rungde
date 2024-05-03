@@ -11,20 +11,43 @@
             ></span>
         </button>
 
-        <Modal hide-title title="Chat" v-model="isOpen" body-class="p-0">
-            <div class="flex flex-col w-full lg:px-3">
+        <TransitionSlide
+            :offset="{
+                enter: [300, 0],
+                leave: [300, 0],
+            }"
+        >
+            <div
+                class="fixed flex flex-col right-0 top-0 h-screen w-[30vw] max-w-full z-40"
+                v-if="isOpen"
+            >
+                <div class="py-1 relative bg-[#18181b]">
+                    <button
+                        @click="isOpen = false"
+                        class="flex left-1 top-1/2 -translate-y-1/2 absolute items-center justify-center rounded-full w-7 h-7 text-white"
+                    >
+                        <XIcon class="w-8" />
+                    </button>
+
+                    <p class="leading-0 text-center text-white text-lg">Chat</p>
+                </div>
+
                 <div
-                    class="relative h-[65vh] max-h-full w-full overflow-y-auto py-4 px-2"
+                    class="flex-1 relative h-[65vh] max-h-full w-full bg-opacity-95 bg-[#18181b] overflow-y-auto p-3"
                     ref="chatDiv"
                 >
                     <div class="flex-1 w-full relative" v-if="messages.length">
                         <div
-                            class="flex mb-0 text-base"
+                            class="mb-1 text-base"
                             v-for="m in messages"
                             :key="m.id"
                         >
-                            <strong>{{ m.username }}</strong>
-                            <p class="ml-2">{{ m.msg }}</p>
+                            <strong
+                                class="font-bold"
+                                :style="`color: ${getUserColor(m.username)}`"
+                                >{{ m.username }}:</strong
+                            >
+                            <span class="ml-2 text-white">{{ m.msg }}</span>
                         </div>
 
                         <div
@@ -43,35 +66,45 @@
                     </div>
                 </div>
 
-                <form
-                    @submit.prevent="send"
-                    class="flex items-stretch gap-1 w-full p-2 pt-0"
-                >
-                    <input
-                        ref="messageInput"
-                        class="w-full border border-black rounded py-1.5 px-2 text-base"
-                        placeholder="Type a message..."
-                        v-model="message"
-                        :readonly="loading"
-                    />
-                    <button
-                        type="submit"
-                        :disabled="!message || loading"
-                        class="text-base rounded w-12 flex items-center text-white justify-center bg-green-600"
+                <div class="flex flex-col w-full">
+                    <form
+                        @submit.prevent="send"
+                        class="flex items-stretch w-full pt-0"
                     >
-                        <template v-if="loading">...</template>
-                        <template v-else>
-                            <PaperAirplaneIcon class="w-4 rotate-90" />
-                        </template>
-                    </button>
-                </form>
+                        <input
+                            ref="messageInput"
+                            class="focus:outline-none w-full border border-black p-2 text-base"
+                            placeholder="Type a message..."
+                            v-model="message"
+                            :readonly="loading"
+                        />
+                        <button
+                            type="submit"
+                            :disabled="!message || loading"
+                            class="text-base w-9 flex items-center text-white justify-center bg-primary"
+                        >
+                            <template v-if="loading">...</template>
+                            <template v-else>
+                                <PaperAirplaneIcon class="w-4 rotate-90" />
+                            </template>
+                        </button>
+                    </form>
+                </div>
             </div>
-        </Modal>
+        </TransitionSlide>
     </div>
 </template>
 
 <script setup lang="ts">
-import { PropType, nextTick, onMounted, ref, toRefs, watch } from "vue";
+import {
+    PropType,
+    nextTick,
+    onMounted,
+    onUnmounted,
+    ref,
+    toRefs,
+    watch,
+} from "vue";
 import { Room } from "../store/authStore";
 import { Channel } from "pusher-js";
 import Modal from "./Modal.vue";
@@ -81,8 +114,10 @@ import {
     ChatAlt2Icon,
     ChevronDownIcon,
     PaperAirplaneIcon,
+    XIcon,
 } from "heroicons-vue3/solid";
 import { useSound } from "@vueuse/sound";
+import { TransitionSlide } from "@morev/vue-transitions";
 
 const props = defineProps({
     room: {
@@ -107,6 +142,25 @@ const messages = ref<
     }[]
 >([]);
 
+const colors = [
+    "hotpink",
+    "springgreen",
+    "#359bff", // blue
+    "#ffe700", // cyan
+];
+const lastSelectedColorIdx = ref(0);
+const usernameColorMap = ref<Record<string, string>>({});
+const getUserColor = (username: string) => {
+    if (usernameColorMap.value[username]) {
+        return usernameColorMap.value[username];
+    }
+    const color = colors[lastSelectedColorIdx.value];
+    lastSelectedColorIdx.value =
+        (lastSelectedColorIdx.value + 1) % colors.length;
+    usernameColorMap.value[username] = color;
+    return color;
+};
+
 const { channel, username } = toRefs(props);
 
 const isOpen = ref(false);
@@ -127,12 +181,26 @@ const altCHandler = (e: KeyboardEvent) => {
     }
 };
 
+const escHandler = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+        isOpen.value = false;
+    }
+};
+
 const chatDiv = ref<HTMLDivElement | null>(null);
+onUnmounted(() => {
+    try {
+        window.removeEventListener("keydown", altCHandler);
+        window.removeEventListener("keydown", escHandler);
+    } catch (error) {}
+});
 onMounted(() => {
     try {
         window.removeEventListener("keydown", altCHandler);
+        window.removeEventListener("keydown", escHandler);
     } catch (error) {}
     window.addEventListener("keydown", altCHandler);
+    window.addEventListener("keydown", escHandler);
 
     channel.value.bind(
         "chat",
