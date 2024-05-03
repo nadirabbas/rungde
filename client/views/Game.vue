@@ -42,6 +42,7 @@
             is-self
             :user-id="me?.user.id"
             :stream-id="me?.stream_id"
+            :show-clock="isTicking"
         />
 
         <UserCard

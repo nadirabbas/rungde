@@ -53,6 +53,8 @@
                 :is-self="isSelf"
             />
         </div>
+
+        <ClockIcon class="animate-pulse w-6 text-white" v-show="showClock" />
     </button>
 </template>
 
@@ -64,6 +66,7 @@ import AudioChat from "./AudioChat.vue";
 import Microphone from "./Microphone.vue";
 import { Room } from "../store/authStore";
 import { useGeneralStore } from "../store/generalStore";
+import { ClockIcon } from "heroicons-vue3/outline";
 
 const generalStore = useGeneralStore();
 
@@ -81,6 +84,7 @@ const props = defineProps({
     userId: Number,
     streamId: String,
     isTeammate: Boolean,
+    showClock: Boolean,
 });
 
 const render = ref(true);
