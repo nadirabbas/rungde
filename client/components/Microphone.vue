@@ -2,12 +2,12 @@
     <div>
         <button
             :class="{
-                'bg-white text-black border-[3px] flex items-center justify-center  rounded-full z-40 fixed lg:right-[185px] lg:top-5 left-5 lg:left-auto top-[87px]':
+                'bg-white text-black border-[3px] flex items-center justify-center  rounded-full z-40 fixed lg:right-[185px] lg:top-5 left-5 lg:left-auto top-[87px] transition':
                     isSelf,
                 'text-white': !isSelf,
                 'text-red-500': muted && isSelf,
                 hidden: !isSpeaking && !isSelf,
-                'border-red-500': isSpeaking && isSelf && !muted,
+                'ring-8 ring-red-600': isSpeaking && isSelf && !muted,
                 'border-white': !isSpeaking && isSelf,
                 'w-8 h-8': !isSelf,
                 'w-16 h-16 lg:w-8 lg:h-8': isSelf,
@@ -40,7 +40,7 @@
 <script setup lang="ts">
 import { MicrophoneIcon } from "heroicons-vue3/solid";
 import { useBus } from "../composables/useBus";
-import { onMounted, onUnmounted, ref, toRefs } from "vue";
+import { onMounted, onUnmounted, ref, toRefs, watch } from "vue";
 import { TransitionFade } from "@morev/vue-transitions";
 import DecibelMeter from "decibel-meter";
 const bus = useBus();
