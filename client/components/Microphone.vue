@@ -2,7 +2,7 @@
     <div>
         <button
             :class="{
-                'bg-white text-black border-[3px] flex items-center justify-center  rounded-full z-40 fixed lg:right-[185px] lg:top-5 left-5 lg:left-auto top-[87px] transition':
+                'bg-white text-black border-[3px] flex items-center justify-center  rounded-full z-40 fixed lg:right-[185px] lg:top-5 left-5 lg:left-auto top-[80px] transition':
                     isSelf,
                 'text-white': !isSelf,
                 'text-red-600 opacity-40': muted && isSelf,
