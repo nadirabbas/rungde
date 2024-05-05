@@ -582,7 +582,7 @@ const setValues = async (r: Room) => {
                     }
                 });
             }
-        }, 5000);
+        }, 10 * 1000);
     }
 };
 
