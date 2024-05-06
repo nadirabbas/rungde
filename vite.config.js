@@ -26,27 +26,11 @@ export default defineConfig({
                 display: 'fullscreen',
                 icons: [
                     {
-                        src: '/images/pwa-192x192.png',
-                        sizes: '192x192',
-                        type: 'image/png'
-                    },
-                    {
-                        src: '/images/pwa-512x512.png',
-                        sizes: '512x512',
-                        type: 'image/png'
-                    },
-                    {
-                        src: '/images/pwa-512x512.png',
-                        sizes: '512x512',
-                        type: 'image/png',
+                        src: '/images/icon.jpg',
+                        sizes: '1000x1000',
+                        type: 'image/jpeg',
                         purpose: 'any'
                     },
-                    {
-                        src: '/images/pwa-512x512.png',
-                        sizes: '512x512',
-                        type: 'image/png',
-                        purpose: 'maskable'
-                    }
                 ]
             }
         })
