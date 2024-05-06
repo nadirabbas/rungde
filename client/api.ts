@@ -1,7 +1,7 @@
 import { useToast } from "./composables/useToast";
 import axios from "axios";
 export const api = axios.create({
-    baseURL: "/api",
+    baseURL: process.env.VITE_API_BASE || "/api",
     headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
