@@ -128,6 +128,12 @@ const animationData = (reaction: string | number, img = false) => {
 };
 
 const loading = ref(false);
+const isAnimationBeingPlayed = ref(false);
+bus.on("animation-complete", (userId: any) => {
+    if (userId !== user.value.id) return;
+    isAnimationBeingPlayed.value = false;
+});
+
 const sendReaction = async (reaction: string) => {
     isOpen.value = false;
 
@@ -135,6 +141,7 @@ const sendReaction = async (reaction: string) => {
         return;
     }
 
+    isAnimationBeingPlayed.value = true;
     bus.emit("reaction-sent", {
         user_id: user.value.id,
         reaction: animationData(reaction),
@@ -172,7 +179,7 @@ onMounted(() => {
 
 const { e } = useMagicKeys();
 watchEffect(() => {
-    if (!e.value) return;
+    if (!e.value || isAnimationBeingPlayed.value) return;
     isOpen.value = !isOpen.value;
 });
 </script>

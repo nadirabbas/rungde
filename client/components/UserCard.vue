@@ -86,14 +86,17 @@
                 :width="80"
                 :height="80"
                 :loop="loops"
-                @onComplete="reactionSent = ''"
+                @onComplete="onAnimationComplete"
             />
         </div>
 
         <MountedTeleport to="#communications">
             <button
                 @click="openEmoji"
-                class="p-1 bg-yellow rounded-full text-[#222]"
+                :class="{
+                    'p-1 bg-yellow rounded-full text-[#222]': true,
+                    'opacity-50': reactionSent,
+                }"
                 v-if="isSelf"
             >
                 <EmojiHappyIcon
@@ -161,6 +164,12 @@ const reinitAudioChat = () => {
 const bus = useBus();
 const reactionSent = ref("");
 const loops = ref(2);
+
+const onAnimationComplete = () => {
+    reactionSent.value = "";
+    bus.emit("animation-complete", userId?.value);
+};
+
 bus.on("reaction-sent", (reaction: any) => {
     if (reaction.user_id != userId?.value) return;
 
