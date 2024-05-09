@@ -2,29 +2,21 @@
     <div
         class="w-full min-h-screen rd-bg-pattern lg:flex-col gap-10 flex items-center justify-center"
     >
-        <Logo class="w-[200px]" />
+        <Logo class="fixed top-5 left-5 w-[100px]" />
+        <Navbar class="fixed top-5 right-5" v-if="authStore.user" />
 
-        <div class="w-[50%] lg:w-[400px] max-w-full">
-            <div class="rounded bg-white p-3"><slot /></div>
+        <div class="max-w-full min-w-[50%] lg:min-w-[400px]">
+            <div class="rounded bg-white p-3">
+                <RouterView />
+            </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { useRouter } from "vue-router";
 import Logo from "../components/Logo.vue";
 import { useAuthStore } from "../store/authStore";
-import { api } from "../api";
-const authStore = useAuthStore();
-const router = useRouter();
+import Navbar from "../components/Navbar.vue";
 
-const logout = async () => {
-    try {
-        await api.post("/auth/logout");
-        authStore.logout();
-        router.push({
-            name: "Login",
-        });
-    } catch (err) {}
-};
+const authStore = useAuthStore();
 </script>

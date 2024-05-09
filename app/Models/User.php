@@ -19,7 +19,13 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'username',
-        'password'
+        'password',
+        'avatar',
+        'games_played',
+        'games_won',
+        'sirs',
+        'courts',
+        'goon_courts'
     ];
 
     protected $hidden = [

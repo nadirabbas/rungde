@@ -1,34 +1,45 @@
 <template>
-    <Modal
-        @close="loading ? null : $emit('close')"
-        :title="isSelf ? 'Options' : 'Player: ' + user?.user.username"
-        :loading="loading"
-        :model-value="modelValue"
-    >
-        <button
-            :class="buttonClass('bg-red-600 text-white')"
-            @click="kickUser"
-            v-if="!isSelf"
+    <div>
+        <Modal
+            @close="loading ? null : $emit('close')"
+            :title="isSelf ? 'Options' : 'Player: ' + user?.user.username"
+            :loading="loading"
+            :model-value="modelValue"
         >
-            Kick user
-        </button>
+            <button
+                :class="buttonClass('rd-bg mb-2 text-white')"
+                @click="viewProfile"
+            >
+                View profile
+            </button>
 
-        <button
-            :class="buttonClass('rd-bg mb-2 text-white')"
-            @click="restartRoom"
-            v-if="isHost && isSelf"
-        >
-            Restart game
-        </button>
+            <button
+                :class="buttonClass('bg-red-600 text-white')"
+                @click="kickUser"
+                v-if="!isSelf"
+            >
+                Kick user
+            </button>
 
-        <button
-            :class="buttonClass('bg-red-600 text-white')"
-            @click="isHost ? closeRoom() : leaveRoom()"
-            v-if="isSelf"
-        >
-            {{ isHost ? "Close" : "Leave" }} room
-        </button>
-    </Modal>
+            <button
+                :class="buttonClass('rd-bg mb-2 text-white')"
+                @click="restartRoom"
+                v-if="isHost && isSelf"
+            >
+                Restart game
+            </button>
+
+            <button
+                :class="buttonClass('bg-red-600 text-white')"
+                @click="isHost ? closeRoom() : leaveRoom()"
+                v-if="isSelf"
+            >
+                {{ isHost ? "Close" : "Leave" }} room
+            </button>
+        </Modal>
+
+        <ProfileModal v-model="viewUsername" />
+    </div>
 </template>
 
 <script lang="ts">
@@ -42,6 +53,7 @@ import { RoomUser } from "../store/authStore";
 import { api } from "../api";
 import { useRouter } from "vue-router";
 import Modal from "./Modal.vue";
+import ProfileModal from "../components/ProfileModal.vue";
 
 const emit = defineEmits(["close", "restart"]);
 
@@ -97,5 +109,11 @@ const restartRoom = async () => {
     await props.restartFn();
     emit("close");
     loading.value = false;
+};
+
+const viewUsername = ref("");
+const viewProfile = () => {
+    emit("close");
+    viewUsername.value = user.value.user.username;
 };
 </script>

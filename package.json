@@ -24,6 +24,7 @@
         "@vueuse/sound": "^2.0.1",
         "case": "^1.6.3",
         "copy-to-clipboard": "^3.3.3",
+        "date-fns": "^3.6.0",
         "decibel-meter": "^2.0.0",
         "heroicons-vue3": "^1.0.2",
         "ion-sdk-js": "^1.8.2",

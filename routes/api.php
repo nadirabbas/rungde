@@ -30,7 +30,8 @@ Route::post('/verify-voice-token', [VoiceTokensController::class, 'verifyVoiceTo
 Route::middleware('auth')->group(function () {
     Route::get('/room/voice-token', [VoiceTokensController::class, 'requestVoiceToken']);
     Route::get('/me', [UsersController::class, 'me']);
-    Route::put('/me/stream', [UsersController::class, 'setStreamId']);
+    Route::post('/me', [UsersController::class, 'updateMe']);
+    Route::get('/users/{username}', [UsersController::class, 'getByUsername']);
 
     Route::put('/room/leave', [RoomsController::class, 'leave']);
     Route::put('/room/close', [RoomsController::class, 'close']);

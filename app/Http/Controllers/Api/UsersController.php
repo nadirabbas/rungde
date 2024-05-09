@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\RoomUserChangedEvent;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class UsersController extends Controller
@@ -17,25 +18,43 @@ class UsersController extends Controller
         ];
     }
 
-    public function setStreamId(Request $request)
+    public function updateMe(Request $request)
     {
         $request->validate([
-            'stream_id' => 'required|string'
+            'username' => 'sometimes|string|max:20|unique:users,username,' . $request->user()->id,
+            'avatar'   => 'sometimes|image|mimes:jpeg,png,jpg,webp|max:5048',
         ]);
 
         $user = $request->user();
-        if (!$user->roomUser) {
-            return response([
-                'message' => 'Please join a room first'
-            ], 404);
+
+        if ($request->hasFile('avatar')) {
+            $avatar = $request->file('avatar');
+            $avatarName = $user->id . '.' . $avatar->getClientOriginalExtension();
+            $avatar->storeAs('public/avatars', $avatarName);
+            $user->avatar = '/storage/avatars/' . $avatarName;
         }
 
-        $user->roomUser->update([
-            'stream_id' => $request->stream_id
+        if ($request->has('username')) {
+            $user->username = $request->username;
+        }
+
+        $user->save();
+
+        return [
+            'user' => $user
+        ];
+    }
+
+    public function getByUsername(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string|max:20|exists:users,username'
         ]);
 
-        $user = $user->fresh();
+        $user = User::firstWhere('username', $request->username);
 
-        event(new RoomUserChangedEvent($user->room, $user->roomUser));
+        return [
+            'user' => $user
+        ];
     }
 }

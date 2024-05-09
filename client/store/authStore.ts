@@ -48,6 +48,12 @@ export interface User {
     username: string;
     room_id: number;
     room: Room | null;
+    sirs: number;
+    games_played: number;
+    games_won: number;
+    avatar: string;
+    courts: number;
+    goon_courts: number;
 }
 
 export interface AuthStoreState {
