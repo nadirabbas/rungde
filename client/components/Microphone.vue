@@ -37,9 +37,11 @@
                         </TransitionFade>
                     </div>
 
-                    <span class="hidden lg:block text-sm ml-2 font-bold">{{
-                        muted ? "Press V" : "Speak"
-                    }}</span>
+                    <span
+                        class="hidden lg:block text-sm ml-2 font-bold"
+                        v-if="isSelf"
+                        >{{ muted ? "Press V" : "Speak" }}</span
+                    >
                 </button>
             </MountedTeleport>
         </div>
