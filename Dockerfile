@@ -58,13 +58,9 @@ RUN composer install --working-dir="/var/www"
 
 RUN composer dump-autoload --working-dir="/var/www"
 
+RUN php artisan optimize:clear
 RUN php artisan optimize
-RUN php artisan route:clear
-RUN php artisan route:cache
-RUN php artisan config:clear
-RUN php artisan config:cache
-RUN php artisan view:clear
-RUN php artisan view:cache
+RUN php artisan storage:link
 
 EXPOSE 80
 
