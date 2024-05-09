@@ -10,10 +10,9 @@
                     :key="reaction"
                     @click="sendReaction(reaction)"
                 >
-                    <Vue3Lottie
-                        :animation-link="animationData(reaction)"
-                        :width="50"
-                        :height="50"
+                    <img
+                        :src="animationData(reaction, true)"
+                        class="w-[50px] aspect-square"
                     />
                 </button>
             </div>
@@ -101,7 +100,7 @@ const reactions = [
     "92b",
 ];
 
-const animationData = (reaction: string | number) => {
+const animationData = (reaction: string | number, img = false) => {
     const len = reaction.toString().length;
     let name;
 
@@ -111,7 +110,9 @@ const animationData = (reaction: string | number) => {
         name = reaction;
     }
 
-    return `https://fonts.gstatic.com/s/e/notoemoji/latest/${name}/lottie.json`;
+    return `https://fonts.gstatic.com/s/e/notoemoji/latest/${name}/${
+        img ? "emoji.svg" : "lottie.json"
+    }`;
 };
 
 const loading = ref(false);
