@@ -70,6 +70,7 @@ bus.on("open-reactions", () => {
 
 const specialLoops = {
     "23f0": 4,
+    "44f": 6,
 };
 
 const reactions = [
