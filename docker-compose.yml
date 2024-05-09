@@ -9,7 +9,7 @@ services:
             context: .
             dockerfile: Dockerfile
         volumes:
-            - /home/meemalifaaeenforwork/rungde-avatars:/var/www/public/avatars
+            - /home/meemalifaaeenforwork/rungde-avatars:/var/www/storage/app/public/avatars
         container_name: rungde
         ports:
             - "80:80"
