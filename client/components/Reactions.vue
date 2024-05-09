@@ -68,6 +68,10 @@ bus.on("open-reactions", () => {
     isOpen.value = true;
 });
 
+const specialLoops = {
+    "23f0": 4,
+};
+
 const reactions = [
     "4af",
     "2764_fe0f",
@@ -133,6 +137,7 @@ const sendReaction = async (reaction: string) => {
     bus.emit("reaction-sent", {
         user_id: user.value.id,
         reaction: animationData(reaction),
+        loops: specialLoops[reaction] || 2,
     });
 
     loading.value = true;
@@ -159,6 +164,7 @@ onMounted(() => {
         bus.emit("reaction-sent", {
             user_id,
             reaction: animationData(reaction),
+            loops: specialLoops[reaction] || 2,
         });
     });
 });

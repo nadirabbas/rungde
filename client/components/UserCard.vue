@@ -85,6 +85,8 @@
                 :animation-link="reactionSent"
                 :width="80"
                 :height="80"
+                :loop="loops"
+                @onComplete="reactionSent = ''"
             />
         </div>
 
@@ -158,15 +160,13 @@ const reinitAudioChat = () => {
 
 const bus = useBus();
 const reactionSent = ref("");
+const loops = ref(2);
 bus.on("reaction-sent", (reaction: any) => {
     if (reaction.user_id != userId?.value) return;
 
     play({ id: "reaction" });
+    loops.value = reaction.loops;
     reactionSent.value = reaction.reaction;
-
-    setTimeout(() => {
-        reactionSent.value = "";
-    }, 4000);
 });
 const openEmoji = () => {
     if (reactionSent.value) return;
