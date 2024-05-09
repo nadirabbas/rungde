@@ -854,6 +854,7 @@ const canPlayCard = (card: string) => {
         cardNum(card) === 14 &&
         cardNum(me.value.latest_turn) === 14 &&
         room.value.last_highest_card_position == me.value.position
+        && room.value.total_turns < 48
     ) {
         return false;
     }
