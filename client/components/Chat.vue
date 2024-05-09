@@ -31,7 +31,13 @@
                         <XIcon class="w-8" />
                     </button>
 
-                    <p class="leading-0 text-center text-white text-lg">Chat</p>
+                    <p class="leading-0 text-center text-white text-lg">
+                        <span>Chat</span>
+                        <span
+                            class="text-sm text-gray-500 hidden lg:block ml-2 absolute right-5 top-1/2 -translate-y-1/2"
+                            >Shortcut: C</span
+                        >
+                    </p>
                 </div>
 
                 <div
@@ -79,6 +85,7 @@
                             placeholder="Type a message..."
                             v-model="message"
                             :readonly="loading"
+                            @keydown.stop
                         />
                         <button
                             type="submit"
@@ -106,6 +113,7 @@ import {
     ref,
     toRefs,
     watch,
+    watchEffect,
 } from "vue";
 import { Room } from "../store/authStore";
 import { Channel } from "pusher-js";
@@ -121,6 +129,7 @@ import {
 import { useSound } from "@vueuse/sound";
 import { TransitionSlide } from "@morev/vue-transitions";
 import MountedTeleport from "./MountedTeleport.vue";
+import { useMagicKeys } from "@vueuse/core";
 
 const props = defineProps({
     room: {
@@ -191,20 +200,15 @@ const escHandler = (e: KeyboardEvent) => {
 };
 
 const chatDiv = ref<HTMLDivElement | null>(null);
-onUnmounted(() => {
-    try {
-        window.removeEventListener("keydown", altCHandler);
-        window.removeEventListener("keydown", escHandler);
-    } catch (error) {}
-});
-onMounted(() => {
-    try {
-        window.removeEventListener("keydown", altCHandler);
-        window.removeEventListener("keydown", escHandler);
-    } catch (error) {}
-    window.addEventListener("keydown", altCHandler);
-    window.addEventListener("keydown", escHandler);
 
+const { c } = useMagicKeys();
+
+watchEffect(() => {
+    if (!c.value) return;
+    isOpen.value = !isOpen.value;
+});
+
+onMounted(() => {
     channel.value.bind(
         "chat",
         ({ msg, username: un }: { msg: string; username: string }) => {

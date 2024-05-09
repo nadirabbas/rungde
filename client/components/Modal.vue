@@ -10,16 +10,29 @@
                     bodyClass || 'p-5'
                 }`"
             >
-                <h1
+                <div
                     :class="{
-                        'w-full text-black text-center text-lg': true,
+                        'w-full flex justify-center items-center relative': true,
                         'mb-6': !loading,
                     }"
                     v-if="!hideTitle"
                 >
-                    <template v-if="loading">Please wait...</template>
-                    <template v-else>{{ title }}</template>
-                </h1>
+                    <h1
+                        :class="{
+                            ' leading-none text-black text-center text-lg': true,
+                        }"
+                    >
+                        <template v-if="loading">Please wait...</template>
+                        <template v-else>{{ title }}</template>
+                    </h1>
+
+                    <p
+                        class="leading-none text-gray-500 text-sm absolute right-0 top-1/2 -translate-y-1/2 hidden lg:block"
+                        v-if="hint"
+                    >
+                        {{ hint }}
+                    </p>
+                </div>
 
                 <slot v-if="!loading" />
             </div>
@@ -38,6 +51,7 @@ defineProps({
     modelValue: Boolean,
     bodyClass: String,
     hideTitle: Boolean,
+    hint: String,
 });
 
 const close = () => {

@@ -24,6 +24,10 @@
             >
                 <XIcon class="w-9" />
             </button>
+
+            <p class="fixed bottom-5 text-base text-gray-500 hidden lg:block">
+                Shortcut: E
+            </p>
         </div>
     </TransitionFade>
 </template>
@@ -31,12 +35,13 @@
 <script setup lang="ts">
 import { Vue3Lottie } from "vue3-lottie";
 import { useBus } from "../composables/useBus";
-import { PropType, onMounted, ref, toRefs, watch } from "vue";
+import { PropType, onMounted, ref, toRefs, watch, watchEffect } from "vue";
 import { Room, User } from "../store/authStore";
 import { Channel } from "pusher-js";
 import { XIcon } from "heroicons-vue3/solid";
 import { TransitionFade } from "@morev/vue-transitions";
 import { api } from "../api";
+import { useMagicKeys } from "@vueuse/core";
 
 const bus = useBus();
 
@@ -156,5 +161,11 @@ onMounted(() => {
             reaction: animationData(reaction),
         });
     });
+});
+
+const { e } = useMagicKeys();
+watchEffect(() => {
+    if (!e.value) return;
+    isOpen.value = !isOpen.value;
 });
 </script>

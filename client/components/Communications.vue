@@ -1,6 +1,6 @@
 <template>
     <div
         id="communications"
-        class="fixed right-36 top-5 flex flex-row-reverse items-center gap-2"
+        class="fixed right-36 top-5 flex flex-row-reverse items-center gap-2.5"
     ></div>
 </template>

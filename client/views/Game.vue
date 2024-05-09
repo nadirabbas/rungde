@@ -295,7 +295,7 @@
             :their-courts="theirCourts"
             :our-goon-courts="ourGoonCourts"
             :their-goon-courts="theirGoonCourts"
-            :model-value="showTotals"
+            v-model="showTotals"
             @close="showTotals = false"
         />
 

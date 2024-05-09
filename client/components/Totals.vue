@@ -3,6 +3,7 @@
         :model-value="modelValue"
         @close="$emit('close')"
         title="Total score"
+        hint="Shortcut: T"
     >
         <div
             class="flex items-center justify-between text-lg mb-4 w-full"
@@ -25,9 +26,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRefs } from "vue";
+import { computed, toRefs, watch, watchEffect } from "vue";
 import { scoreSpan } from "../views/Game.vue";
 import Modal from "./Modal.vue";
+import { useMagicKeys } from "@vueuse/core";
 const props = defineProps({
     ourWins: Number,
     theirWins: Number,
@@ -53,4 +55,10 @@ const totals = computed(() => [
     },
     { name: "Overall", our: refs.ourWins?.value, their: refs.theirWins?.value },
 ]);
+const emit = defineEmits(["update:model-value"]);
+const { t } = useMagicKeys();
+watch(t, () => {
+    if (!t.value) return;
+    emit("update:model-value", !refs.modelValue.value);
+});
 </script>
