@@ -59,8 +59,8 @@
             <div v-if="reactionSent" class="mx-1">
                 <Vue3Lottie
                     :animation-link="reactionSent"
-                    :width="35"
-                    :height="35"
+                    :width="50"
+                    :height="50"
                 />
             </div>
 
