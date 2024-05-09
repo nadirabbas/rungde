@@ -2,7 +2,7 @@
     <div>
         <MountedTeleport to="#communications">
             <button
-                class="rounded-full bg-yellow text-[#222] p-1"
+                class="rounded-full bg-yellow text-[#222] p-1 relative"
                 @click="open"
             >
                 <ChatAlt2Icon class="w-6 h-6" @click="open" />
@@ -210,7 +210,7 @@ watchEffect(() => {
 
 onMounted(() => {
     channel.value.bind(
-        "chat",
+        "client-chat",
         ({ msg, username: un }: { msg: string; username: string }) => {
             const isSelf = un === username.value;
             if (isSelf) return;
@@ -229,7 +229,7 @@ const send = async () => {
     loading.value = true;
 
     try {
-        await api.put("/room/chat", {
+        channel.value.trigger("client-chat", {
             msg: message.value,
             username: username.value,
         });

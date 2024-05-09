@@ -151,7 +151,10 @@ const sendReaction = async (reaction: string) => {
     loading.value = true;
 
     try {
-        await api.post("/reaction", { reaction });
+        channel.value.trigger("client-reaction", {
+            reaction,
+            user_id: user.value.id,
+        });
     } catch (error) {
         console.error(error);
     }
@@ -167,7 +170,7 @@ reactions.forEach((reaction) => {
 });
 
 onMounted(() => {
-    channel.value.bind("reaction", ({ user_id, reaction }) => {
+    channel.value.bind("client-reaction", ({ user_id, reaction }) => {
         if (user_id === user.value.id) return;
         bus.emit("reaction-sent", {
             user_id,
