@@ -16,7 +16,7 @@
             <button
                 :class="buttonClass('bg-red-600 text-white')"
                 @click="kickUser"
-                v-if="!isSelf"
+                v-if="!isSelf && isHost"
             >
                 Kick user
             </button>
