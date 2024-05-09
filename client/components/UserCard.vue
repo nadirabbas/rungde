@@ -58,9 +58,9 @@
                 v-model="isSpeaking"
                 :class="{
                     'absolute top/1-2 -translated-y-1/2': !isSelf,
-                    '-translate-x-full': isTeammate,
-                    'translate-x-full right-0': isLeftOpp,
-                    '-translate-x-full left-0':
+                    '-translate-x-[102%]': isTeammate,
+                    'translate-x-[102%] right-0': isLeftOpp,
+                    '-translate-x-[102%] left-0':
                         !isSelf && !isTeammate && !isLeftOpp,
                 }"
             />
@@ -70,14 +70,14 @@
             v-if="reactionSent"
             :class="{
                 absolute: true,
-                '-bottom-2 -translate-x-full': isSelf && !score,
-                '-translate-x-full -top-3': isTeammate && !score,
+                '-bottom-2 -translate-x-[102%]': isSelf && !score,
+                '-translate-x-[102%] -top-3': isTeammate && !score,
 
                 '-bottom-2 -translate-x-[120%]': isSelf && score,
                 '-top-3 -translate-x-[120%]': isTeammate && score,
 
-                'translate-x-full right-0': isLeftOpp,
-                '-translate-x-full left-0':
+                'translate-x-[102%] right-0': isLeftOpp,
+                '-translate-x-[102%] left-0':
                     !isSelf && !isTeammate && !isLeftOpp,
             }"
         >
