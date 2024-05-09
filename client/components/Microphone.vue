@@ -17,7 +17,7 @@
             @touchstart="unmute"
             @touchcancel="mute"
             @touchend="mute"
-            v-if="connected"
+            v-if="connected && !hidden"
         >
             <MicrophoneIcon
                 :class="{
@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { MicrophoneIcon } from "heroicons-vue3/solid";
 import { useBus } from "../composables/useBus";
-import { onMounted, onUnmounted, ref, toRefs, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, toRefs, watch } from "vue";
 import { TransitionFade } from "@morev/vue-transitions";
 import DecibelMeter from "decibel-meter";
 const bus = useBus();
@@ -50,8 +50,17 @@ const props = defineProps({
         type: Number,
         required: true,
     },
+    hideForOthers: Boolean,
 });
-const { userId, isSelf } = toRefs(props);
+const { userId, isSelf, hideForOthers } = toRefs(props);
+
+const hidden = computed(() => {
+    if (hideForOthers.value && !isSelf.value) {
+        return true;
+    }
+
+    return false;
+});
 
 const connected = ref(false);
 const muted = ref(true);

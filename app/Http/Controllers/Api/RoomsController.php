@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\RoomReactionEvent;
 use App\Events\RoomUpdatedEvent;
 use App\Events\RoomUserChangedEvent;
 use App\Http\Controllers\Controller;
@@ -186,5 +187,18 @@ class RoomsController extends Controller
         return [
             'message' => 'User has been kicked'
         ];
+    }
+
+    public function sendReaction(Request $request)
+    {
+        $request->validate([
+            'reaction' => 'required',
+        ]);
+
+        event(new RoomReactionEvent(
+            $request->user()->room->id,
+            $request->reaction,
+            $request->user()->id
+        ));
     }
 }

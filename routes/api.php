@@ -32,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/me', [UsersController::class, 'me']);
     Route::post('/me', [UsersController::class, 'updateMe']);
     Route::get('/users/{username}', [UsersController::class, 'getByUsername']);
+    Route::post('/reaction', [RoomsController::class, 'sendReaction']);
 
     Route::put('/room/leave', [RoomsController::class, 'leave']);
     Route::put('/room/close', [RoomsController::class, 'close']);

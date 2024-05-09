@@ -37,21 +37,44 @@
             <ChevronDownIcon class="ml-1 w-4" v-if="showMenu" />
         </span>
 
-        <div @click.stop v-if="generalStore.hasUserInteracted">
-            <AudioChat
-                v-if="isSelf && room && userId && render"
-                :participants="room.participants"
-                :room-id="room.id"
-                :is-self="isSelf"
-                :user-id="userId"
-                @reinit="reinitAudioChat"
-            />
+        <div @click.stop class="flex items-center">
+            <template v-if="generalStore.hasUserInteracted">
+                <AudioChat
+                    v-if="isSelf && room && userId && render"
+                    :participants="room.participants"
+                    :room-id="room.id"
+                    :is-self="isSelf"
+                    :user-id="userId"
+                    @reinit="reinitAudioChat"
+                />
 
-            <Microphone
-                v-if="render && userId"
-                :user-id="userId"
-                :is-self="isSelf"
-            />
+                <Microphone
+                    v-if="render && userId"
+                    :user-id="userId"
+                    :is-self="isSelf"
+                    :hide-for-others="!reactionSent"
+                />
+            </template>
+
+            <div v-if="reactionSent" class="mx-1">
+                <Vue3Lottie
+                    :animation-link="reactionSent"
+                    :width="35"
+                    :height="35"
+                />
+            </div>
+
+            <button
+                @click="openEmoji"
+                class="mr-1"
+                v-if="isSelf && !reactionSent"
+            >
+                <EmojiHappyIcon
+                    :class="{
+                        'w-7 text-yellow': true,
+                    }"
+                />
+            </button>
         </div>
 
         <ClockIcon class="animate-pulse w-6 text-white" v-show="showClock" />
@@ -60,13 +83,19 @@
 
 <script setup lang="ts">
 import { ChevronDownIcon } from "heroicons-vue3/solid";
+import { EmojiHappyIcon } from "heroicons-vue3/solid";
 import UserCardScore from "./UserCardScore.vue";
-import { PropType, nextTick, ref } from "vue";
+import { PropType, nextTick, ref, toRefs } from "vue";
 import AudioChat from "./AudioChat.vue";
 import Microphone from "./Microphone.vue";
-import { Room } from "../store/authStore";
+import { Room, useAuthStore } from "../store/authStore";
 import { useGeneralStore } from "../store/generalStore";
 import { ClockIcon } from "heroicons-vue3/outline";
+import { useBus } from "../composables/useBus";
+import { Vue3Lottie } from "vue3-lottie";
+import { useSoundSprite } from "../composables/useSoundSprite";
+
+const { play } = useSoundSprite();
 
 const generalStore = useGeneralStore();
 
@@ -87,12 +116,31 @@ const props = defineProps({
     showClock: Boolean,
 });
 
+const { userId } = toRefs(props);
+
 const render = ref(true);
 const reinitAudioChat = () => {
     render.value = false;
     nextTick(() => {
         render.value = true;
     });
+};
+
+const bus = useBus();
+const reactionSent = ref("");
+bus.on("reaction-sent", (reaction: any) => {
+    if (reaction.user_id != userId?.value) return;
+
+    play({ id: "reaction" });
+    reactionSent.value = reaction.reaction;
+
+    setTimeout(() => {
+        reactionSent.value = "";
+    }, 4000);
+});
+const openEmoji = () => {
+    if (reactionSent.value) return;
+    bus.emit("open-reactions");
 };
 </script>
 

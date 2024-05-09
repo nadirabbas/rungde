@@ -303,6 +303,13 @@
             :channel="channel"
             :username="me?.user.username"
         />
+
+        <Reactions
+            :room="room"
+            :channel="channel"
+            :user="authStore.user"
+            v-if="channel"
+        />
     </div>
 </template>
 
@@ -321,6 +328,7 @@ import { useRouter } from "vue-router";
 import Card from "../components/Card.vue";
 import Button from "../components/Button.vue";
 import Totals from "../components/Totals.vue";
+import Reactions from "../components/Reactions.vue";
 import {
     allCards,
     getHighCardPos,
@@ -334,7 +342,6 @@ import moment from "moment";
 import copy from "copy-to-clipboard";
 
 import CardsOnTable from "../components/CardsOnTable.vue";
-import { useSound } from "@vueuse/sound";
 import { maxBy } from "lodash-es";
 import { mapValues } from "lodash-es";
 import { useDealer } from "../composables/useDealer";
@@ -344,6 +351,7 @@ import Chat from "../components/Chat.vue";
 import { Channel } from "pusher-js";
 import { useToast } from "../composables/useToast";
 import { useGeneralStore } from "../store/generalStore";
+import { useSoundSprite } from "../composables/useSoundSprite";
 
 const { dealer, setDeck } = useDealer();
 const toast = useToast();
@@ -431,25 +439,7 @@ const isOpponent = (position: number, myPosition?: number) => {
     return diff !== 0 && diff !== 2;
 };
 
-const { play: playSound } = useSound("/audio/sprite.opus", {
-    // @ts-ignore
-    sprite: mapValues(
-        {
-            start: [0, 5000],
-            selectRung: [5123, 6771],
-            rungSelected: [21712, 22381],
-            turn: [6913, 7180],
-            turnLost: [7327, 8128],
-            wonSir: [8251, 9911],
-            lostSir: [10079, 13512],
-            victory: [13648, 16560],
-            defeat: [17155, 21484],
-            cardPlayed: [22651, 23348],
-            ticking: [25271, 25831],
-        },
-        ([s, e]: [number, number]) => [s, e - s]
-    ),
-});
+const { play: playSound } = useSoundSprite();
 
 const glow = ref<boolean | null>(null);
 const sirWinDiff = ref(0);
