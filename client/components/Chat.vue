@@ -1,15 +1,17 @@
 <template>
     <div>
-        <button
-            class="fixed right-36 top-5 rounded-full bg-yellow text-[#222] p-1"
-            @click="open"
-        >
-            <ChatAlt2Icon class="w-6 h-6" @click="open" />
-            <span
-                v-show="hasUnread"
-                class="bg-red-500 text-white rounded-full w-3 h-3 block absolute -top-0.5 -right-0.5"
-            ></span>
-        </button>
+        <MountedTeleport to="#communications">
+            <button
+                class="rounded-full bg-yellow text-[#222] p-1"
+                @click="open"
+            >
+                <ChatAlt2Icon class="w-6 h-6" @click="open" />
+                <span
+                    v-show="hasUnread"
+                    class="bg-red-500 text-white rounded-full w-3 h-3 block absolute -top-0.5 -right-0.5"
+                ></span>
+            </button>
+        </MountedTeleport>
 
         <TransitionSlide
             :offset="{
@@ -118,6 +120,7 @@ import {
 } from "heroicons-vue3/solid";
 import { useSound } from "@vueuse/sound";
 import { TransitionSlide } from "@morev/vue-transitions";
+import MountedTeleport from "./MountedTeleport.vue";
 
 const props = defineProps({
     room: {

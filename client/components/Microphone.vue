@@ -1,38 +1,41 @@
 <template>
     <div>
-        <button
-            :class="{
-                'bg-white text-black border-[3px] flex items-center justify-center  rounded-full z-40 fixed lg:right-[185px] lg:top-5 left-5 lg:left-auto top-[80px] transition':
-                    isSelf,
-                'text-white': !isSelf,
-                'text-red-600 opacity-40': muted && isSelf,
-                hidden: !isSpeaking && !isSelf,
-                'ring-8 ring-red-600': isSpeaking && isSelf && !muted,
-                'border-white': !isSpeaking && isSelf,
-                'w-8 h-8': !isSelf,
-                'w-16 h-16 lg:w-8 lg:h-8': isSelf,
-            }"
-            @mousedown="unmute"
-            @mouseup="mute"
-            @touchstart="unmute"
-            @touchcancel="mute"
-            @touchend="mute"
-            v-if="connected && !hidden"
-        >
-            <MicrophoneIcon
-                :class="{
-                    'w-4': !isSelf,
-                    'w-8 lg:w-4': isSelf,
-                }"
-            />
+        <div class="max-h-4">
+            <MountedTeleport to="#communications" :disabled="!isSelf">
+                <button
+                    :class="{
+                        'bg-white text-black border-[3px] flex items-center justify-center  rounded-full z-40 fixed lg:relative lg:right-auto lg:top-auto left-5 lg:left-auto top-[80px] transition':
+                            isSelf,
+                        'text-white': !isSelf,
+                        'text-black opacity-30': muted && isSelf,
+                        'ring-8 ring-red-600': isSpeaking && isSelf && !muted,
+                        'border-white': !isSpeaking && isSelf,
+                        'w-16 h-16 lg:w-8 lg:h-8': isSelf,
+                        hidden: !isSpeaking && !isSelf,
+                    }"
+                    @mousedown="unmute"
+                    @mouseup="mute"
+                    @touchstart="unmute"
+                    @touchcancel="mute"
+                    @touchend="mute"
+                    v-if="connected && !hidden"
+                >
+                    <MicrophoneIcon
+                        :class="{
+                            'w-4': !isSelf,
+                            'w-8 lg:w-4': isSelf,
+                        }"
+                    />
 
-            <TransitionFade>
-                <span
-                    class="top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-10 lg:w-6 h-[3px] bg-red-500 absolute rotate-45"
-                    v-if="muted && isSelf"
-                ></span>
-            </TransitionFade>
-        </button>
+                    <TransitionFade>
+                        <span
+                            class="top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-10 lg:w-6 h-[3px] bg-black absolute rotate-45"
+                            v-if="muted && isSelf"
+                        ></span>
+                    </TransitionFade>
+                </button>
+            </MountedTeleport>
+        </div>
     </div>
 </template>
 
@@ -42,6 +45,7 @@ import { useBus } from "../composables/useBus";
 import { computed, onMounted, onUnmounted, ref, toRefs, watch } from "vue";
 import { TransitionFade } from "@morev/vue-transitions";
 import DecibelMeter from "decibel-meter";
+import MountedTeleport from "./MountedTeleport.vue";
 const bus = useBus();
 
 const props = defineProps({

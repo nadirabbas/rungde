@@ -42,7 +42,7 @@
 
                         <label
                             :class="{
-                                'flex items-center justify-center rounded-lg w-[100px] aspect-square': true,
+                                'flex items-center justify-center rounded-lg w-[170px] aspect-square': true,
                                 'rd-bg text-white': !avatar,
                                 'cursor-pointer': editingEnabled,
                             }"

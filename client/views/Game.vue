@@ -1,6 +1,8 @@
 <template>
     <FullscreenLoader v-if="loading" />
     <div v-if="!loading && render" class="min-h-screen w-full rd-bg-pattern">
+        <Communications />
+
         <div class="fixed left-5 top-5">
             <Logo class="w-[70px] md:w-[150px]" v-if="!rung" />
             <span class="flex bg-white px-2 py-1 rounded" v-else>
@@ -125,7 +127,7 @@
             :turn-rung="turnRung"
         />
 
-        <div class="fixed left-[23vw] top-1/2 -translate-y-1/2" v-if="sirs">
+        <div class="fixed left-[24vw] top-1/2 -translate-y-1/2" v-if="sirs">
             <Card :width="8" card="back" />
             <div
                 class="-top-2 -left-2 absolute rounded-full w-6 h-6 text-black font-black shadow-xl shadow-black flex items-center justify-center bg-yellow text-sm"
@@ -325,6 +327,7 @@ import Logo from "../components/Logo.vue";
 import UserCard from "../components/UserCard.vue";
 import { preloadImages } from "../utils/preloadImages";
 import { useRouter } from "vue-router";
+import Communications from "../components/Communications.vue";
 import Card from "../components/Card.vue";
 import Button from "../components/Button.vue";
 import Totals from "../components/Totals.vue";

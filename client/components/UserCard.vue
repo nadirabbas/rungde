@@ -1,9 +1,8 @@
 <template>
     <button
         :class="{
-            'flex items-center gap-1': true,
+            'flex gap-1 items-center z-40 user-card': true,
             'flex-row-reverse': !isLeftOpp,
-            'min-w-[100px]': isTeammate,
         }"
     >
         <span
@@ -37,47 +36,76 @@
             <ChevronDownIcon class="ml-1 w-4" v-if="showMenu" />
         </span>
 
-        <div @click.stop class="flex items-center">
-            <template v-if="generalStore.hasUserInteracted">
-                <AudioChat
-                    v-if="isSelf && room && userId && render"
-                    :participants="room.participants"
-                    :room-id="room.id"
-                    :is-self="isSelf"
-                    :user-id="userId"
-                    @reinit="reinitAudioChat"
-                />
+        <div
+            @click.stop
+            v-if="generalStore.hasUserInteracted"
+            class="items-center flex"
+        >
+            <AudioChat
+                v-if="isSelf && room && userId && render"
+                :participants="room.participants"
+                :room-id="room.id"
+                :is-self="isSelf"
+                :user-id="userId"
+                @reinit="reinitAudioChat"
+            />
 
-                <Microphone
-                    v-if="render && userId"
-                    :user-id="userId"
-                    :is-self="isSelf"
-                    :hide-for-others="!reactionSent"
-                />
-            </template>
+            <Microphone
+                v-if="render && userId"
+                :user-id="userId"
+                :is-self="isSelf"
+                :hide-for-others="!!reactionSent"
+                v-model="isSpeaking"
+                :class="{
+                    'absolute top/1-2 -translated-y-1/2': !isSelf,
+                    '-translate-x-full': isTeammate,
+                    'translate-x-full right-0': isLeftOpp,
+                    '-translate-x-full left-0':
+                        !isSelf && !isTeammate && !isLeftOpp,
+                }"
+            />
+        </div>
 
-            <div v-if="reactionSent" class="mx-1">
-                <Vue3Lottie
-                    :animation-link="reactionSent"
-                    :width="50"
-                    :height="50"
-                />
-            </div>
+        <div
+            v-if="reactionSent"
+            :class="{
+                absolute: true,
+                '-bottom-2 -translate-x-full': isSelf && !score,
+                '-translate-x-full -top-3': isTeammate && !score,
 
+                '-bottom-2 -translate-x-[120%]': isSelf && score,
+                '-top-3 -translate-x-[120%]': isTeammate && score,
+
+                'translate-x-full right-0': isLeftOpp,
+                '-translate-x-full left-0':
+                    !isSelf && !isTeammate && !isLeftOpp,
+            }"
+        >
+            <Vue3Lottie
+                :animation-link="reactionSent"
+                :width="80"
+                :height="80"
+            />
+        </div>
+
+        <MountedTeleport to="#communications">
             <button
                 @click="openEmoji"
-                class="mr-1"
-                v-if="isSelf && !reactionSent"
+                class="p-1 bg-yellow rounded-full text-[#222]"
+                v-if="isSelf"
             >
                 <EmojiHappyIcon
                     :class="{
-                        'w-7 text-yellow': true,
+                        'w-6': true,
                     }"
                 />
             </button>
-        </div>
+        </MountedTeleport>
 
-        <ClockIcon class="animate-pulse w-6 text-white" v-show="showClock" />
+        <ClockIcon
+            class="animate-pulse w-7 text-white"
+            v-show="showClock && !reactionSent"
+        />
     </button>
 </template>
 
@@ -86,6 +114,7 @@ import { ChevronDownIcon } from "heroicons-vue3/solid";
 import { EmojiHappyIcon } from "heroicons-vue3/solid";
 import UserCardScore from "./UserCardScore.vue";
 import { PropType, nextTick, ref, toRefs } from "vue";
+import MountedTeleport from "./MountedTeleport.vue";
 import AudioChat from "./AudioChat.vue";
 import Microphone from "./Microphone.vue";
 import { Room, useAuthStore } from "../store/authStore";
@@ -118,6 +147,7 @@ const props = defineProps({
 
 const { userId } = toRefs(props);
 
+const isSpeaking = ref(false);
 const render = ref(true);
 const reinitAudioChat = () => {
     render.value = false;

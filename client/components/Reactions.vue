@@ -1,10 +1,11 @@
 <template>
     <TransitionFade>
         <div
-            class="fixed z-40 left-0 top-0 w-full h-full bg-black bg-opacity-80 flex items-center justify-center"
+            class="fixed z-40 left-0 top-0 w-full h-full bg-black bg-opacity-95 flex items-center justify-center cursor-pointer"
+            @click.self="isOpen = false"
             v-if="isOpen"
         >
-            <div class="grid grid-cols-8 gap-5">
+            <div class="grid grid-cols-9 gap-5">
                 <button
                     v-for="reaction in reactions"
                     :key="reaction"
@@ -21,7 +22,7 @@
                 @click="isOpen = false"
                 class="text-white absolute right-5 top-5"
             >
-                <XIcon class="w-7" />
+                <XIcon class="w-9" />
             </button>
         </div>
     </TransitionFade>
@@ -63,6 +64,7 @@ bus.on("open-reactions", () => {
 });
 
 const reactions = [
+    "4af",
     "2764_fe0f",
     494,
     "44f",
