@@ -16,13 +16,18 @@
 </template>
 
 <script setup lang="ts">
-import { CogIcon } from "heroicons-vue3/solid";
+import { CogIcon, ChartBarIcon } from "heroicons-vue3/solid";
 import { markRaw } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
 
 const navItems = [
+    {
+        label: "Match history",
+        icon: markRaw(ChartBarIcon),
+        to: "/global-match-history",
+    },
     {
         label: "Profile",
         icon: markRaw(CogIcon),

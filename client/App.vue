@@ -1,7 +1,7 @@
 <template>
     <div>
         <div
-            class="z-10 fixed w-full h-full left-0 top-0 flex items-center justify-center bg-white"
+            class="z-40 fixed w-full h-full left-0 top-0 flex items-center justify-center bg-white"
             v-show="generalStore.loading"
         >
             <Spinner />

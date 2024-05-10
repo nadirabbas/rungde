@@ -1,11 +1,6 @@
 <template>
     <div class="relative">
-        <router-link
-            to="/"
-            class="mb-3 rd-bg text-white text-sm rounded flex items-center gap-3 max-w-max p-1"
-        >
-            <ArrowLeftIcon class="w-4" />
-        </router-link>
+        <BackButton class="mb-3" />
 
         <ProfileCard
             :username="username"
@@ -18,7 +13,7 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import ProfileCard from "../components/ProfileCard.vue";
-import { ArrowLeftIcon } from "heroicons-vue3/solid";
+import BackButton from "../components/BackButton.vue";
 
 const route = useRoute();
 const username = computed(() => route.params.username);

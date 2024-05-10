@@ -6,9 +6,11 @@ use App\Events\RoomReactionEvent;
 use App\Events\RoomUpdatedEvent;
 use App\Events\RoomUserChangedEvent;
 use App\Http\Controllers\Controller;
+use App\Models\MatchHistory;
 use App\Models\Room;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class RoomsController extends Controller
 {
@@ -52,6 +54,15 @@ class RoomsController extends Controller
 
         try {
             if ($request->input('ended_at')) {
+                $winner_1_id = null;
+                $winner_2_id = null;
+                $loser_1_id = null;
+                $loser_2_id = null;
+                $is_goon_court = false;
+                $is_court = false;
+                $winner_score = 0;
+                $loser_score = 0;
+
                 $participants = $room->participants()->get();
 
                 foreach ($participants as $participant) {
@@ -63,7 +74,26 @@ class RoomsController extends Controller
                     $teammatePosition = $participant->position + 2;
                     $teammatePosition = $teammatePosition > 4 ? $teammatePosition - 4 : $teammatePosition;
                     $teammate = $participants->where('position', $teammatePosition)->first();
-                    $isWinner = $participant->user_id === $request->input('last_winner_id') || $teammate->user_id === $request->input('last_winner_id');
+
+                    $isSelfWinner = $participant->user_id === $request->input('last_winner_id');
+                    $isTeammateWinner = $teammate->user_id === $request->input('last_winner_id');
+
+                    $isWinner = $isSelfWinner || $isTeammateWinner;
+
+                    if ($isSelfWinner) {
+                        $winner_1_id = $participant->user_id;
+                    } else if ($isTeammateWinner) {
+                        $winner_2_id = $participant->user_id;
+                    } else {
+                        $loser_1_id = $loser_1_id ?: $participant->user_id;
+                        $loser_2_id = $loser_2_id ?: $teammate->user_id;
+                    }
+
+                    if ($isWinner) {
+                        $winner_score += $participant->sir_count;
+                    } else {
+                        $loser_score += $participant->sir_count;
+                    }
 
                     if ($isWinner) {
                         $data['games_won'] = $participant->user->games_won + 1;
@@ -72,8 +102,10 @@ class RoomsController extends Controller
 
                         if ($ourScore === 13) {
                             if ($didWeSelectRung) {
+                                $is_court = true;
                                 $data['courts'] = $participant->user->courts + 1;
                             } else {
+                                $is_goon_court = true;
                                 $data['goon_courts'] = $participant->user->goon_courts + 1;
                             }
                         }
@@ -81,8 +113,20 @@ class RoomsController extends Controller
 
                     $participant->user->update($data);
                 }
+
+                MatchHistory::create([
+                    'winner_1_id' => $winner_1_id,
+                    'winner_2_id' => $winner_2_id,
+                    'loser_1_id' => $loser_1_id,
+                    'loser_2_id' => $loser_2_id,
+                    'is_court' => $is_court,
+                    'is_goon_court' => $is_goon_court,
+                    'winner_score' => $winner_score,
+                    'loser_score' => $loser_score,
+                ]);
             }
         } catch (\Throwable $th) {
+            Log::info($th->getMessage());
             //throw $th;
         }
 

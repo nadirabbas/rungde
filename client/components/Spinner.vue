@@ -78,7 +78,6 @@ export default defineComponent({
     width: 30px;
     height: 30px;
     display: inline-block;
-    z-index: 2000000000;
 }
 
 .spinner[size="small"] {

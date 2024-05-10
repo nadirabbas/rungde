@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\MatchHistoryController;
 use App\Http\Controllers\Api\RoomChatController;
 use App\Http\Controllers\Api\RoomsController;
 use App\Http\Controllers\Api\UsersController;
@@ -28,6 +29,8 @@ Route::post('/auth/logout', [AuthController::class, 'logout']);
 Route::post('/verify-voice-token', [VoiceTokensController::class, 'verifyVoiceToken']);
 
 Route::middleware('auth')->group(function () {
+    Route::get('/match-history', [MatchHistoryController::class, 'index']);
+
     Route::get('/room/voice-token', [VoiceTokensController::class, 'requestVoiceToken']);
     Route::get('/me', [UsersController::class, 'me']);
     Route::post('/me', [UsersController::class, 'updateMe']);

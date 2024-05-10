@@ -6,6 +6,17 @@
         <Navbar class="fixed top-5 right-5" v-if="authStore.user" />
 
         <div class="max-w-full min-w-[50%] lg:min-w-[400px]">
+            <div class="flex items-center justify-between relative mb-3">
+                <div
+                    id="back"
+                    class="absolute top-1/2 left-0 -translate-y-1/2"
+                ></div>
+                <h1
+                    id="title"
+                    class="text-center text-2xl font-medium w-full text-white leading-none"
+                ></h1>
+            </div>
+
             <div class="rounded bg-white p-3">
                 <RouterView />
             </div>
