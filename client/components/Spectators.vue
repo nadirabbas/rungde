@@ -1,12 +1,18 @@
 <template>
     <div>
         <button
-            class="p-1 rounded-full bg-yellow relative text-[#222]"
+            :class="{
+                'p-1 rounded-full bg-yellow relative text-[#222]': true,
+                'opacity-50': !room.spectators.length,
+            }"
             @click="room.spectators.length && (isOpen = !isOpen)"
         >
             <EyeIcon class="w-6 h-6" />
             <span
-                class="bg-red-600 text-white font-bold rounded-full absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center text-sm"
+                :class="{
+                    'bg-red-500 text-white font-bold rounded-full absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center text-sm': true,
+                }"
+                v-show="room.spectators.length"
                 >{{ room.spectators.length }}</span
             >
         </button>
