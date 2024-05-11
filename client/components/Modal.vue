@@ -1,9 +1,8 @@
 <template>
     <TransitionFade>
         <div
-            class="fixed top-0 left-0 w-screen h-screen flex items-center justify-center backdrop-blur-sm bg-black bg-opacity-70"
+            class="z-50 fixed top-0 left-0 w-screen h-screen flex items-center justify-center backdrop-blur-sm bg-black bg-opacity-70"
             @click.self="close"
-            style="z-index: 999"
             v-if="modelValue"
         >
             <div
