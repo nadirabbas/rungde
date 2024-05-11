@@ -157,8 +157,6 @@ class RoomsController extends Controller
             'as_spectator' => 'sometimes|numeric'
         ]);
 
-        Log::info($request->input('as_spectator'));
-
         $room = Room::where('code', $request->code)->first();
         if ($room->participants()->whereRelation('user', 'id', $request->user()->id)->exists()) {
             return [
@@ -220,7 +218,6 @@ class RoomsController extends Controller
     public function leave(Request $request)
     {
         $user = $request->user();
-
         if ($user->room) {
             $roomUser = $user->room->participants()->where('user_id', $user->id)->first();
             $user->room->participants()->where('user_id', $request->user()->id)->delete();
@@ -233,6 +230,7 @@ class RoomsController extends Controller
                 $user->roomSpectator->room_id,
                 "{$user->username} stopped spectating."
             ));
+            event(new RoomUpdatedEvent($user->roomSpectator->room->fresh()->withEventRelations()));
         }
 
         return [
@@ -281,5 +279,31 @@ class RoomsController extends Controller
             $request->reaction,
             $request->user()->id
         ));
+    }
+
+    public function kickSpectator(Request $request)
+    {
+        $request->validate([
+            'spectator_id' => 'required|numeric|exists:room_spectators,id'
+        ]);
+
+        $spectator = $request->user()->room->spectators()->where('id', $request->spectator_id)->first();
+        if (!$spectator) {
+            return response()->json([
+                'message' => 'Spectator not found'
+            ], 404);
+        }
+        $room = $spectator->room;
+
+        $spectator->delete();
+        event(new RoomSpectatorEvent(
+            $room->id,
+            "{$spectator->user->username} stopped spectating."
+        ));
+        event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
+
+        return [
+            'message' => 'Spectator has been kicked'
+        ];
     }
 }

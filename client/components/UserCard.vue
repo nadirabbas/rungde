@@ -92,7 +92,7 @@
             />
         </div>
 
-        <MountedTeleport to="#communications" v-if="!hideEmoji">
+        <MountedTeleport to="#em" v-if="!hideEmoji">
             <button
                 @click="openEmoji"
                 :class="{

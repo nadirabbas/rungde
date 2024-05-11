@@ -32,6 +32,7 @@ Route::post('/verify-voice-token', [VoiceTokensController::class, 'verifyVoiceTo
 Route::middleware('auth:api')->group(function () {
     Route::get('/match-history', [MatchHistoryController::class, 'index']);
 
+    Route::put('/room/kick-spectator', [RoomsController::class, 'kickSpectator']);
     Route::get('/room/voice-token', [VoiceTokensController::class, 'requestVoiceToken']);
     Route::get('/me', [UsersController::class, 'me']);
     Route::post('/me', [UsersController::class, 'updateMe']);

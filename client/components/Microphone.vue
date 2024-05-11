@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="max-h-4">
-            <MountedTeleport to="#communications" :disabled="!isSelf">
+            <MountedTeleport to="#vc" :disabled="!isSelf">
                 <UseMousePressed
                     v-if="connected && !hidden"
                     v-slot="{ pressed }"

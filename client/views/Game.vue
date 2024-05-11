@@ -1,8 +1,6 @@
 <template>
     <FullscreenLoader v-if="loading" />
     <div v-if="!loading && render" class="min-h-screen w-full rd-bg-pattern">
-        <Communications />
-
         <div class="fixed left-5 top-5">
             <Logo class="w-[70px] md:w-[150px]" v-if="!rung" />
             <span class="flex bg-white px-2 py-1 rounded" v-else>
@@ -331,6 +329,8 @@
             :user="authStore.user"
             v-if="channel"
         />
+
+        <Communications :room="room" />
     </div>
 </template>
 
