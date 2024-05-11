@@ -340,7 +340,7 @@ import GameMenu from "../components/GameMenu.vue";
 import { usePusher } from "../composables/usePusher";
 import FullscreenLoader from "../components/FullscreenLoader.vue";
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
-import { api, initApi } from "../api-ws";
+import { api } from "../api";
 import { Room, RoomUser, useAuthStore } from "../store/authStore";
 import Logo from "../components/Logo.vue";
 import UserCard from "../components/UserCard.vue";
@@ -1157,9 +1157,7 @@ const theirCourts = computed(() => {
         : room.value.team_2_4_courts;
 });
 
-onMounted(() => {
-    api.onReconnect(() => verifyRoom());
-});
+onMounted(verifyRoom);
 
 const ourScore = computed(
     () => (teammate.value?.sir_count || 0) + (me.value?.sir_count || 0)

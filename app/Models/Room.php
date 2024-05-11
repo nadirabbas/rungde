@@ -56,12 +56,12 @@ class Room extends Model
 
     public function participants()
     {
-        return $this->hasMany(RoomUser::class)->with('user:id,username');
+        return $this->hasMany(RoomUser::class)->with('user');
     }
 
     public function spectators()
     {
-        return $this->hasMany(RoomSpectator::class)->with('user:id,username');
+        return $this->hasMany(RoomSpectator::class)->with('user');
     }
 
     public function getIsEndedAttribute()
