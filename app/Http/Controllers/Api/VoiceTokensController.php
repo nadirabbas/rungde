@@ -11,18 +11,20 @@ class VoiceTokensController extends Controller
     public function requestVoiceToken(Request $request)
     {
         $user = $request->user();
-        if (!$user->roomUser) {
+        if (!$user->roomUser && !$user->roomSpectator) {
             return response()->json([
                 'message' => 'You are not in a room',
             ], 400);
         }
+
+        $room = $user->roomUser ? $user->roomUser->room : $user->roomSpectator->room;
 
         $user->voiceTokens()->delete();
 
         $newVoiceToken = $user->voiceTokens()->create([
             'token' => bin2hex(random_bytes(32)),
             'expires_at' => now()->addHour(),
-            'room_id' => $user->room->id
+            'room_id' => $room->id
         ]);
 
         return response()->json([

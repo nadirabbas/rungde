@@ -1,12 +1,21 @@
 <template>
     <div class="flex flex-col gap-3">
-        <form @submit.prevent="join">
+        <form @submit.prevent="() => join()">
             <FieldLabel label="Room code" class="mb-3">
                 <TextField v-model="roomCode" />
             </FieldLabel>
-            <Button :loading="joining" class="rd-bg text-white w-full"
-                >Join room</Button
-            >
+            <div class="flex items-center gap-3">
+                <Button :loading="joining" class="flex-1 rd-bg text-white"
+                    >Join room</Button
+                >
+                <Button
+                    type="button"
+                    @click="joinAsSpectator"
+                    :loading="joining"
+                    class="rd-bg-2 flex-1 text-white"
+                    >Spectate</Button
+                >
+            </div>
         </form>
 
         <div class="relative py-3">
@@ -63,7 +72,7 @@ const create = async () => {
 
 const toast = useToast();
 
-const join = async () => {
+const join = async (asSpectator = false) => {
     let error = "";
     if (!roomCode.value) error = "Please enter a room code";
     if (error) {
@@ -76,6 +85,7 @@ const join = async () => {
     try {
         const res = await api.put("/rooms/join", {
             code: roomCode.value,
+            as_spectator: asSpectator ? 1 : 0,
         });
         authStore.setRoom(res.data.room);
         router.push({
@@ -89,5 +99,9 @@ const join = async () => {
     }
 
     joining.value = false;
+};
+
+const joinAsSpectator = () => {
+    return join(true);
 };
 </script>

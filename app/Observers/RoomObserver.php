@@ -9,6 +9,6 @@ class RoomObserver
 {
     public function updated(Room $room)
     {
-        event(new RoomUpdatedEvent($room->load('participants')));
+        event(new RoomUpdatedEvent($room->withEventRelations()));
     }
 }

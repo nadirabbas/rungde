@@ -9,18 +9,20 @@
             :class="{
                 'py-1 rounded-full text-sm flex items-center justify-center transition border-[3px]': true,
                 ' bg-green-600': friend && name,
-                ' bg-red-600': !friend && name,
+                ' bg-red-600': !friend && !isSpectating && name,
                 'bg-gray-500 border-gray-500': !name,
                 'border-green-600': friend && !senior && name,
-                'border-red-600': !friend && !senior && name,
-                'user-card-border': active && !senior,
-                'user-card-border-senior': active && senior,
+                'border-red-600': !friend && !senior && name && !isSpectating,
+                'user-card-border': active && !senior && !isSpectating,
+                'user-card-border-senior': active && senior && !isSpectating,
                 'px-3': !showMenu,
                 'pr-2': showMenu,
                 'pl-3': showMenu && !score,
                 'pl-1': score,
-                'text-white': !senior,
+                'text-white': !senior && !isSpectating,
                 'bg-yellow font-bold text-black border-yellow': senior,
+                'min-w-32 min-h-10': large,
+                'border-white bg-white text-black font-bold': isSpectating,
             }"
         >
             <UserCardScore
@@ -42,7 +44,7 @@
             class="items-center flex"
         >
             <AudioChat
-                v-if="isSelf && room && userId && render"
+                v-if="isSelf && room && userId && render && !hideVoiceChat"
                 :participants="room.participants"
                 :room-id="room.id"
                 :is-self="isSelf"
@@ -90,7 +92,7 @@
             />
         </div>
 
-        <MountedTeleport to="#communications">
+        <MountedTeleport to="#communications" v-if="!hideEmoji">
             <button
                 @click="openEmoji"
                 :class="{
@@ -148,6 +150,10 @@ const props = defineProps({
     streamId: String,
     isTeammate: Boolean,
     showClock: Boolean,
+    large: Boolean,
+    hideEmoji: Boolean,
+    hideVoiceChat: Boolean,
+    isSpectating: Boolean,
 });
 
 const { userId } = toRefs(props);

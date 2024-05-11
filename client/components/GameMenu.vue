@@ -7,6 +7,14 @@
             :model-value="modelValue"
         >
             <button
+                :class="buttonClass('bg-green-600 text-white mb-2')"
+                @click="copyCode(room.code)"
+                v-if="isSelf"
+            >
+                Copy room code: {{ room.code }}
+            </button>
+
+            <button
                 :class="buttonClass('rd-bg mb-2 text-white')"
                 @click="viewProfile"
             >
@@ -54,6 +62,8 @@ import { api } from "../api";
 import { useRouter } from "vue-router";
 import Modal from "./Modal.vue";
 import ProfileModal from "../components/ProfileModal.vue";
+import copy from "copy-to-clipboard";
+import { useToast } from "../composables/useToast";
 
 const emit = defineEmits(["close", "restart"]);
 
@@ -69,6 +79,7 @@ const props = defineProps({
         type: Function,
         required: true,
     },
+    room: null,
 });
 
 const { user } = toRefs(props);
@@ -85,6 +96,16 @@ const apiReq = async (uri: string, data: any, cb: () => void) => {
     }
 
     loading.value = false;
+};
+
+const toast = useToast();
+const copyCode = (code: string) => {
+    try {
+        copy(code);
+        toast.success("Code copied to clipboard");
+    } catch (error) {
+        toast.error("There was a problem copying the code");
+    }
 };
 
 const leaveRoom = async () => {

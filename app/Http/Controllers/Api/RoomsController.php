@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Events\RoomReactionEvent;
+use App\Events\RoomSpectatorEvent;
 use App\Events\RoomUpdatedEvent;
 use App\Events\RoomUserChangedEvent;
 use App\Http\Controllers\Controller;
@@ -14,7 +15,6 @@ use Illuminate\Support\Facades\Log;
 
 class RoomsController extends Controller
 {
-
     public function current(Request $request)
     {
         $user = $request->user();
@@ -22,7 +22,13 @@ class RoomsController extends Controller
 
         if ($room) {
             return [
-                'room' => $room->load('participants')
+                'room' => $room->withEventRelations()
+            ];
+        }
+
+        if ($user->roomSpectator) {
+            return [
+                'room' => $user->roomSpectator->room->withEventRelations()
             ];
         }
 
@@ -131,7 +137,7 @@ class RoomsController extends Controller
             //throw $th;
         }
 
-        event(new RoomUpdatedEvent($room->fresh()->load('participants')));
+        event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
     }
 
     public function show(Room $room)
@@ -147,8 +153,11 @@ class RoomsController extends Controller
     {
         $user = $request->user();
         $request->validate([
-            'code' => 'required|exists:rooms'
+            'code' => 'required|exists:rooms',
+            'as_spectator' => 'sometimes|numeric'
         ]);
+
+        Log::info($request->input('as_spectator'));
 
         $room = Room::where('code', $request->code)->first();
         if ($room->participants()->whereRelation('user', 'id', $request->user()->id)->exists()) {
@@ -157,7 +166,7 @@ class RoomsController extends Controller
             ];
         }
 
-        $joined = $this->joinRoom($room, $user);
+        $joined = $this->joinRoom($room, $user, $request->input('as_spectator'));
         if (!$joined) {
             return response()->json([
                 'message' => 'Room is full'
@@ -169,14 +178,33 @@ class RoomsController extends Controller
         ];
     }
 
-    protected function joinRoom(Room $room, User $user)
+    protected function joinRoom(Room $room, User $user, $spectate = false)
     {
+        $fn = fn () => event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
+
+        if ($spectate) {
+            $spectator = $room->spectators()->create([
+                'room_id' => $room->id,
+                'user_id' => $user->id
+            ]);
+            $fn();
+
+            event(new RoomSpectatorEvent(
+                $room->id,
+                "{$user->username} started spectating."
+            ));
+            return $spectator;
+        }
+
         // get availabe position
         $position = $room->participants()->pluck('position')->toArray();
         $position = array_diff([1, 2, 3, 4], $position);
         $position = array_values($position);
 
-        if (!count($position)) return false;
+        if (!count($position)) {
+            // Room full, add as spectator
+            return false;
+        }
 
         $roomUser = $room->participants()->create([
             'room_id' => $room->id,
@@ -184,7 +212,7 @@ class RoomsController extends Controller
             'position' => $position[0]
         ]);
 
-        event(new RoomUpdatedEvent($room->fresh()->load('participants')));
+        $fn();
 
         return $roomUser;
     }
@@ -192,12 +220,19 @@ class RoomsController extends Controller
     public function leave(Request $request)
     {
         $user = $request->user();
-        $room = $user->room;
-        $roomUser = $room->participants()->where('user_id', $user->id)->first();
 
-        if ($room) {
-            $room->participants()->where('user_id', $request->user()->id)->delete();
-            event(new RoomUpdatedEvent($room->fresh()->load('participants'), false, $roomUser->position));
+        if ($user->room) {
+            $roomUser = $user->room->participants()->where('user_id', $user->id)->first();
+            $user->room->participants()->where('user_id', $request->user()->id)->delete();
+            event(new RoomUpdatedEvent($user->room->fresh()->withEventRelations(), false, $roomUser->position));
+        }
+
+        if ($user->roomSpectator) {
+            $user->roomSpectator->delete();
+            event(new RoomSpectatorEvent(
+                $user->roomSpectator->room_id,
+                "{$user->username} stopped spectating."
+            ));
         }
 
         return [
@@ -227,7 +262,7 @@ class RoomsController extends Controller
         if ($room) {
             $roomUser = $room->participants()->where('position', $request->position)->first();
             $roomUser->delete();
-            event(new RoomUpdatedEvent($room->load('participants'), false, '', $roomUser->position));
+            event(new RoomUpdatedEvent($room->withEventRelations(), false, '', $roomUser->position));
         }
 
         return [

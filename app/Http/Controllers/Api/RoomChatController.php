@@ -15,7 +15,7 @@ class RoomChatController extends Controller
             'msg' => 'required|max:500',
         ]);
 
-        if (!$user->room) {
+        if (!$user->room && !$user->roomSpectator) {
             return response([
                 'message' => 'You are not in a room'
             ], 400);

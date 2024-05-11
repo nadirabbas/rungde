@@ -19,6 +19,7 @@ export interface Room {
     started_at: string | null;
     is_ended: boolean;
     participants: RoomUser[];
+    spectators: RoomUser[];
     turn: 1 | 2 | 3 | 4;
     rung: string | null;
     rung_selector: number;

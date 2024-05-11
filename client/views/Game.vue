@@ -11,7 +11,7 @@
             </span>
         </div>
 
-        <div class="fixed bottom-0 ml-5 transform">
+        <div class="fixed bottom-0 ml-5 transform" v-if="!isSpectating">
             <Card
                 v-for="(card, i) in cards"
                 :card="card"
@@ -31,8 +31,22 @@
         </div>
 
         <UserCard
+            name="Spectating"
+            class="fixed left-1/2 -translate-x-1/2 bottom-5"
+            show-menu
+            @click="openMenu(spectator)"
+            :room="room"
+            is-self
+            :user-id="authStore.user.id"
+            :large="isSpectating"
+            hide-emoji
+            is-spectating
+            v-if="isSpectating"
+        />
+
+        <UserCard
             :senior="isSenior(me)"
-            :name="authStore.user.username"
+            :name="me.user.username"
             class="fixed right-5 bottom-5"
             friend
             :active="turnPos && turnPos == me.position && 'left'"
@@ -45,6 +59,8 @@
             :user-id="me?.user.id"
             :stream-id="me?.stream_id"
             :show-clock="isTicking"
+            :hide-emoji="isSpectating"
+            :hide-voice-chat="isSpectating"
         />
 
         <UserCard
@@ -176,7 +192,9 @@
             >
                 <div class="bg-white rounded p-2 min-w-[20vw]">
                     <template v-if="!room.rung">
-                        <template v-if="me.position === rungSelector">
+                        <template
+                            v-if="me.position === rungSelector && !isSpectating"
+                        >
                             <p class="text-center font-medium text-sm mb-3">
                                 Select rung
                             </p>
@@ -279,11 +297,12 @@
 
         <GameMenu
             :user="openMenuFor"
-            :is-self="openMenuFor?.position == me?.position"
-            :is-host="me.position == 1"
+            :is-self="openMenuFor?.user.id == authStore.user.id"
+            :is-host="me.position == 1 && !isSpectating"
             @close="openMenuFor = null"
             :restart-fn="resetRoom"
             :model-value="!!openMenuFor"
+            :room="room"
         />
 
         <Totals
@@ -303,7 +322,7 @@
             v-if="room"
             :room="room"
             :channel="channel"
-            :username="me?.user.username"
+            :username="authStore.user.username"
         />
 
         <Reactions
@@ -376,6 +395,8 @@ const totalTurns = ref(0);
 const showTotals = ref(false);
 
 const me = ref<RoomUser>();
+const spectator = ref<RoomUser>();
+const isSpectating = ref(false);
 const clickedCard = ref<string | null>(null);
 const cards = ref<string[]>([]);
 const teammate = ref<RoomUser | null>();
@@ -414,7 +435,7 @@ const goonCourt = computed(() => {
     return null;
 });
 
-const isHost = computed(() => me.value?.position == 1);
+const isHost = computed(() => me.value?.position == 1 && !isSpectating.value);
 
 const getOpp = (pos: "right" | "left") => {
     const myPos = me.value?.position || 0;
@@ -451,7 +472,9 @@ watch([teammate, me, leftOpp, rightOpp], (user, old) => {
     if (!room.value) return;
 
     if (victory.value !== null && room.value.participants.length === 4) {
-        playSound({ id: victory.value ? "victory" : "defeat" });
+        playSound({
+            id: victory.value || isSpectating.value ? "victory" : "defeat",
+        });
         return;
     }
 
@@ -480,7 +503,7 @@ watch([teammate, me, leftOpp, rightOpp], (user, old) => {
         playSound({ id: "wonSir" });
     } else if (weLost) {
         g(false);
-        playSound({ id: "lostSir" });
+        playSound({ id: isSpectating.value ? "wonSir" : "lostSir" });
     }
 });
 
@@ -520,8 +543,21 @@ const setValues = async (r: Room) => {
 
     room.value = r;
     me.value = r.participants.find(
-        (p: RoomUser) => p.user.id === authStore.user?.id
+        (p: RoomUser) => p.user.id == authStore.user?.id
     );
+
+    if (!me.value) {
+        const mySpectator = r.spectators.find(
+            (p: RoomUser) => p.user.id == authStore.user?.id
+        );
+
+        if (mySpectator) {
+            me.value = r.participants.find((p: RoomUser) => p.position == 1);
+            spectator.value = mySpectator;
+            isSpectating.value = true;
+        }
+    }
+
     const myPos = me.value?.position || 0;
     opponents.value = r.participants.filter((p) => isOpponent(p.position));
     teammate.value = r.participants.find(
@@ -553,12 +589,12 @@ const setValues = async (r: Room) => {
         playSound({ id: "cardPlayed" });
     }
 
-    if (r.turn == me.value?.position) {
+    if (r.turn == me.value?.position && !isSpectating.value) {
         if (!oldRoom[myTurnColumn] && r[myTurnColumn]) return;
         playSound({ id: "turn" });
 
         const playTick = async () => {
-            if (!isTicking.value) return;
+            if (!isTicking.value || isSpectating.value) return;
             playSound({ id: "ticking" });
             await new Promise((resolve) => setTimeout(resolve, 1000));
             playTick();
@@ -755,6 +791,10 @@ const victory = computed(() => {
 
     if (ourScore + theirScore < 13 || ourScore === theirScore) return null;
 
+    if (isSpectating.value) {
+        return true;
+    }
+
     if (ourScore > theirScore) {
         return true;
     } else if (ourScore < theirScore) {
@@ -769,6 +809,9 @@ const initSocket = async () => {
         channel.value = pusher.subscribe(`private-room.${room.value?.id}`);
         channel.value.bind("userchanged", ({ roomUser }) => {
             setParticipantById(roomUser.user_id, roomUser);
+        });
+        channel.value.bind("spectator-event", ({ msg }) => {
+            toast.error(msg);
         });
 
         channel.value.bind(
