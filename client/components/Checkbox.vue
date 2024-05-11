@@ -27,7 +27,7 @@
                         'flex items-center justify-center ': checked,
 
                         // Default
-                        'border-green-500 bg-green-500': !legacy && checked,
+                        'border-green-500 bg-green-600': checked,
                         rounded: !legacy,
                         'border-gray-300 hover:bg-link-water-2':
                             !legacy && !checked,
