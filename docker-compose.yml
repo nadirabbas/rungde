@@ -9,7 +9,7 @@ services:
             context: .
             dockerfile: Dockerfile
         volumes:
-            - /home/meemalifaaeenforwork/rungde-storage:/var/www/storage
+            - /home/meemalifaaeenforwork/rungde-storage:/var/www/storage/keys
         container_name: rungde
         ports:
             - "80:80"
