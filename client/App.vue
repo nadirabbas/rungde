@@ -1,8 +1,9 @@
 <template>
     <div>
         <div
-            class="z-40 fixed w-full h-full left-0 top-0 flex items-center justify-center bg-white"
+            class="fixed w-full h-full left-0 top-0 flex items-center justify-center bg-white"
             v-show="generalStore.loading"
+            style="z-index: 999"
         >
             <Spinner />
         </div>
@@ -13,8 +14,8 @@
             <p class="text-2xl">Please rotate your device</p>
         </div>
         <div class="landscape-only">
-            <component :is="layout">
-                <router-view />
+            <component :is="layout" :key="layout">
+                <router-view :key="layout" />
             </component>
         </div>
     </div>

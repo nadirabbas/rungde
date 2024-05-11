@@ -321,7 +321,7 @@ import GameMenu from "../components/GameMenu.vue";
 import { usePusher } from "../composables/usePusher";
 import FullscreenLoader from "../components/FullscreenLoader.vue";
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
-import { api } from "../api";
+import { api, initApi } from "../api-ws";
 import { Room, RoomUser, useAuthStore } from "../store/authStore";
 import Logo from "../components/Logo.vue";
 import UserCard from "../components/UserCard.vue";
@@ -853,8 +853,8 @@ const canPlayCard = (card: string) => {
     if (
         cardNum(card) === 14 &&
         cardNum(me.value.latest_turn) === 14 &&
-        room.value.last_highest_card_position == me.value.position
-        && room.value.total_turns < 48
+        room.value.last_highest_card_position == me.value.position &&
+        room.value.total_turns < 48
     ) {
         return false;
     }
@@ -1114,7 +1114,9 @@ const theirCourts = computed(() => {
         : room.value.team_2_4_courts;
 });
 
-onMounted(verifyRoom);
+onMounted(() => {
+    api.onReconnect(() => verifyRoom());
+});
 
 const ourScore = computed(
     () => (teammate.value?.sir_count || 0) + (me.value?.sir_count || 0)

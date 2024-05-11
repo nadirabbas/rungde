@@ -22,10 +22,11 @@ class AuthController extends Controller
             'password' => Hash::make($request->password)
         ]);
 
-        auth()->login($user, true);
+        $token = $user->createToken('auth_token')->accessToken;
 
         return [
-            'user' => $user->load('room')
+            'user' => $user->load('room'),
+            'token' => $token
         ];
     }
 
@@ -44,16 +45,18 @@ class AuthController extends Controller
             ], 401);
         }
 
-        auth()->login($user, true);
+        $token = $user->createToken('auth_token')->accessToken;
 
         return [
-            'user' => $user->load('room')
+            'user' => $user->load('room'),
+            'token' => $token
         ];
     }
 
     public function logout()
     {
-        auth()->logout();
+        auth()->user()->tokens()->delete();
+        return response()->json(['message' => 'Tokens Revoked']);
     }
 
     public function oauth(Request $request)

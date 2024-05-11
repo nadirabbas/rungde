@@ -17,7 +17,8 @@ class RoomsController extends Controller
 
     public function current(Request $request)
     {
-        $room = $request->user()->room;
+        $user = $request->user();
+        $room = $user->room()->first();
 
         if ($room) {
             return [
@@ -144,6 +145,7 @@ class RoomsController extends Controller
 
     public function join(Request $request)
     {
+        $user = $request->user();
         $request->validate([
             'code' => 'required|exists:rooms'
         ]);
@@ -155,7 +157,7 @@ class RoomsController extends Controller
             ];
         }
 
-        $joined = $this->joinRoom($room, $request->user());
+        $joined = $this->joinRoom($room, $user);
         if (!$joined) {
             return response()->json([
                 'message' => 'Room is full'

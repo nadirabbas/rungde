@@ -12,6 +12,7 @@ import { Consumer, Producer } from "mediasoup-client/lib/types";
 import { Socket } from "socket.io-client";
 import { useBus } from "../composables/useBus";
 import { watchStreamAudioLevel } from "stream-audio-level";
+import { useVoiceServer } from "../composables/useVoiceServer";
 
 const bus = useBus();
 
@@ -36,8 +37,9 @@ const init = async () => {
     tries.value++;
     try {
         const device = new Device();
-        socket.value = io(import.meta.env.VITE_VOICE_SERVER);
-        socket.value?.on("connect", async () => {
+        socket.value = useVoiceServer();
+
+        const connected = async () => {
             socket.value?.on("error", (msg) => {
                 window.alert(msg);
             });
@@ -232,6 +234,14 @@ const init = async () => {
                     );
                 }
             );
+        };
+
+        if (socket.value?.connected) {
+            connected();
+        }
+
+        socket.value?.on("connect", async () => {
+            connected();
         });
 
         socket.value?.on("disconnect", () => {

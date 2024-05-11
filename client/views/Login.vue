@@ -97,7 +97,7 @@ const submit = async () => {
             })
             .then((res) => res.data);
 
-        authStore.login(res.user);
+        authStore.login(res.user, res.token);
         router.push({
             name: "Dashboard",
         });

@@ -59,12 +59,14 @@ export interface User {
 export interface AuthStoreState {
     user: User | null;
     assetsLoaded: boolean;
+    token: string | null;
 }
 
 export const useAuthStore = defineStore("auth", {
     state: (): AuthStoreState => ({
         user: null,
         assetsLoaded: false,
+        token: null,
     }),
     getters: {
         room(): Room {
@@ -77,9 +79,13 @@ export const useAuthStore = defineStore("auth", {
         },
         logout() {
             this.user = null;
+            this.token = null;
         },
-        login(user: User) {
+        login(user: User, token?: string) {
             this.user = user;
+            if (token) {
+                this.token = token;
+            }
         },
         setRoom(room: Room) {
             this.user!.room = room;

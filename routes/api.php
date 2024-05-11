@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\RoomChatController;
 use App\Http\Controllers\Api\RoomsController;
 use App\Http\Controllers\Api\UsersController;
 use App\Http\Controllers\Api\VoiceTokensController;
+use App\Http\Middleware\CustomAuth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,7 +29,7 @@ Route::post('/auth/logout', [AuthController::class, 'logout']);
 
 Route::post('/verify-voice-token', [VoiceTokensController::class, 'verifyVoiceToken']);
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth:api')->group(function () {
     Route::get('/match-history', [MatchHistoryController::class, 'index']);
 
     Route::get('/room/voice-token', [VoiceTokensController::class, 'requestVoiceToken']);
