@@ -2,47 +2,52 @@
     <div>
         <div class="max-h-4">
             <MountedTeleport to="#communications" :disabled="!isSelf">
-                <button
-                    :class="{
-                        'bg-white text-black border-[3px] flex items-center justify-center  rounded-full z-40 fixed lg:relative lg:right-auto lg:top-auto left-5 lg:left-auto top-[20.5vh] transition':
-                            isSelf,
-                        'text-white': !isSelf,
-                        'text-black opacity-30': muted && isSelf,
-                        'ring-8 lg:ring-4 ring-red-600':
-                            isSpeaking && isSelf && !muted,
-                        'border-white': !isSpeaking && isSelf,
-                        'w-16 h-16 lg:w-auto lg:h-8 lg:px-3': isSelf,
-                        hidden: !isSpeaking && !isSelf,
-                    }"
-                    @mousedown="unmute"
-                    @mouseup="mute"
-                    @touchstart="unmute"
-                    @touchcancel="mute"
-                    @touchend="mute"
+                <UseMousePressed
                     v-if="connected && !hidden"
+                    v-slot="{ pressed }"
                 >
-                    <div class="relative">
-                        <MicrophoneIcon
-                            :class="{
-                                'w-4': !isSelf,
-                                'w-8 lg:w-4': isSelf,
-                            }"
+                    <div>
+                        <PropWatcher
+                            :watch="pressed"
+                            @change="$event ? unmute() : mute()"
                         />
+                        <button
+                            :class="{
+                                'bg-white text-black border-[3px] flex items-center justify-center  rounded-full z-40 fixed lg:relative lg:right-auto lg:top-auto left-5 lg:left-auto top-[20.5vh] transition':
+                                    isSelf,
+                                'text-white': !isSelf,
+                                'text-black opacity-30': muted && isSelf,
+                                'ring-8 lg:ring-4 ring-red-600':
+                                    isSpeaking && isSelf && !muted,
+                                'border-white': !isSpeaking && isSelf,
+                                'w-16 h-16 lg:w-auto lg:h-8 lg:px-3': isSelf,
+                                hidden: !isSpeaking && !isSelf,
+                            }"
+                        >
+                            <div class="relative">
+                                <MicrophoneIcon
+                                    :class="{
+                                        'w-4': !isSelf,
+                                        'w-8 lg:w-4': isSelf,
+                                    }"
+                                />
 
-                        <TransitionFade>
+                                <TransitionFade>
+                                    <span
+                                        class="top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-10 lg:w-5 lg:h-[2px] h-[3px] bg-black absolute rotate-45"
+                                        v-if="muted && isSelf"
+                                    ></span>
+                                </TransitionFade>
+                            </div>
+
                             <span
-                                class="top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-10 lg:w-5 lg:h-[2px] h-[3px] bg-black absolute rotate-45"
-                                v-if="muted && isSelf"
-                            ></span>
-                        </TransitionFade>
+                                class="hidden lg:block text-sm ml-2 font-bold"
+                                v-if="isSelf"
+                                >{{ muted ? "Press V" : "Speak" }}</span
+                            >
+                        </button>
                     </div>
-
-                    <span
-                        class="hidden lg:block text-sm ml-2 font-bold"
-                        v-if="isSelf"
-                        >{{ muted ? "Press V" : "Speak" }}</span
-                    >
-                </button>
+                </UseMousePressed>
             </MountedTeleport>
         </div>
     </div>
@@ -64,6 +69,9 @@ import { TransitionFade } from "@morev/vue-transitions";
 import DecibelMeter from "decibel-meter";
 import MountedTeleport from "./MountedTeleport.vue";
 import { useMagicKeys } from "@vueuse/core";
+import { UseMousePressed } from "@vueuse/components";
+import PropWatcher from "./PropWatcher.vue";
+
 const bus = useBus();
 
 const props = defineProps({
