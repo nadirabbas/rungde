@@ -48,17 +48,22 @@ import Spinner from "./Spinner.vue";
 import MatchHistoryUsers from "./MatchHistoryUsers.vue";
 import BackButton from "./BackButton.vue";
 import MountedTeleport from "./MountedTeleport.vue";
+import { useAuthStore } from "../store/authStore";
 
 const props = defineProps({
     fetchHistory: {
         type: Function as PropType<
-            (pagination?: { page?: number }) => Promise<any>
+            (pagination?: {
+                page?: number;
+                only_self?: boolean;
+            }) => Promise<any>
         >,
         required: true,
     },
+    showOnlySelf: Boolean,
 });
 
-const { fetchHistory: fetchHistoryFn } = toRefs(props);
+const { fetchHistory: fetchHistoryFn, showOnlySelf } = toRefs(props);
 
 const loading = ref(false);
 const totalMatches = ref(0);
@@ -70,7 +75,10 @@ const fetchHistory = async () => {
     loading.value = true;
 
     try {
-        const res = await fetchHistoryFn.value({ page: page.value });
+        const res = await fetchHistoryFn.value({
+            page: page.value,
+            only_self: showOnlySelf.value,
+        });
         history.value.push(...res.data);
         totalMatches.value = res.total;
     } catch (error) {
@@ -81,7 +89,10 @@ const fetchHistory = async () => {
 };
 
 onMounted(fetchHistory);
-watch(page, fetchHistory);
+watch(showOnlySelf, () => {
+    history.value = [];
+    fetchHistory();
+});
 </script>
 
 <script lang="ts">

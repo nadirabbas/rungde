@@ -15,6 +15,10 @@
                     id="title"
                     class="text-center text-2xl font-medium w-full text-white leading-none"
                 ></h1>
+                <div
+                    id="filters"
+                    class="absolute top-1/2 right-0 -translate-y-1/2"
+                ></div>
             </div>
 
             <div class="rounded bg-white p-3">
