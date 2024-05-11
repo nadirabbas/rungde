@@ -10,8 +10,8 @@ services:
             dockerfile: Dockerfile
         volumes:
             - /home/meemalifaaeenforwork/rungde-avatars:/var/www/storage/app/public/avatars
-            - /home/meemalifaaeenforwork/rungde-passport:/var/www/storage/oauth-private.key
-            - /home/meemalifaaeenforwork/rungde-passport:/var/www/storage/oauth-public.key
+            - /home/meemalifaaeenforwork/rungde-passport/oauth-private.key:/var/www/storage/oauth-private.key
+            - /home/meemalifaaeenforwork/rungde-passport/oauth-public.key:/var/www/storage/oauth-public.key
         container_name: rungde
         ports:
             - "80:80"
