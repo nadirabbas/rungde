@@ -6,7 +6,7 @@
         <Navbar class="fixed top-5 right-5" v-if="authStore.user" />
 
         <div class="max-w-full min-w-[50%] lg:min-w-[400px]">
-            <div class="flex items-center justify-between relative mb-3">
+            <div class="flex items-center justify-between relative mb-5">
                 <div
                     id="back"
                     class="absolute top-1/2 left-0 -translate-y-1/2"

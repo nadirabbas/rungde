@@ -1,5 +1,6 @@
 import Dashboard from "../views/Dashboard.vue";
 import Game from "../views/Game.vue";
+import Leaderboard from "../views/Leaderboard.vue";
 import GlobalMatchHistory from "../views/GlobalMatchHistory.vue";
 import Login from "../views/Login.vue";
 import Profile from "../views/Profile.vue";
@@ -43,6 +44,14 @@ export const routes = [
         path: "/global-match-history",
         name: "GlobalMatchHistory",
         component: GlobalMatchHistory,
+        meta: {
+            requiresAuth: true,
+        },
+    },
+    {
+        path: "/leaderboard",
+        name: "Leaderboard",
+        component: Leaderboard,
         meta: {
             requiresAuth: true,
         },

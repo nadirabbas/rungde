@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\MatchHistory;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class MatchHistoryController extends Controller
@@ -25,5 +26,23 @@ class MatchHistoryController extends Controller
         })->latest()->paginate(50);
 
         return $history;
+    }
+
+    public function leaderboard(Request $request)
+    {
+        $request->validate([
+            'sort_by' => 'required|in:goon_courts,courts,games_won,games_played,tricks'
+        ]);
+
+        $sortBy = [
+            'goon_courts' => 'goon_courts',
+            'courts' => 'courts',
+            'games_won' => 'games_won',
+            'games_played' => 'games_played',
+            'tricks' => 'sirs'
+        ][$request->input('sort_by')];
+
+        $leaderboard = User::orderBy($sortBy, 'desc')->paginate(50);
+        return $leaderboard;
     }
 }

@@ -26,6 +26,7 @@ import {
     ChartBarIcon,
     LogoutIcon,
     HomeIcon,
+    SparklesIcon,
 } from "heroicons-vue3/solid";
 import { markRaw } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -40,6 +41,11 @@ const navItems = [
         label: "Home",
         icon: markRaw(HomeIcon),
         to: "/",
+    },
+    {
+        label: "Leaderboard",
+        icon: markRaw(SparklesIcon),
+        to: "/leaderboard",
     },
     {
         label: "Match history",
