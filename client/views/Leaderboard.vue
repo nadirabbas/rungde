@@ -1,5 +1,5 @@
 <template>
-    <div class="min-w-[60vw] max-h-[60vh] overflow-y-auto">
+    <div class="min-w-[60vw] max-h-[50vh] overflow-y-auto">
         <MountedTeleport to="#title">Leaderboard</MountedTeleport>
         <MountedTeleport to="#filters">
             <div class="flex flex-col">
