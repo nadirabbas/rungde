@@ -13,6 +13,7 @@ export interface RoomUser {
 
 export interface Room {
     id: number;
+    event_counter: number;
     user_id: number;
     code: string;
     ended_at: string | null;

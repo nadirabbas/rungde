@@ -529,9 +529,19 @@ const setParticipantById = (id, user) => {
 };
 
 const isTicking = ref(false);
+const isWaitingForNextTurn = ref(false);
 
 const setValues = async (r: Room) => {
     const oldRoom = { ...room.value };
+
+    if (oldRoom.event_counter && oldRoom.event_counter >= r.event_counter) {
+        // Older event received after newer
+        console.log("Discarding older event", {
+            newState: r,
+            oldState: oldRoom,
+        });
+        return;
+    }
 
     if (r.participants.length === 4 && !r.started_at) {
         playSound({ id: "start" });
@@ -542,6 +552,11 @@ const setValues = async (r: Room) => {
     }
 
     room.value = r;
+
+    if (!cardsOnTableArray.value.length) {
+        isWaitingForNextTurn.value = false;
+    }
+
     me.value = r.participants.find(
         (p: RoomUser) => p.user.id == authStore.user?.id
     );
@@ -594,7 +609,12 @@ const setValues = async (r: Room) => {
         playSound({ id: "turn" });
 
         const playTick = async () => {
-            if (!isTicking.value || isSpectating.value) return;
+            if (
+                !isTicking.value ||
+                isSpectating.value ||
+                isWaitingForNextTurn.value
+            )
+                return;
             playSound({ id: "ticking" });
             await new Promise((resolve) => setTimeout(resolve, 1000));
             playTick();
@@ -890,7 +910,13 @@ const hasTurnRungCard = computed(() =>
 
 const isCardBeingPlayed = ref(false);
 const canPlayCard = (card: string) => {
-    if (!me.value || !room.value || roomPaused.value) return;
+    if (
+        !me.value ||
+        !room.value ||
+        roomPaused.value ||
+        isWaitingForNextTurn.value
+    )
+        return;
 
     if (!isMyTurn.value || isCardBeingPlayed.value) return false;
     if (
@@ -943,6 +969,7 @@ const playCard = async (e: any, card: string) => {
         return;
     }
 
+    isTicking.value = false;
     isCardBeingPlayed.value = true;
 
     const oldCards = [...cards.value];
@@ -1024,8 +1051,9 @@ const playCard = async (e: any, card: string) => {
     }
 
     try {
-        if (isLastTurn) {
-            await updateRoom({
+        let initialData = {};
+        if (isLastTurn && room.value) {
+            initialData = {
                 card_position_1: cardPositionsWithNull[1],
                 card_position_2: cardPositionsWithNull[2],
                 card_position_3: cardPositionsWithNull[3],
@@ -1033,9 +1061,7 @@ const playCard = async (e: any, card: string) => {
                 room_users: mapValues(roomUsers, (u) => ({
                     cards: u.cards,
                 })),
-            });
-
-            await new Promise((resolve) => setTimeout(resolve, 1500));
+            };
         }
 
         const data = {
@@ -1102,7 +1128,18 @@ const playCard = async (e: any, card: string) => {
             )?.user.id;
         }
 
-        await updateRoom(data);
+        if (isLastTurn) {
+            isTicking.value = false;
+            isWaitingForNextTurn.value = true;
+        }
+        await updateRoom(
+            isLastTurn
+                ? {
+                      ...initialData,
+                      delayed_update: data,
+                  }
+                : data
+        );
     } catch (err) {
         cards.value = oldCards;
         cardsOnTable.value = oldCardsOnTable;
@@ -1193,6 +1230,18 @@ const cardsOnTable = ref({
     2: "",
     3: "",
     4: "",
+});
+const cardsOnTableArray = computed(() => {
+    if (!room.value) {
+        return [];
+    }
+
+    return [
+        room.value.card_position_1,
+        room.value.card_position_2,
+        room.value.card_position_3,
+        room.value.card_position_4,
+    ].filter((c) => c);
 });
 
 const sirs = ref(0);

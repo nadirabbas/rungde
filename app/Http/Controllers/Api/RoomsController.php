@@ -7,6 +7,7 @@ use App\Events\RoomSpectatorEvent;
 use App\Events\RoomUpdatedEvent;
 use App\Events\RoomUserChangedEvent;
 use App\Http\Controllers\Controller;
+use App\Jobs\RoomUpdateJob;
 use App\Models\MatchHistory;
 use App\Models\Room;
 use App\Models\User;
@@ -53,7 +54,13 @@ class RoomsController extends Controller
 
     public function update(Request $request, Room $room)
     {
-        $room->update($request->all());
+        $delayedUpdateData = $request->input('delayed_update');
+        $newRoomData = $request->all();
+        if (isset($newRoomData['delayed_update'])) {
+            unset($newRoomData['delayed_update']);
+        }
+
+        $room->update($newRoomData);
 
         if ($request->input('room_users')) {
             collect($request->room_users)->each(fn ($users, $position) => $room->participants()->where('position', $position)->first()?->update($users));
@@ -138,6 +145,13 @@ class RoomsController extends Controller
         }
 
         event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
+        if ($delayedUpdateData && count($delayedUpdateData)) {
+            sleep(2);
+            $room->update($delayedUpdateData);
+            collect($delayedUpdateData['room_users'])->each(fn ($users, $position) => $room->participants()->where('position', $position)->first()?->update($users));
+
+            event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
+        }
     }
 
     public function show(Room $room)

@@ -21,6 +21,9 @@ class RoomUpdatedEvent implements ShouldBroadcastNow
 
     public function __construct(Room $room, ?bool $closed = null, ?string $leftPos = null, ?string $removedPos = null)
     {
+        $room->event_counter++;
+        $room->save();
+
         $this->room = $room;
         $this->closed = $closed ?? false;
         $this->leftPos = $leftPos ?? '';

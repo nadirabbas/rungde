@@ -35,7 +35,8 @@ class Room extends Model
         'team_2_4_goon_courts',
         'team_1_3_courts',
         'team_2_4_courts',
-        'new_deck'
+        'new_deck',
+        'event_counter'
     ];
 
     protected $appends = [
