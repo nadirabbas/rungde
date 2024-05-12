@@ -1,7 +1,7 @@
 <template>
     <button
         :class="{
-            'flex gap-1 items-center z-40 user-card': true,
+            'flex gap-1 items-center user-card': true,
             'flex-row-reverse': !isLeftOpp,
         }"
     >

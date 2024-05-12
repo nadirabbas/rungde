@@ -1,47 +1,84 @@
 <template>
-    <TransitionFade>
-        <div
-            class="fixed z-40 left-0 top-0 w-full h-full bg-black bg-opacity-95 flex items-center justify-center cursor-pointer"
-            @click.self="isOpen = false"
-            v-if="isOpen"
-        >
-            <div class="grid grid-cols-9 gap-5">
-                <button
-                    v-for="reaction in reactions"
-                    :key="reaction"
-                    @click="sendReaction(reaction)"
-                >
-                    <img
-                        :src="animationData(reaction, true)"
-                        class="w-[50px] aspect-square"
-                    />
-                </button>
-            </div>
-
-            <button
-                @click="isOpen = false"
-                class="text-white absolute right-5 top-5"
+    <div>
+        <TransitionFade>
+            <div
+                class="fixed z-40 left-0 top-0 w-full h-full bg-black bg-opacity-95 flex items-center justify-center cursor-pointer"
+                @click.self="isOpen = false"
+                v-if="isOpen"
             >
-                <XIcon class="w-9" />
-            </button>
+                <div class="grid grid-cols-9 gap-5">
+                    <button
+                        v-for="reaction in reactions"
+                        :key="reaction"
+                        @click="sendReaction(reaction)"
+                    >
+                        <img
+                            :src="animationData(reaction, true)"
+                            class="w-[50px] aspect-square"
+                        />
+                    </button>
+                </div>
 
-            <p class="fixed bottom-5 text-base text-gray-500 hidden lg:block">
-                Shortcut: E
-            </p>
-        </div>
-    </TransitionFade>
+                <button
+                    @click="isOpen = false"
+                    class="text-white absolute right-5 top-5"
+                >
+                    <XIcon class="w-9" />
+                </button>
+
+                <p
+                    class="fixed bottom-5 text-base text-gray-500 hidden lg:block"
+                >
+                    Shortcut: E
+                </p>
+            </div>
+        </TransitionFade>
+
+        <MountedTeleport to="#spectator-reactions">
+            <div class="flex flex-col gap-2 mt-2">
+                <div
+                    v-for="(reaction, id) in spectatorReactions"
+                    class="flex items-center justify-between gap-2 py-1 px-3 bg-black bg-opacity-40 rounded-full"
+                    :key="id"
+                >
+                    <p class="text-sm font-medium text-white">
+                        @{{ reaction.username }}
+                    </p>
+
+                    <Vue3Lottie
+                        :animation-link="reaction.reaction"
+                        :key="id"
+                        :loop="reaction.loops"
+                        @onComplete="() => removeSpecReaction(id)"
+                        :width="25"
+                        :height="25"
+                    />
+                </div>
+            </div>
+        </MountedTeleport>
+    </div>
 </template>
 
 <script setup lang="ts">
 import { Vue3Lottie } from "vue3-lottie";
 import { useBus } from "../composables/useBus";
-import { PropType, onMounted, ref, toRefs, watch, watchEffect } from "vue";
+import {
+    PropType,
+    onMounted,
+    reactive,
+    ref,
+    toRefs,
+    watch,
+    watchEffect,
+} from "vue";
 import { Room, User } from "../store/authStore";
 import { Channel } from "pusher-js";
 import { XIcon } from "heroicons-vue3/solid";
 import { TransitionFade } from "@morev/vue-transitions";
 import { api } from "../api";
 import { useMagicKeys } from "@vueuse/core";
+import { v4 as uuid } from "uuid";
+import MountedTeleport from "./MountedTeleport.vue";
 
 const bus = useBus();
 
@@ -58,9 +95,10 @@ const props = defineProps({
         type: Object as PropType<User>,
         required: true,
     },
+    isSpectating: Boolean,
 });
 
-const { channel, user } = toRefs(props);
+const { channel, user, isSpectating } = toRefs(props);
 
 const isOpen = ref(false);
 
@@ -74,9 +112,11 @@ const specialLoops = {
     "923": 4,
     aab: 1,
     2753: 1,
+    "44b": 4,
 };
 
 const reactions = [
+    "44b",
     "4af",
     525,
     "2764_fe0f",
@@ -112,7 +152,6 @@ const reactions = [
     "ae1",
     914,
     "92b",
-    "aab",
 ];
 
 const animationData = (reaction: string | number, img = false) => {
@@ -157,6 +196,12 @@ const sendReaction = async (reaction: string) => {
         channel.value.trigger("client-reaction", {
             reaction,
             user_id: user.value.id,
+            username:
+                user.value.username +
+                user.value.username +
+                user.value.username +
+                user.value.username,
+            isSpec: isSpectating.value,
         });
     } catch (error) {
         console.error(error);
@@ -172,15 +217,34 @@ reactions.forEach((reaction) => {
     document.head.appendChild(link);
 });
 
+const spectatorReactions = reactive({});
+const removeSpecReaction = (id) => {
+    delete spectatorReactions[id];
+};
+
 onMounted(() => {
-    channel.value.bind("client-reaction", ({ user_id, reaction }) => {
-        if (user_id === user.value.id) return;
-        bus.emit("reaction-sent", {
-            user_id,
-            reaction: animationData(reaction),
-            loops: specialLoops[reaction] || 2,
-        });
-    });
+    channel.value.bind(
+        "client-reaction",
+        ({ user_id, reaction, username, isSpec }) => {
+            if (user_id === user.value.id) return;
+
+            if (isSpec) {
+                const reactionId = uuid();
+                spectatorReactions[reactionId] = {
+                    username,
+                    reaction: animationData(reaction),
+                    loops: specialLoops[reaction] || 2,
+                };
+                return;
+            }
+
+            bus.emit("reaction-sent", {
+                user_id,
+                reaction: animationData(reaction),
+                loops: specialLoops[reaction] || 2,
+            });
+        }
+    );
 });
 
 const { e } = useMagicKeys();

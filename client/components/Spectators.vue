@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="z-index: 999">
         <button
             :class="{
                 'p-1 rounded-full bg-yellow relative text-[#222]': true,

@@ -37,7 +37,6 @@
             is-self
             :user-id="authStore.user.id"
             :large="isSpectating"
-            hide-emoji
             is-spectating
             v-if="isSpectating"
         />
@@ -106,32 +105,36 @@
             :stream-id="leftOpp?.stream_id"
         />
 
-        <button
-            class="fixed top-5 right-5 flex items-center justify-center"
-            @click="showTotals = true"
-        >
-            <span
-                :class="
-                    scoreSpan(
-                        `bg-green-600 rounded mr-1.5 ${
-                            glow === true && 'glow-animation'
-                        }`
-                    )
-                "
-                >{{ glow === true ? "+" + sirWinDiff : ourScore }}</span
+        <div class="fixed top-5 right-5 flex flex-col items-end justify-end">
+            <button
+                class="flex items-center justify-center"
+                @click="showTotals = true"
             >
-            <span
-                :class="
-                    scoreSpan(
-                        `bg-red-600 rounded ${
-                            glow === false && 'glow-animation'
-                        }`
-                    )
-                "
-                >{{ glow === false ? "+" + sirWinDiff : theirScore }}</span
-            >
-            <ChevronDownIcon class="w-5 text-white ml-1" />
-        </button>
+                <span
+                    :class="
+                        scoreSpan(
+                            `bg-green-600 rounded mr-1.5 ${
+                                glow === true && 'glow-animation'
+                            }`
+                        )
+                    "
+                    >{{ glow === true ? "+" + sirWinDiff : ourScore }}</span
+                >
+                <span
+                    :class="
+                        scoreSpan(
+                            `bg-red-600 rounded ${
+                                glow === false && 'glow-animation'
+                            }`
+                        )
+                    "
+                    >{{ glow === false ? "+" + sirWinDiff : theirScore }}</span
+                >
+                <ChevronDownIcon class="w-5 text-white ml-1" />
+            </button>
+
+            <div id="spectator-reactions"></div>
+        </div>
 
         <CardsOnTable
             :cards="cardsOnTable"
@@ -327,6 +330,7 @@
             :room="room"
             :channel="channel"
             :user="authStore.user"
+            :is-spectating="isSpectating"
             v-if="channel"
         />
 
