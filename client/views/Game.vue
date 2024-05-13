@@ -2,7 +2,10 @@
     <FullscreenLoader v-if="loading" />
     <div
         v-if="!loading && render"
-        class="min-h-screen w-full rd-bg-pattern game"
+        :class="{
+            'min-h-screen w-full rd-bg-pattern game': true,
+            turn: isMyTurn,
+        }"
     >
         <div class="fixed left-5 top-5">
             <Logo class="w-[70px] md:w-[150px]" v-if="!rung" />
@@ -1231,6 +1234,7 @@ const isSenior = (user: RoomUser) => {
 };
 
 const turnPos = ref(0);
+const isMyTurn = computed(() => turnPos.value == me.value?.position);
 
 const cardsOnTable = ref({
     1: "",
@@ -1294,7 +1298,7 @@ export const scoreSpan = (c: string) =>
 </script>
 
 <style lang="scss">
-.game {
+.game.turn {
     animation: turn 1s ease-in infinite;
 }
 
