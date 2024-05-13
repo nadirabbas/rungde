@@ -94,8 +94,8 @@ class RoomsController extends Controller
                         $teammatePosition = $teammatePosition > 4 ? $teammatePosition - 4 : $teammatePosition;
                         $teammate = $participants->where('position', $teammatePosition)->first();
 
-                        $isSelfWinner = $participant->user_id === $delayedUpdateData('last_winner_id');
-                        $isTeammateWinner = $teammate->user_id === $delayedUpdateData('last_winner_id');
+                        $isSelfWinner = $participant->user_id === $delayedUpdateData['last_winner_id'];
+                        $isTeammateWinner = $teammate->user_id === $delayedUpdateData['last_winner_id'];
 
                         $isWinner = $isSelfWinner || $isTeammateWinner;
 
