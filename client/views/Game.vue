@@ -913,7 +913,6 @@ const loadAssets = () => {
     );
 };
 
-const isMyTurn = computed(() => turnPos.value == me.value?.position);
 const hasTurnRungCard = computed(() =>
     cards.value.some((c) => c[0] === turnRung.value)
 );
