@@ -29,7 +29,7 @@ return [
     * to add your own middlewares to this list or change any of the existing middleware.
     */
     'middleware' => [
-        Illuminate\Cookie\Middleware\EncryptCookies::class,
+        // Illuminate\Cookie\Middleware\EncryptCookies::class,
         Illuminate\Session\Middleware\StartSession::class,
         Spatie\WebTinker\Http\Middleware\Authorize::class,
     ],
