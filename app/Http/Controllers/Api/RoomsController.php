@@ -67,7 +67,7 @@ class RoomsController extends Controller
         }
 
         try {
-            if ($request->input('ended_at')) {
+            if (isset($delayedUpdateData['ended_at']) && $delayedUpdateData['ended_at']) {
                 $winner_1_id = null;
                 $winner_2_id = null;
                 $loser_1_id = null;

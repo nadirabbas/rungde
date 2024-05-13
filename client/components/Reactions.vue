@@ -196,11 +196,7 @@ const sendReaction = async (reaction: string) => {
         channel.value.trigger("client-reaction", {
             reaction,
             user_id: user.value.id,
-            username:
-                user.value.username +
-                user.value.username +
-                user.value.username +
-                user.value.username,
+            username: user.value.username,
             isSpec: isSpectating.value,
         });
     } catch (error) {

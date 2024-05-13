@@ -15,7 +15,7 @@ class UsersController extends Controller
         $user = $request->user();
 
         return [
-            'user' => $user->load('room')
+            'user' => $user->load('room')->load('roomSpectator')
         ];
     }
 
