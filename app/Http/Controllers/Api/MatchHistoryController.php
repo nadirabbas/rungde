@@ -42,7 +42,7 @@ class MatchHistoryController extends Controller
             'tricks' => 'sirs'
         ][$request->input('sort_by')];
 
-        $leaderboard = User::orderBy($sortBy, 'desc')->paginate(50);
+        $leaderboard = User::orderBy($sortBy, 'desc')->paginate(10);
         return $leaderboard;
     }
 }
