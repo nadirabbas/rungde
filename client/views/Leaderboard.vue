@@ -3,10 +3,10 @@
         <MountedTeleport to="#title">Leaderboard</MountedTeleport>
         <MountedTeleport to="#filters">
             <div class="flex flex-col">
-                <span class="text-white"> Ranked by </span>
+                <span class="text-white text-xs mb-0.5"> Ranked by </span>
                 <select
                     v-model="sortBy"
-                    class="focus:outline-none p-1 bg-white border-none rounded"
+                    class="focus:outline-none p-0.5 bg-white border-none text-sm rounded"
                 >
                     <option
                         v-for="opt in sortByOptions"

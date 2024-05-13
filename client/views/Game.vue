@@ -1,6 +1,9 @@
 <template>
     <FullscreenLoader v-if="loading" />
-    <div v-if="!loading && render" class="min-h-screen w-full rd-bg-pattern">
+    <div
+        v-if="!loading && render"
+        class="min-h-screen w-full rd-bg-pattern game"
+    >
         <div class="fixed left-5 top-5">
             <Logo class="w-[70px] md:w-[150px]" v-if="!rung" />
             <span class="flex bg-white px-2 py-1 rounded" v-else>
@@ -1289,3 +1292,23 @@ const copyCode = () => {
 export const scoreSpan = (c: string) =>
     `${c} w-8 h-8 flex items-center justify-center text-white font-medium`;
 </script>
+
+<style lang="scss">
+.game {
+    animation: turn 1s ease-in infinite;
+}
+
+$c: rgba(255, 255, 255, 0.35);
+
+@keyframes turn {
+    0% {
+        box-shadow: inset 0 0 10px 2px $c;
+    }
+    50% {
+        box-shadow: inset 0 0 20px 2px $c;
+    }
+    100% {
+        box-shadow: inset 0 0 10px 2px $c;
+    }
+}
+</style>

@@ -23,11 +23,12 @@
                 <span
                     v-if="!slider"
                     :class="{
-                        'w-4 lg:w-5 aspect-square block border bg-white': true,
+                        'w-4 lg:w-5 aspect-square block border ': true,
                         'flex items-center justify-center ': checked,
+                        'bg-white': !checked,
 
                         // Default
-                        'border-green-500 bg-green-600': checked,
+                        'border-green-600 bg-green-600': checked,
                         rounded: !legacy,
                         'border-gray-300 hover:bg-link-water-2':
                             !legacy && !checked,
