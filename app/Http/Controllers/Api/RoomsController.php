@@ -66,87 +66,89 @@ class RoomsController extends Controller
             collect($request->room_users)->each(fn ($users, $position) => $room->participants()->where('position', $position)->first()?->update($users));
         }
 
-        try {
-            if (isset($delayedUpdateData['ended_at']) && $delayedUpdateData['ended_at']) {
-                $winner_1_id = null;
-                $winner_2_id = null;
-                $loser_1_id = null;
-                $loser_2_id = null;
-                $is_goon_court = false;
-                $is_court = false;
-                $winner_score = 0;
-                $loser_score = 0;
-
-                $participants = $room->participants()->get();
-
-                foreach ($participants as $participant) {
-                    $data = [
-                        'games_played' => $participant->user->games_played + 1,
-                        'sirs' => $participant->sir_count + $participant->user->sirs
-                    ];
-
-                    $teammatePosition = $participant->position + 2;
-                    $teammatePosition = $teammatePosition > 4 ? $teammatePosition - 4 : $teammatePosition;
-                    $teammate = $participants->where('position', $teammatePosition)->first();
-
-                    $isSelfWinner = $participant->user_id === $request->input('last_winner_id');
-                    $isTeammateWinner = $teammate->user_id === $request->input('last_winner_id');
-
-                    $isWinner = $isSelfWinner || $isTeammateWinner;
-
-                    if ($isSelfWinner) {
-                        $winner_1_id = $participant->user_id;
-                    } else if ($isTeammateWinner) {
-                        $winner_2_id = $participant->user_id;
-                    } else {
-                        $loser_1_id = $loser_1_id ?: $participant->user_id;
-                        $loser_2_id = $loser_2_id ?: $teammate->user_id;
-                    }
-
-                    if ($isWinner) {
-                        $winner_score += $participant->sir_count;
-                    } else {
-                        $loser_score += $participant->sir_count;
-                    }
-
-                    if ($isWinner) {
-                        $data['games_won'] = $participant->user->games_won + 1;
-                        $ourScore = $participant->sir_count + $teammate->sir_count;
-                        $didWeSelectRung = $room->rung_selector === $participant->position || $room->rung_selector === $teammatePosition;
-
-                        if ($ourScore === 13) {
-                            if ($didWeSelectRung) {
-                                $is_court = true;
-                                $data['courts'] = $participant->user->courts + 1;
-                            } else {
-                                $is_goon_court = true;
-                                $data['goon_courts'] = $participant->user->goon_courts + 1;
-                            }
-                        }
-                    }
-
-                    $participant->user->update($data);
-                }
-
-                MatchHistory::create([
-                    'winner_1_id' => $winner_1_id,
-                    'winner_2_id' => $winner_2_id,
-                    'loser_1_id' => $loser_1_id,
-                    'loser_2_id' => $loser_2_id,
-                    'is_court' => $is_court,
-                    'is_goon_court' => $is_goon_court,
-                    'winner_score' => $winner_score,
-                    'loser_score' => $loser_score,
-                ]);
-            }
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            //throw $th;
-        }
 
         event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
         if ($delayedUpdateData && count($delayedUpdateData)) {
             sleep(2);
+
+            try {
+                if (isset($delayedUpdateData['ended_at']) && $delayedUpdateData['ended_at']) {
+                    $winner_1_id = null;
+                    $winner_2_id = null;
+                    $loser_1_id = null;
+                    $loser_2_id = null;
+                    $is_goon_court = false;
+                    $is_court = false;
+                    $winner_score = 0;
+                    $loser_score = 0;
+
+                    $participants = $room->participants()->get();
+
+                    foreach ($participants as $participant) {
+                        $data = [
+                            'games_played' => $participant->user->games_played + 1,
+                            'sirs' => $participant->sir_count + $participant->user->sirs
+                        ];
+
+                        $teammatePosition = $participant->position + 2;
+                        $teammatePosition = $teammatePosition > 4 ? $teammatePosition - 4 : $teammatePosition;
+                        $teammate = $participants->where('position', $teammatePosition)->first();
+
+                        $isSelfWinner = $participant->user_id === $delayedUpdateData('last_winner_id');
+                        $isTeammateWinner = $teammate->user_id === $delayedUpdateData('last_winner_id');
+
+                        $isWinner = $isSelfWinner || $isTeammateWinner;
+
+                        if ($isSelfWinner) {
+                            $winner_1_id = $participant->user_id;
+                        } else if ($isTeammateWinner) {
+                            $winner_2_id = $participant->user_id;
+                        } else {
+                            $loser_1_id = $loser_1_id ?: $participant->user_id;
+                            $loser_2_id = $loser_2_id ?: $teammate->user_id;
+                        }
+
+                        if ($isWinner) {
+                            $winner_score += $participant->sir_count;
+                        } else {
+                            $loser_score += $participant->sir_count;
+                        }
+
+                        if ($isWinner) {
+                            $data['games_won'] = $participant->user->games_won + 1;
+                            $ourScore = $participant->sir_count + $teammate->sir_count;
+                            $didWeSelectRung = $room->rung_selector === $participant->position || $room->rung_selector === $teammatePosition;
+
+                            if ($ourScore === 13) {
+                                if ($didWeSelectRung) {
+                                    $is_court = true;
+                                    $data['courts'] = $participant->user->courts + 1;
+                                } else {
+                                    $is_goon_court = true;
+                                    $data['goon_courts'] = $participant->user->goon_courts + 1;
+                                }
+                            }
+                        }
+
+                        $participant->user->update($data);
+                    }
+
+                    MatchHistory::create([
+                        'winner_1_id' => $winner_1_id,
+                        'winner_2_id' => $winner_2_id,
+                        'loser_1_id' => $loser_1_id,
+                        'loser_2_id' => $loser_2_id,
+                        'is_court' => $is_court,
+                        'is_goon_court' => $is_goon_court,
+                        'winner_score' => $winner_score,
+                        'loser_score' => $loser_score,
+                    ]);
+                }
+            } catch (\Throwable $th) {
+                Log::info($th->getMessage());
+                //throw $th;
+            }
+
             $room->update($delayedUpdateData);
             collect($delayedUpdateData['room_users'])->each(fn ($users, $position) => $room->participants()->where('position', $position)->first()?->update($users));
 
