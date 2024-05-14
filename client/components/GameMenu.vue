@@ -15,6 +15,44 @@
             </button>
 
             <button
+                :class="
+                    buttonClass(
+                        `rd-bg text-white mb-2 ${
+                            muteMap[user.user_id] && 'opacity-50'
+                        }`
+                    )
+                "
+                @click="toggleMute"
+                v-if="!isSelf"
+            >
+                <MutableIcon :muted="muteMap[user.user_id]">
+                    <MicrophoneIcon class="w-4" />
+                </MutableIcon>
+                <span class="leading-none">{{
+                    muteMap[user.user_id] ? "User muted" : "Mute"
+                }}</span>
+            </button>
+
+            <button
+                :class="
+                    buttonClass(
+                        `rd-bg text-white mb-2 ${
+                            muteEmojiMap[user.user_id] && 'opacity-50'
+                        }`
+                    )
+                "
+                @click="toggleEmojiMute"
+                v-if="!isSelf"
+            >
+                <MutableIcon :muted="muteEmojiMap[user.user_id]">
+                    <EmojiHappyIcon class="w-4" />
+                </MutableIcon>
+                <span class="leading-none">{{
+                    muteEmojiMap[user.user_id] ? "Emojis muted" : "Mute emojis"
+                }}</span>
+            </button>
+
+            <button
                 :class="buttonClass('rd-bg mb-2 text-white')"
                 @click="viewProfile"
             >
@@ -52,7 +90,7 @@
 
 <script lang="ts">
 export const buttonClass = (c: string) =>
-    `py-2 shadow-xl px-8 rounded text-base ${c} w-full`;
+    `py-3 shadow-xl leading-none px-8 rounded text-base flex items-center justify-center gap-2 ${c} w-full`;
 </script>
 
 <script setup lang="ts">
@@ -64,8 +102,11 @@ import Modal from "./Modal.vue";
 import ProfileModal from "../components/ProfileModal.vue";
 import copy from "copy-to-clipboard";
 import { useToast } from "../composables/useToast";
+import { useBus } from "../composables/useBus";
+import MutableIcon from "./MutableIcon.vue";
+import { EmojiHappyIcon, MicrophoneIcon } from "heroicons-vue3/solid";
 
-const emit = defineEmits(["close", "restart"]);
+const emit = defineEmits(["close", "restart", "update:muteEmojiMap"]);
 
 const props = defineProps({
     user: {
@@ -80,9 +121,31 @@ const props = defineProps({
         required: true,
     },
     room: null,
+    muteMap: {
+        type: Object as PropType<{ [key: string]: boolean }>,
+        required: true,
+    },
+    muteEmojiMap: {
+        type: Object as PropType<{ [key: string]: boolean }>,
+        required: true,
+    },
 });
 
-const { user } = toRefs(props);
+const { user, muteMap, muteEmojiMap } = toRefs(props);
+
+const bus = useBus();
+const toggleMute = () => {
+    bus.emit(
+        muteMap.value[user.value.user_id] ? "unmute-user" : "mute-user",
+        user.value.user_id
+    );
+};
+const toggleEmojiMute = () => {
+    emit("update:muteEmojiMap", {
+        ...muteEmojiMap.value,
+        [user.value.user_id]: !muteEmojiMap.value[user.value.user_id],
+    });
+};
 
 const loading = ref(false);
 

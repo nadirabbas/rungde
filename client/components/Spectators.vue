@@ -47,7 +47,7 @@
                                         `${
                                             muteEmojiMap[s.user.id] &&
                                             'opacity-50'
-                                        }`
+                                        } text-[#222] bg-white`
                                     )
                                 "
                             >
@@ -60,7 +60,9 @@
                                 @click="toggleMute(s.user.id)"
                                 :class="
                                     spectatorActionClass(
-                                        `${muteMap[s.user.id] && 'opacity-50'}`
+                                        `${
+                                            muteMap[s.user.id] && 'opacity-50'
+                                        } text-[#222] bg-white`
                                     )
                                 "
                             >
@@ -73,7 +75,9 @@
                         <button
                             @click="kickSpectator(s.id)"
                             v-if="room.user_id == authStore.user.id"
-                            :class="spectatorActionClass()"
+                            :class="
+                                spectatorActionClass('text-white bg-red-500')
+                            "
                         >
                             <XIcon class="w-5" />
                         </button>
@@ -99,8 +103,7 @@ import Avatar from "./Avatar.vue";
 import { useBus } from "../composables/useBus";
 import MutableIcon from "./MutableIcon.vue";
 
-const spectatorActionClass = (c) =>
-    `${c} text-[#222] bg-white p-1.5 rounded-full`;
+const spectatorActionClass = (c) => `${c} p-1.5 rounded-full`;
 
 const isOpen = ref(false);
 const authStore = useAuthStore();

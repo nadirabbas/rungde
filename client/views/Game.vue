@@ -312,6 +312,8 @@
             @close="openMenuFor = null"
             :restart-fn="resetRoom"
             :model-value="!!openMenuFor"
+            :mute-map="muteMap"
+            v-model:mute-emoji-map="muteEmojiMap"
             :room="room"
         />
 
