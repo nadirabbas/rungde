@@ -7,7 +7,7 @@
             v-if="modelValue"
         >
             <div
-                :class="`bg-white rounded min-w-[30vw] flex flex-col items-center text-2xl max-h-[95vh] overflow-y-auto ${
+                :class="`bg-white relative rounded min-w-[30vw] flex flex-col items-center text-2xl max-h-[95vh] overflow-y-auto ${
                     bodyClass || 'p-5'
                 }`"
             >

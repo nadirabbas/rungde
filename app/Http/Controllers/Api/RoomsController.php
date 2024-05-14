@@ -193,7 +193,7 @@ class RoomsController extends Controller
         ];
     }
 
-    protected function joinRoom(Room $room, User $user, $spectate = false)
+    protected function joinRoom(Room $room, User $user, $spectate = false, $preferredPosition = null)
     {
         $fn = fn () => event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
 
@@ -210,20 +210,24 @@ class RoomsController extends Controller
             return $spectator;
         }
 
-        // get availabe position
-        $position = $room->participants()->pluck('position')->toArray();
-        $position = array_diff([1, 2, 3, 4], $position);
-        $position = array_values($position);
+        $position = $preferredPosition;
 
-        if (!count($position)) {
-            // Room full, add as spectator
-            return false;
+        // get availabe position
+        if (!$position) {
+            $position = $room->participants()->pluck('position')->toArray();
+            $position = array_diff([1, 2, 3, 4], $position);
+            $position = array_values($position);
+            if (!count($position)) {
+                // Room full, add as spectator
+                return false;
+            }
+            $position = $position[0];
         }
 
         $roomUser = $room->participants()->create([
             'room_id' => $room->id,
             'user_id' => $user->id,
-            'position' => $position[0]
+            'position' => $position
         ]);
 
         $fn();
@@ -363,5 +367,64 @@ class RoomsController extends Controller
 
         event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
         event(new RoomToastEvent($room, "{$user->username} swapped places with {$spectator->user->username}"));
+    }
+
+    public function switchToSpectator(Request $request)
+    {
+        $user = $request->user();
+        if (!$user->room) {
+            return response()->json([
+                'message' => 'Not in room'
+            ], 403);
+        }
+        $room = $user->room;
+
+        $spectator = $room->spectators()->create([
+            'room_id' => $room->id,
+            'user_id' => $user->id
+        ]);
+
+        $user->roomUser->delete();
+
+        $room->reset();
+
+        event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
+        event(new RoomToastEvent($room, "{$user->username} switched to spectator"));
+
+        return [
+            'message' => 'You are now a spectator'
+        ];
+    }
+
+    public function switchToPlayer(Request $request)
+    {
+        $request->validate([
+            'position' => 'required|numeric'
+        ]);
+
+
+        $user = $request->user();
+        if (!$user->roomSpectator) {
+            return response()->json([
+                'message' => 'Not a spectator'
+            ], 403);
+        }
+        $room = $user->roomSpectator->room;
+
+        $userWithPos = $room->participants()->where('position', $request->position)->first();
+        if ($userWithPos) {
+            return response()->json([
+                'message' => 'Position already taken'
+            ], 422);
+        }
+
+        $user->roomSpectator->delete();
+        $this->joinRoom($room, $user, false, $request->position);
+
+        event(new RoomToastEvent($room, "{$user->username} joined the game"));
+
+        return [
+            'message' => 'You are now a room user'
+        ];
     }
 }

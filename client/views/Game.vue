@@ -42,7 +42,8 @@
             :room="room"
             is-self
             :user-id="authStore.user.id"
-            is-spectating
+            is-spectator-card
+            :is-spectating="isSpectating"
             v-model:mute-map="muteMap"
             v-model:mute-emoji-map="muteEmojiMap"
             v-if="isSpectating"
@@ -51,6 +52,7 @@
         <UserCard
             :senior="isSenior(me)"
             :name="me.user.username"
+            :position="me.position"
             class="fixed right-5 bottom-5"
             friend
             :active="turnPos && turnPos == me.position && 'left'"
@@ -67,11 +69,13 @@
             :hide-voice-chat="isSpectating"
             v-model:mute-map="muteMap"
             v-model:mute-emoji-map="muteEmojiMap"
+            :is-spectating="isSpectating"
         />
 
         <UserCard
             :senior="isSenior(teammate)"
             :name="teammate?.user.username"
+            :position="teammate?.position || 3"
             friend
             class="fixed left-1/2 -translate-x-1/2 top-5"
             :active="turnPos && turnPos == teammate?.position && 'left'"
@@ -83,11 +87,13 @@
             :user-id="teammate?.user.id"
             :stream-id="teammate?.stream_id"
             is-teammate
+            :is-spectating="isSpectating"
         />
 
         <UserCard
             :senior="isSenior(rightOpp)"
             :name="rightOpp?.user.username"
+            :position="rightOpp?.position || 2"
             class="fixed top-1/2 -translate-y-1/2 right-5"
             :active="turnPos && turnPos == rightOpp?.position && 'left'"
             :show-menu="!!rightOpp"
@@ -97,11 +103,13 @@
             :room="room"
             :user-id="rightOpp?.user.id"
             :stream-id="rightOpp?.stream_id"
+            :is-spectating="isSpectating"
         />
 
         <UserCard
             :senior="isSenior(leftOpp)"
             :name="leftOpp?.user.username"
+            :position="leftOpp?.position || 4"
             class="fixed top-1/2 -translate-y-1/2 left-5"
             :active="turnPos && turnPos == leftOpp?.position && 'right'"
             :show-menu="!!leftOpp"
@@ -112,6 +120,7 @@
             is-left-opp
             :user-id="leftOpp?.user.id"
             :stream-id="leftOpp?.stream_id"
+            :is-spectating="isSpectating"
         />
 
         <div class="fixed top-5 right-5 flex flex-col items-end justify-end">
@@ -352,6 +361,7 @@
             v-model:mute-map="muteMap"
             v-model:mute-emoji-map="muteEmojiMap"
             :channel="channel"
+            :is-spectating="isSpectating"
             v-if="channel"
         />
     </div>

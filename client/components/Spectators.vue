@@ -3,9 +3,8 @@
         <button
             :class="{
                 'p-1 rounded-full bg-yellow relative text-[#222]': true,
-                'opacity-50': !room.spectators.length,
             }"
-            @click="room.spectators.length && (isOpen = !isOpen)"
+            @click="isOpen = !isOpen"
         >
             <EyeIcon class="w-6 h-6" />
             <span
@@ -28,7 +27,7 @@
             "
             :subtitle="
                 room.user_id == authStore.user.id && !requestedSwapFor
-                    ? 'You can mute for yourself only, not for all.'
+                    ? 'You can mute for yourself only, not for everyone.'
                     : ''
             "
         >
@@ -51,7 +50,32 @@
                     v-if="requestedSwapFor || incomingSwapRequestBy"
                 />
 
-                <template v-else>
+                <div v-else>
+                    <div
+                        class="absolute top-4 right-5 flex items-center justify-center"
+                        v-if="
+                            room.user_id != authStore.user.id && !isSpectating
+                        "
+                    >
+                        <button
+                            class="text-sm bg-green-600 text-white p-1 rounded-full px-3"
+                            @click="switchToSpectator"
+                        >
+                            {{
+                                switching
+                                    ? "Please wait..."
+                                    : "Switch to Spectator"
+                            }}
+                        </button>
+                    </div>
+
+                    <div
+                        v-if="!room.spectators.length"
+                        class="flex items-center justify-center min-h-[100px] text-sm text-gray-600"
+                    >
+                        No spectators
+                    </div>
+
                     <div
                         v-for="s in room.spectators"
                         class="rd-bg p-2 rounded mb-2 flex justify-between"
@@ -66,6 +90,7 @@
                         <div class="flex items-center gap-2">
                             <template v-if="s.user.id != authStore.user.id">
                                 <button
+                                    v-if="!isSpectating"
                                     @click="requestedSwapFor = s.user"
                                     :class="
                                         spectatorActionClass(
@@ -135,7 +160,7 @@
                             </button>
                         </div>
                     </div>
-                </template>
+                </div>
             </div>
         </Modal>
     </div>
@@ -166,6 +191,7 @@ const requestedSwapFor = ref();
 const incomingSwapRequestBy = ref();
 
 const isOpen = ref(false);
+const switching = ref(false);
 const authStore = useAuthStore();
 
 const props = defineProps({
@@ -185,6 +211,7 @@ const props = defineProps({
         type: Object as PropType<Channel>,
         required: true,
     },
+    isSpectating: Boolean,
 });
 
 const { muteMap, muteEmojiMap, channel } = toRefs(props);
@@ -256,4 +283,14 @@ onUnmounted(() => {
     channel.value.unbind("client-swap");
     channel.value.unbind("client-swap-deny");
 });
+
+const switchToSpectator = async () => {
+    switching.value = true;
+    try {
+        await api.post("/room/switch-to-spectator");
+    } catch (error) {
+        console.error(error);
+    }
+    switching.value = false;
+};
 </script>

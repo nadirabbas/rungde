@@ -6,7 +6,7 @@
                 <template v-if="!isRequested">
                     {{
                         requestedFor
-                            ? `Switch places with @${requestedFor.username}`
+                            ? `Switch places with @${requestedFor.username}?`
                             : `@${incomingRequestBy.username} wants to switch places.`
                     }}
                 </template>

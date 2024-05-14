@@ -4,19 +4,12 @@
             'flex gap-1 user-card': true,
             'flex-row-reverse': !isLeftOpp,
             'items-end': isSelf,
-            'flex-col justify-center items-center': isTeammate || isSpectating,
-            'flex-col-reverse': isSpectating,
+            'flex-col justify-center items-center':
+                isTeammate || isSpectatorCard,
+            'flex-col-reverse': isSpectatorCard,
             'items-center': isLeftOpp || (!isSelf && !isTeammate && !isLeftOpp),
-            // '-bottom-2 -translate-x-[103.5%]': isSelf && !score,
-            //     '-translate-x-[103.5%] -top-3': isTeammate && !score,
-
-            //     '-bottom-2 -translate-x-[120%]': isSelf && score,
-            //     '-top-3 -translate-x-[120%]': isTeammate && score,
-
-            //     'translate-x-[103.5%] right-0': isLeftOpp,
-            //     '-translate-x-[103.5%] left-0':
-            //         !isSelf && !isTeammate && !isLeftOpp,
         }"
+        @click="!name && isSpectating && switchToPlayer()"
     >
         <div
             :class="{
@@ -28,22 +21,25 @@
                 :class="{
                     'py-1 rounded-full text-sm flex items-center justify-center transition border-[3px]': true,
                     ' bg-green-600': friend && name,
-                    ' bg-red-600': !friend && !isSpectating && name,
-                    'bg-gray-500 border-gray-500': !name,
+                    ' bg-red-600': !friend && !isSpectatorCard && name,
+                    'bg-gray-500 border-gray-500': !name && !isSpectating,
+                    'bg-yellow font-bold border-yellow': !name && isSpectating,
                     'border-green-600': friend && !senior && name,
                     'border-red-600':
-                        !friend && !senior && name && !isSpectating,
-                    'user-card-border': active && !senior && !isSpectating,
+                        !friend && !senior && name && !isSpectatorCard,
+                    'user-card-border': active && !senior && !isSpectatorCard,
                     'user-card-border-senior':
-                        active && senior && !isSpectating,
+                        active && senior && !isSpectatorCard,
                     'px-3': !showMenu,
                     'pr-2': showMenu,
                     'pl-3': showMenu && !score,
                     'pl-1': score,
-                    'text-white': !senior && !isSpectating,
+                    'text-white':
+                        !senior && !isSpectatorCard && (!isSpectating || name),
                     'bg-yellow font-bold text-black border-yellow': senior,
                     'min-w-32 min-h-10': large,
-                    'border-white bg-white text-black font-bold': isSpectating,
+                    'border-white bg-white text-black font-bold':
+                        isSpectatorCard,
                 }"
             >
                 <UserCardScore
@@ -53,7 +49,10 @@
                 />
 
                 <span>
-                    {{ name || "Waiting for user..." }}
+                    {{
+                        name ||
+                        (isSpectating ? "Join seat" : "Waiting for user...")
+                    }}
                 </span>
 
                 <ChevronDownIcon class="ml-1 w-4" v-if="showMenu" />
@@ -99,7 +98,7 @@
         <div
             v-if="reactionSent"
             :class="{
-                '-mb-1': isSelf && !isSpectating,
+                '-mb-1': isSelf && !isSpectatorCard,
             }"
         >
             <Vue3Lottie
@@ -149,6 +148,7 @@ import { ClockIcon } from "heroicons-vue3/outline";
 import { useBus } from "../composables/useBus";
 import { Vue3Lottie } from "vue3-lottie";
 import { useSoundSprite } from "../composables/useSoundSprite";
+import { api } from "../api";
 
 const { play } = useSoundSprite();
 
@@ -156,6 +156,7 @@ const generalStore = useGeneralStore();
 
 const props = defineProps({
     name: String,
+    position: Number,
     friend: Boolean,
     active: null,
     showMenu: Boolean,
@@ -172,12 +173,13 @@ const props = defineProps({
     large: Boolean,
     hideEmoji: Boolean,
     hideVoiceChat: Boolean,
+    isSpectatorCard: Boolean,
     isSpectating: Boolean,
     muteMap: null,
     muteEmojiMap: null,
 });
 
-const { userId } = toRefs(props);
+const { userId, position } = toRefs(props);
 
 const isSpeaking = ref(false);
 const render = ref(true);
@@ -207,6 +209,18 @@ bus.on("reaction-sent", (reaction: any) => {
 const openEmoji = () => {
     if (reactionSent.value) return;
     bus.emit("open-reactions");
+};
+
+const switchToPlayer = async () => {
+    generalStore.loading = true;
+    try {
+        await api.post("/room/switch-to-player", {
+            position: position?.value,
+        });
+    } catch (error) {
+        console.error(error);
+    }
+    generalStore.loading = false;
 };
 </script>
 

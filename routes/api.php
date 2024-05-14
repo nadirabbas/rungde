@@ -31,6 +31,8 @@ Route::post('/verify-voice-token', [VoiceTokensController::class, 'verifyVoiceTo
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/room/swap-places', [RoomsController::class, 'swapPlaces']);
+    Route::post('/room/switch-to-spectator', [RoomsController::class, 'switchToSpectator']);
+    Route::post('/room/switch-to-player', [RoomsController::class, 'switchToPlayer']);
     Route::get('/match-history', [MatchHistoryController::class, 'index']);
     Route::get('/leaderboard', [MatchHistoryController::class, 'leaderboard']);
 

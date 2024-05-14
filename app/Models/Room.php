@@ -77,4 +77,38 @@ class Room extends Model
             'spectators'
         ]);
     }
+
+    public function reset()
+    {
+        // same as reset room from Game.vue
+        $this->update([
+            "latest_turn" => null,
+            "latest_turn_position" => null,
+            "ended_at" => null,
+            "started_at" => null,
+            "rung" => null,
+            "rung_selector" => null,
+            "turn" => null,
+            "card_position_1" => null,
+            "card_position_2" => null,
+            "card_position_3" => null,
+            "card_position_4" => null,
+            "total_turns" => 0,
+            "folded_deck_count" => 0,
+            "turn_rung" => null,
+            "last_highest_card_position" => null,
+            "team_1_3_wins" => 0,
+            "team_2_4_wins" => 0,
+            "team_1_3_goon_courts" => 0,
+            "team_2_4_goon_courts" => 0,
+            "team_1_3_courts" => 0,
+            "team_2_4_courts" => 0,
+            "deck" => [],
+        ]);
+
+        $this->participants()->update([
+            'sir_count' => 0,
+            'cards' => []
+        ]);
+    }
 }

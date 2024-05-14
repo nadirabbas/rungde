@@ -7,8 +7,8 @@ use App\Models\Room;
 
 class RoomObserver
 {
-    public function updated(Room $room)
+    public function updating(Room $room)
     {
-        event(new RoomUpdatedEvent($room->withEventRelations()));
+        // $room->event_counter++;
     }
 }

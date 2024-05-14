@@ -11,6 +11,7 @@
             @update:mute-emoji-map="$emit('update:mute-emoji-map', $event)"
             :mute-emoji-map="muteEmojiMap"
             :channel="channel"
+            :is-spectating="isSpectating"
             v-if="channel"
         />
         <div id="c"></div>
@@ -25,6 +26,7 @@ import { Channel } from "pusher-js";
 
 const props = defineProps({
     room: null,
+    isSpectating: Boolean,
     muteMap: {
         type: Object,
         required: true,

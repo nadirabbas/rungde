@@ -29,8 +29,8 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Room::observe(RoomObserver::class);
-        RoomUser::observe(RoomUserObserver::class);
+        Room::observe(RoomObserver::class);
+        // RoomUser::observe(RoomUserObserver::class);
     }
 
     /**
