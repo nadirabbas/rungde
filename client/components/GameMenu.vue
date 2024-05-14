@@ -196,9 +196,9 @@ const kickUser = async () => {
     });
 };
 
-const restartRoom = async (resetScores = false) => {
+const restartRoom = async (resetScores = false, resetScoreOnly = false) => {
     loading.value = true;
-    await props.restartFn(resetScores);
+    await props.restartFn(resetScores, resetScoreOnly);
     emit("close");
     loading.value = false;
 };
