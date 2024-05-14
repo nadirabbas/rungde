@@ -1,92 +1,105 @@
 <template>
     <button
         :class="{
-            'flex gap-1 items-center user-card': true,
+            'flex gap-1 user-card': true,
             'flex-row-reverse': !isLeftOpp,
+            'items-end': isSelf,
+            'flex-col justify-center items-center': isTeammate || isSpectating,
+            'flex-col-reverse': isSpectating,
+            'items-center': isLeftOpp || (!isSelf && !isTeammate && !isLeftOpp),
+            // '-bottom-2 -translate-x-[103.5%]': isSelf && !score,
+            //     '-translate-x-[103.5%] -top-3': isTeammate && !score,
+
+            //     '-bottom-2 -translate-x-[120%]': isSelf && score,
+            //     '-top-3 -translate-x-[120%]': isTeammate && score,
+
+            //     'translate-x-[103.5%] right-0': isLeftOpp,
+            //     '-translate-x-[103.5%] left-0':
+            //         !isSelf && !isTeammate && !isLeftOpp,
         }"
     >
-        <span
+        <div
             :class="{
-                'py-1 rounded-full text-sm flex items-center justify-center transition border-[3px]': true,
-                ' bg-green-600': friend && name,
-                ' bg-red-600': !friend && !isSpectating && name,
-                'bg-gray-500 border-gray-500': !name,
-                'border-green-600': friend && !senior && name,
-                'border-red-600': !friend && !senior && name && !isSpectating,
-                'user-card-border': active && !senior && !isSpectating,
-                'user-card-border-senior': active && senior && !isSpectating,
-                'px-3': !showMenu,
-                'pr-2': showMenu,
-                'pl-3': showMenu && !score,
-                'pl-1': score,
-                'text-white': !senior && !isSpectating,
-                'bg-yellow font-bold text-black border-yellow': senior,
-                'min-w-32 min-h-10': large,
-                'border-white bg-white text-black font-bold': isSpectating,
+                'flex items-center gap-1': true,
+                'flex-row-reverse': !isLeftOpp,
             }"
         >
-            <UserCardScore
-                :score="scoreDiff ? `+${scoreDiff}` : score"
-                class="mr-2"
-                v-if="score"
-            />
+            <span
+                :class="{
+                    'py-1 rounded-full text-sm flex items-center justify-center transition border-[3px]': true,
+                    ' bg-green-600': friend && name,
+                    ' bg-red-600': !friend && !isSpectating && name,
+                    'bg-gray-500 border-gray-500': !name,
+                    'border-green-600': friend && !senior && name,
+                    'border-red-600':
+                        !friend && !senior && name && !isSpectating,
+                    'user-card-border': active && !senior && !isSpectating,
+                    'user-card-border-senior':
+                        active && senior && !isSpectating,
+                    'px-3': !showMenu,
+                    'pr-2': showMenu,
+                    'pl-3': showMenu && !score,
+                    'pl-1': score,
+                    'text-white': !senior && !isSpectating,
+                    'bg-yellow font-bold text-black border-yellow': senior,
+                    'min-w-32 min-h-10': large,
+                    'border-white bg-white text-black font-bold': isSpectating,
+                }"
+            >
+                <UserCardScore
+                    :score="scoreDiff ? `+${scoreDiff}` : score"
+                    class="mr-2"
+                    v-if="score"
+                />
 
-            <span>
-                {{ name || "Waiting for user..." }}
+                <span>
+                    {{ name || "Waiting for user..." }}
+                </span>
+
+                <ChevronDownIcon class="ml-1 w-4" v-if="showMenu" />
             </span>
 
-            <ChevronDownIcon class="ml-1 w-4" v-if="showMenu" />
-        </span>
+            <div
+                @click.stop
+                v-if="generalStore.hasUserInteracted"
+                class="items-center flex"
+            >
+                <AudioChat
+                    v-if="isSelf && room && userId && render && !hideVoiceChat"
+                    :participants="room.participants"
+                    :room-id="room.id"
+                    :is-self="isSelf"
+                    :user-id="userId"
+                    @reinit="reinitAudioChat"
+                />
 
-        <div
-            @click.stop
-            v-if="generalStore.hasUserInteracted"
-            class="items-center flex"
-        >
-            <AudioChat
-                v-if="isSelf && room && userId && render && !hideVoiceChat"
-                :participants="room.participants"
-                :room-id="room.id"
-                :is-self="isSelf"
-                :user-id="userId"
-                @reinit="reinitAudioChat"
-            />
-
-            <Microphone
-                v-if="render && userId"
-                :user-id="userId"
-                :is-self="isSelf"
-                :hide-for-others="!!reactionSent"
-                v-model="isSpeaking"
-                :class="{
-                    'absolute top/1-2 -translated-y-1/2': !isSelf,
-                    '-translate-x-[103.5%]': isTeammate,
-                    'translate-x-[103.5%] right-0': isLeftOpp,
-                    '-translate-x-[103.5%] left-0':
-                        !isSelf && !isTeammate && !isLeftOpp,
-                }"
-            />
+                <Microphone
+                    v-if="render && userId"
+                    :user-id="userId"
+                    :is-self="isSelf"
+                    :hide-for-others="!!reactionSent"
+                    v-model="isSpeaking"
+                    :class="{
+                        'absolute top/1-2 -translated-y-1/2': !isSelf,
+                        '-translate-x-[103.5%]': isTeammate,
+                        'translate-x-[103.5%] right-0': isLeftOpp,
+                        '-translate-x-[103.5%] left-0':
+                            !isSelf && !isTeammate && !isLeftOpp,
+                    }"
+                />
+            </div>
         </div>
 
         <div
             v-if="reactionSent"
             :class="{
-                absolute: true,
-                '-bottom-2 -translate-x-[103.5%]': isSelf && !score,
-                '-translate-x-[103.5%] -top-3': isTeammate && !score,
-
-                '-bottom-2 -translate-x-[120%]': isSelf && score,
-                '-top-3 -translate-x-[120%]': isTeammate && score,
-
-                'translate-x-[103.5%] right-0': isLeftOpp,
-                '-translate-x-[103.5%] left-0':
-                    !isSelf && !isTeammate && !isLeftOpp,
+                '-mb-1': isSelf && !isSpectating,
             }"
         >
             <Vue3Lottie
                 :animation-link="reactionSent"
-                :width="80"
-                :height="80"
+                :width="60"
+                :height="60"
                 :loop="loops"
                 @onComplete="onAnimationComplete"
             />

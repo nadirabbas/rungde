@@ -42,7 +42,6 @@
             :room="room"
             is-self
             :user-id="authStore.user.id"
-            :large="isSpectating"
             is-spectating
             v-if="isSpectating"
         />

@@ -79,6 +79,7 @@ import { api } from "../api";
 import { useMagicKeys } from "@vueuse/core";
 import { v4 as uuid } from "uuid";
 import MountedTeleport from "./MountedTeleport.vue";
+import { useSoundSprite } from "../composables/useSoundSprite";
 
 const bus = useBus();
 
@@ -171,6 +172,8 @@ const animationData = (reaction: string | number, img = false) => {
 
 const loading = ref(false);
 const isAnimationBeingPlayed = ref(false);
+const { play } = useSoundSprite();
+
 bus.on("animation-complete", (userId: any) => {
     if (userId !== user.value.id) return;
     isAnimationBeingPlayed.value = false;
@@ -231,6 +234,7 @@ onMounted(() => {
                     reaction: animationData(reaction),
                     loops: specialLoops[reaction] || 2,
                 };
+                play({ id: "reaction" });
                 return;
             }
 

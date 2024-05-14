@@ -57,9 +57,7 @@ const verifyAuth = async () => {
             const res = await api.get("/me").then((res) => res.data);
             authStore.login(res.user);
 
-            const room = res.user.room_spectator || res.user.room;
-
-            if (room?.is_ended === false && route.name !== "Game") {
+            if (res.room && route.name !== "Game") {
                 router.push({
                     name: "Game",
                 });
