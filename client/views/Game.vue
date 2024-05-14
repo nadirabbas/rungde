@@ -1298,7 +1298,7 @@ export const scoreSpan = (c: string) =>
 
 <style lang="scss">
 .game.turn {
-    animation: turn 1s ease-in infinite;
+    animation: turn 1.3s ease-out infinite;
 }
 
 $c: rgba(255, 255, 255, 0.35);
@@ -1308,7 +1308,7 @@ $c: rgba(255, 255, 255, 0.35);
         box-shadow: inset 0 0 10px 2px $c;
     }
     50% {
-        box-shadow: inset 0 0 20px 2px $c;
+        box-shadow: inset 0 0 20px 20px $c;
     }
     100% {
         box-shadow: inset 0 0 10px 2px $c;
