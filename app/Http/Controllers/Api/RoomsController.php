@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\RoomReactionEvent;
 use App\Events\RoomSpectatorEvent;
+use App\Events\RoomToastEvent;
 use App\Events\RoomUpdatedEvent;
 use App\Events\RoomUserChangedEvent;
 use App\Http\Controllers\Controller;
@@ -322,5 +323,45 @@ class RoomsController extends Controller
         return [
             'message' => 'Spectator has been kicked'
         ];
+    }
+
+    public function swapPlaces(Request $request)
+    {
+        $request->validate([
+            'spectator_id' => 'required|exists:room_spectators,user_id'
+        ]);
+
+        $user = $request->user();
+        if (!$user->room) {
+            return response()->json([
+                'message' => 'Not in room'
+            ], 403);
+        }
+        $room = $user->room;
+
+        $spectator = $room->spectators()->where('user_id', $request->spectator_id)->first();
+        if (!$spectator) {
+            return response()->json([
+                'message' => 'Spectator not found'
+            ], 404);
+        }
+
+
+        if ($room->user_id === $user->id) {
+            $room->update([
+                'user_id' => $spectator->user_id
+            ]);
+        }
+
+        $user->roomUser->update([
+            'user_id' => $spectator->user_id
+        ]);
+
+        $spectator->update([
+            'user_id' => $user->id
+        ]);
+
+        event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
+        event(new RoomToastEvent($room, "{$user->username} swapped places with {$spectator->user->username}"));
     }
 }

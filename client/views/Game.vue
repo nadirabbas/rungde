@@ -351,6 +351,8 @@
             :room="room"
             v-model:mute-map="muteMap"
             v-model:mute-emoji-map="muteEmojiMap"
+            :channel="channel"
+            v-if="channel"
         />
     </div>
 </template>
@@ -602,6 +604,8 @@ const setValues = async (r: Room, isEvent = true) => {
             spectator.value = mySpectator;
             isSpectating.value = true;
         }
+    } else {
+        isSpectating.value = false;
     }
 
     const myPos = me.value?.position || 0;
@@ -860,6 +864,9 @@ const initSocket = async () => {
         channel.value = pusher.subscribe(`private-room.${room.value?.id}`);
         channel.value.bind("userchanged", ({ roomUser }) => {
             setParticipantById(roomUser.user_id, roomUser);
+        });
+        channel.value.bind("alert", ({ msg }) => {
+            toast.error(msg);
         });
         channel.value.bind(
             "spectator-event",

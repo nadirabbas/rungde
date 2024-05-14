@@ -10,6 +10,8 @@
             :mute-map="muteMap"
             @update:mute-emoji-map="$emit('update:mute-emoji-map', $event)"
             :mute-emoji-map="muteEmojiMap"
+            :channel="channel"
+            v-if="channel"
         />
         <div id="c"></div>
         <div id="em"></div>
@@ -17,7 +19,9 @@
 </template>
 
 <script setup lang="ts">
+import { PropType } from "vue";
 import Spectators from "./Spectators.vue";
+import { Channel } from "pusher-js";
 
 const props = defineProps({
     room: null,
@@ -27,6 +31,10 @@ const props = defineProps({
     },
     muteEmojiMap: {
         type: Object,
+        required: true,
+    },
+    channel: {
+        type: Object as PropType<Channel>,
         required: true,
     },
 });

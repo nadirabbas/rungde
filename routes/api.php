@@ -30,6 +30,7 @@ Route::post('/auth/logout', [AuthController::class, 'logout']);
 Route::post('/verify-voice-token', [VoiceTokensController::class, 'verifyVoiceToken']);
 
 Route::middleware('auth:api')->group(function () {
+    Route::post('/room/swap-places', [RoomsController::class, 'swapPlaces']);
     Route::get('/match-history', [MatchHistoryController::class, 'index']);
     Route::get('/leaderboard', [MatchHistoryController::class, 'leaderboard']);
 
