@@ -81,7 +81,7 @@
                 <Microphone
                     v-if="render && userId"
                     :user-id="userId"
-                    :is-self="isSelf"
+                    :is-self="isSpectating ? isSpectatorCard : isSelf"
                     :hide-for-others="!!reactionSent"
                     v-model="isSpeaking"
                     :class="{

@@ -34,77 +34,79 @@
             />
         </div>
 
-        <UserCard
-            name="Spectating"
-            class="fixed left-1/2 -translate-x-1/2 bottom-5"
-            show-menu
-            @click="openMenu(spectator)"
-            :room="room"
-            is-self
-            :user-id="authStore.user.id"
-            is-spectator-card
-            :is-spectating="isSpectating"
-            v-model:mute-map="muteMap"
-            v-model:mute-emoji-map="muteEmojiMap"
-            v-if="isSpectating"
-        />
+        <template v-if="room">
+            <UserCard
+                name="Spectating"
+                class="fixed left-1/2 -translate-x-1/2 bottom-5"
+                show-menu
+                @click="openMenu(spectator)"
+                :room="room"
+                is-self
+                :user-id="authStore.user.id"
+                is-spectator-card
+                :is-spectating="isSpectating"
+                v-model:mute-map="muteMap"
+                v-model:mute-emoji-map="muteEmojiMap"
+                v-if="isSpectating"
+            />
 
-        <UserCard
-            :senior="isSenior(me)"
-            :name="me.user.username"
-            :position="me.position"
-            class="fixed right-5 bottom-5"
-            friend
-            :active="turnPos && turnPos == me.position && 'left'"
-            show-menu
-            @click="openMenu(me)"
-            :score="me?.sir_count"
-            :score-diff="turnPos == me?.position && sirWinDiff"
-            :room="room"
-            is-self
-            :user-id="me?.user.id"
-            :stream-id="me?.stream_id"
-            :show-clock="isTicking"
-            :hide-emoji="isSpectating"
-            :hide-voice-chat="isSpectating"
-            v-model:mute-map="muteMap"
-            v-model:mute-emoji-map="muteEmojiMap"
-            :is-spectating="isSpectating"
-        />
+            <UserCard
+                :senior="isSenior(me)"
+                :name="me.user.username"
+                :position="me.position"
+                class="fixed right-5 bottom-5"
+                friend
+                :active="turnPos && turnPos == me.position && 'left'"
+                show-menu
+                @click="openMenu(me)"
+                :score="me?.sir_count"
+                :score-diff="turnPos == me?.position && sirWinDiff"
+                :room="room"
+                is-self
+                :user-id="me?.user.id"
+                :stream-id="me?.stream_id"
+                :show-clock="isTicking"
+                :hide-emoji="isSpectating"
+                :hide-voice-chat="isSpectating"
+                v-model:mute-map="muteMap"
+                v-model:mute-emoji-map="muteEmojiMap"
+                :is-spectating="isSpectating"
+            />
 
-        <UserCard
-            :senior="isSenior(teammate)"
-            :name="teammate?.user.username"
-            :position="teammate?.position || 3"
-            friend
-            class="fixed left-1/2 -translate-x-1/2 top-5"
-            :active="turnPos && turnPos == teammate?.position && 'left'"
-            :show-menu="!!teammate"
-            @click="openMenu(teammate)"
-            :score="teammate?.sir_count"
-            :score-diff="turnPos == teammate?.position && sirWinDiff"
-            :room="room"
-            :user-id="teammate?.user.id"
-            :stream-id="teammate?.stream_id"
-            is-teammate
-            :is-spectating="isSpectating"
-        />
+            <UserCard
+                :senior="isSenior(teammate)"
+                :name="teammate?.user.username"
+                :position="teammate?.position || 3"
+                friend
+                class="fixed left-1/2 -translate-x-1/2 top-5"
+                :active="turnPos && turnPos == teammate?.position && 'left'"
+                :show-menu="!!teammate"
+                @click="openMenu(teammate)"
+                :score="teammate?.sir_count"
+                :score-diff="turnPos == teammate?.position && sirWinDiff"
+                :room="room"
+                :user-id="teammate?.user.id"
+                :stream-id="teammate?.stream_id"
+                is-teammate
+                :is-spectating="isSpectating"
+            />
 
-        <UserCard
-            :senior="isSenior(rightOpp)"
-            :name="rightOpp?.user.username"
-            :position="rightOpp?.position || 2"
-            class="fixed top-1/2 -translate-y-1/2 right-5"
-            :active="turnPos && turnPos == rightOpp?.position && 'left'"
-            :show-menu="!!rightOpp"
-            @click="openMenu(rightOpp)"
-            :score="rightOpp?.sir_count"
-            :score-diff="turnPos == rightOpp?.position && sirWinDiff"
-            :room="room"
-            :user-id="rightOpp?.user.id"
-            :stream-id="rightOpp?.stream_id"
-            :is-spectating="isSpectating"
-        />
+            <UserCard
+                :senior="isSenior(rightOpp)"
+                :name="rightOpp?.user.username"
+                :position="rightOpp?.position || 2"
+                class="fixed top-1/2 -translate-y-1/2 right-5"
+                :active="turnPos && turnPos == rightOpp?.position && 'left'"
+                :show-menu="!!rightOpp"
+                @click="openMenu(rightOpp)"
+                :score="rightOpp?.sir_count"
+                :score-diff="turnPos == rightOpp?.position && sirWinDiff"
+                :room="room"
+                :user-id="rightOpp?.user.id"
+                :stream-id="rightOpp?.stream_id"
+                :is-spectating="isSpectating"
+            />
+        </template>
 
         <UserCard
             :senior="isSenior(leftOpp)"
@@ -364,7 +366,6 @@
             v-model:mute-emoji-map="muteEmojiMap"
             :channel="channel"
             :is-spectating="isSpectating"
-            v-if="channel"
         />
     </div>
 </template>
@@ -596,8 +597,6 @@ const setValues = async (r: Room, isEvent = true) => {
         playSound({ id: "selectRung" });
     }
 
-    room.value = r;
-
     if (!cardsOnTableArray.value.length) {
         isWaitingForNextTurn.value = false;
     }
@@ -650,6 +649,8 @@ const setValues = async (r: Room, isEvent = true) => {
     if (r.turn && r.turn_rung) {
         playSound({ id: "cardPlayed" });
     }
+
+    room.value = r;
 
     if (r.turn == me.value?.position && !isSpectating.value) {
         if (!oldRoom[myTurnColumn] && r[myTurnColumn]) return;
