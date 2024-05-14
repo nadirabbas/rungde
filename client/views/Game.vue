@@ -791,13 +791,20 @@ const startTurn = () => {
 };
 
 const reseting = ref(false);
-const resetRoom = async (resetScore = false) => {
+const resetRoom = async (resetScore = false, resetScoreOnly = false) => {
     if (!isHost.value) return false;
-
-    reseting.value = true;
-
-    try {
-        await updateRoom({
+    let data = {};
+    if (resetScoreOnly) {
+        data = {
+            team_1_3_wins: 0,
+            team_2_4_wins: 0,
+            team_1_3_goon_courts: 0,
+            team_2_4_goon_courts: 0,
+            team_1_3_courts: 0,
+            team_2_4_courts: 0,
+        };
+    } else {
+        data = {
             latest_turn: null,
             latest_turn_position: null,
             ended_at: null,
@@ -838,7 +845,13 @@ const resetRoom = async (resetScore = false) => {
             team_1_3_courts: resetScore ? 0 : undefined,
             team_2_4_courts: resetScore ? 0 : undefined,
             deck: [],
-        });
+        };
+    }
+
+    reseting.value = true;
+
+    try {
+        await updateRoom(data);
     } catch (error) {
         console.error(error);
     }

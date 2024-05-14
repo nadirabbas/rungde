@@ -77,10 +77,10 @@
 
             <button
                 :class="buttonClass('rd-bg mb-2 text-white')"
-                @click="restartRoom(true)"
+                @click="restartRoom(false, true)"
                 v-if="isHost && isSelf"
             >
-                Clear scores and restart
+                Clear total score
             </button>
 
             <button
