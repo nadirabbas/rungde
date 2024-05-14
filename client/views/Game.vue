@@ -125,22 +125,23 @@
 
         <div class="fixed top-5 right-5 flex flex-col items-end justify-end">
             <button
-                class="flex items-center justify-center"
+                class="flex items-stretch justify-center"
                 @click="showTotals = true"
             >
-                <span
+                <div
                     :class="
-                        scoreSpan(
+                        scoreCont(
                             `bg-green-600 rounded mr-1.5 ${
                                 glow === true && 'glow-animation'
                             }`
                         )
                     "
-                    >{{ glow === true ? "+" + sirWinDiff : ourScore }}</span
                 >
+                    {{ glow === true ? "+" + sirWinDiff : ourScore }}
+                </div>
                 <span
                     :class="
-                        scoreSpan(
+                        scoreCont(
                             `bg-red-600 rounded ${
                                 glow === false && 'glow-animation'
                             }`
@@ -148,6 +149,19 @@
                     "
                     >{{ glow === false ? "+" + sirWinDiff : theirScore }}</span
                 >
+                <div class="flex ml-1.5 gap-[1px]">
+                    <div
+                        class="px-2 gap-1 flex items-center justify-center font-medium rounded relative bg-gray-900"
+                    >
+                        <span class="text-green-500">
+                            {{ ourTeamWins }}
+                        </span>
+                        <span class="text-white">-</span>
+                        <span class="text-red-500">
+                            {{ theirTeamWins }}
+                        </span>
+                    </div>
+                </div>
                 <ChevronDownIcon class="w-5 text-white ml-1" />
             </button>
 
@@ -1354,7 +1368,7 @@ const copyCode = () => {
 </script>
 
 <script lang="ts">
-export const scoreSpan = (c: string) =>
+export const scoreCont = (c: string) =>
     `${c} w-8 h-8 flex items-center justify-center text-white font-medium`;
 </script>
 

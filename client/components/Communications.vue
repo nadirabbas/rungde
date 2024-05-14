@@ -1,7 +1,7 @@
 <template>
     <div
         id="communications"
-        class="fixed right-36 top-5 flex items-center gap-2.5"
+        class="fixed right-48 top-5 flex items-center gap-2.5"
     >
         <div id="vc"></div>
         <Spectators

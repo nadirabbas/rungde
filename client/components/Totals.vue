@@ -13,11 +13,11 @@
             <p class="text-base mr-6">{{ t.name }}</p>
 
             <div class="flex items-center gap-4">
-                <span :class="scoreSpan('bg-green-600 rounded')">{{
+                <span :class="scoreCont('bg-green-600 rounded')">{{
                     t.our
                 }}</span>
                 <span class="scale-x-150">v</span>
-                <span :class="scoreSpan('bg-red-600 rounded')">{{
+                <span :class="scoreCont('bg-red-600 rounded')">{{
                     t.their
                 }}</span>
             </div>
@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { computed, toRefs, watch, watchEffect } from "vue";
-import { scoreSpan } from "../views/Game.vue";
+import { scoreCont } from "../views/Game.vue";
 import Modal from "./Modal.vue";
 import { useMagicKeys } from "@vueuse/core";
 const props = defineProps({
