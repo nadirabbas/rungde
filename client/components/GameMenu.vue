@@ -196,6 +196,9 @@ const restartRoom = async () => {
 };
 
 const viewUsername = ref("");
+bus.on("view-profile", (username: any) => {
+    viewUsername.value = username;
+});
 const viewProfile = () => {
     emit("close");
     viewUsername.value = user.value.user.username;

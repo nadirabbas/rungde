@@ -41,6 +41,15 @@
                     <div class="flex items-center gap-2">
                         <template v-if="s.user.id != authStore.user.id">
                             <button
+                                @click="viewProfile(s.user.username)"
+                                :class="
+                                    spectatorActionClass('text-[#222] bg-white')
+                                "
+                            >
+                                <UserIcon class="w-5" />
+                            </button>
+
+                            <button
                                 @click="toggleEmojiMute(s.user.id)"
                                 :class="
                                     spectatorActionClass(
@@ -95,6 +104,7 @@ import {
     EmojiHappyIcon,
     EyeIcon,
     MicrophoneIcon,
+    UserIcon,
     XIcon,
 } from "heroicons-vue3/solid";
 import Modal from "./Modal.vue";
@@ -126,6 +136,12 @@ const props = defineProps({
 const { muteMap, muteEmojiMap } = toRefs(props);
 
 const bus = useBus();
+
+const viewProfile = (username: string) => {
+    isOpen.value = false;
+    bus.emit("view-profile", username);
+};
+
 const toggleMute = (userId: number) => {
     bus.emit(muteMap.value[userId] ? "unmute-user" : "mute-user", userId);
 };
