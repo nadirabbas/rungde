@@ -680,6 +680,11 @@ const setValues = async (r: Room, isEvent = true) => {
             }
         }, 10 * 1000);
     }
+
+    if (cards.value.length === 1 && isMyTurn.value) {
+        clickedCard.value = cards.value[0];
+        playCard(null, cards.value[0]);
+    }
 };
 
 const isDevelopment = computed(
