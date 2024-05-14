@@ -7,7 +7,24 @@ $alpha: 1;
     font-family: "King Arthur Legend";
     src: url("../fonts/King Arthur Legend.ttf");
 }
-
+.golden-card {
+    background: radial-gradient(
+            ellipse farthest-corner at right bottom,
+            #ffe54e 0%,
+            /* #fedb37 lightened */ #ffd94e 8%,
+            /* #fdb931 lightened */ #b89d45 30%,
+            /* #9f7928 lightened */ #a9894c 40%,
+            /* #8a6e2f lightened */ transparent 80%
+        ),
+        radial-gradient(
+            ellipse farthest-corner at left top,
+            #fffff0 0%,
+            /* #ffffff lightened */ #ffffc2 8%,
+            /* #ffffac lightened */ #e5cc82 25%,
+            /* #d1b464 lightened */ #7d6e43 62.5%,
+            /* #5d4a1f lightened */ #7d6e43 100% /* #5d4a1f lightened */
+        );
+}
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap");
 

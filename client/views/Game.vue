@@ -125,44 +125,32 @@
 
         <div class="fixed top-5 right-5 flex flex-col items-end justify-end">
             <button
-                class="flex items-stretch justify-center"
+                class="flex items-stretch justify-center h-8 border border-gray-500 rounded"
                 @click="showTotals = true"
             >
-                <div
+                <span :class="scoreContSmall(`rounded-l `)">
+                    {{ ourTeamWins }}
+                </span>
+                <span
                     :class="
                         scoreCont(
-                            `bg-green-600 rounded mr-1.5 ${
-                                glow === true && 'glow-animation'
-                            }`
+                            `bg-green-600 ${glow === true && 'glow-animation'}`
                         )
                     "
                 >
                     {{ glow === true ? "+" + sirWinDiff : ourScore }}
-                </div>
+                </span>
                 <span
                     :class="
                         scoreCont(
-                            `bg-red-600 rounded ${
-                                glow === false && 'glow-animation'
-                            }`
+                            `bg-red-600  ${glow === false && 'glow-animation'}`
                         )
                     "
                     >{{ glow === false ? "+" + sirWinDiff : theirScore }}</span
                 >
-                <div class="flex ml-1.5 gap-[1px]">
-                    <div
-                        class="px-2 gap-1 flex items-center justify-center font-medium rounded relative bg-gray-900"
-                    >
-                        <span class="text-green-500">
-                            {{ ourTeamWins }}
-                        </span>
-                        <span class="text-white">-</span>
-                        <span class="text-red-500">
-                            {{ theirTeamWins }}
-                        </span>
-                    </div>
-                </div>
-                <ChevronDownIcon class="w-5 text-white ml-1" />
+                <span :class="scoreContSmall(`rounded-r`)">
+                    {{ theirTeamWins }}
+                </span>
             </button>
 
             <div id="spectator-reactions"></div>
@@ -1369,7 +1357,9 @@ const copyCode = () => {
 
 <script lang="ts">
 export const scoreCont = (c: string) =>
-    `${c} w-8 h-8 flex items-center justify-center text-white font-medium`;
+    `${c} w-8 flex items-center justify-center text-white font-medium`;
+export const scoreContSmall = (c: string) =>
+    `${c} bg-secondary bg-opacity-80 px-1.5 text-xs flex items-center justify-center text-white font-bold`;
 </script>
 
 <style lang="scss">
