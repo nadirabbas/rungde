@@ -1019,11 +1019,11 @@ const canPlayCard = (card: string) => {
         return false;
     }
 
-    if (turnRung.value) {
-        if (hasTurnRungCard.value) {
-            return card[0] === turnRung.value;
-        }
-    }
+    // if (turnRung.value) {
+    //     if (hasTurnRungCard.value) {
+    //         return card[0] === turnRung.value;
+    //     }
+    // }
 
     return true;
 };
