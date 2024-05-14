@@ -336,6 +336,7 @@
             :channel="channel"
             :user="authStore.user"
             :is-spectating="isSpectating"
+            :spectator-map="spectatorMap"
             v-if="channel"
         />
 
@@ -405,6 +406,7 @@ const showTotals = ref(false);
 
 const me = ref<RoomUser>();
 const spectator = ref<RoomUser>();
+const spectatorMap = ref<Record<string, RoomUser>>({});
 const isSpectating = ref(false);
 const clickedCard = ref<string | null>(null);
 const cards = ref<string[]>([]);
@@ -540,7 +542,7 @@ const setParticipantById = (id, user) => {
 const isTicking = ref(false);
 const isWaitingForNextTurn = ref(false);
 
-const setValues = async (r: Room) => {
+const setValues = async (r: Room, isEvent = true) => {
     const oldRoom = { ...room.value };
 
     if (oldRoom.event_counter && oldRoom.event_counter >= r.event_counter) {
@@ -550,6 +552,13 @@ const setValues = async (r: Room) => {
             oldState: oldRoom,
         });
         return;
+    }
+
+    if (!isEvent) {
+        spectatorMap.value = r.spectators.reduce((acc, s) => {
+            acc[s.user.id] = s;
+            return acc;
+        }, {});
     }
 
     if (r.participants.length === 4 && !r.started_at) {
@@ -658,7 +667,7 @@ const verifyRoom = async () => {
         const res = await api.get("/rooms/current");
         const r = res.data.room;
         dealer._drawPile = [...(r.deck || [])];
-        setValues(r);
+        setValues(r, false);
 
         await initSocket();
     } catch (err) {
@@ -839,9 +848,28 @@ const initSocket = async () => {
         channel.value.bind("userchanged", ({ roomUser }) => {
             setParticipantById(roomUser.user_id, roomUser);
         });
-        channel.value.bind("spectator-event", ({ msg }) => {
-            toast.error(msg);
-        });
+        channel.value.bind(
+            "spectator-event",
+            ({ joined, spectator, leftId }) => {
+                let spec = spectator;
+                if (leftId) {
+                    spec = spectatorMap.value[leftId];
+                    room.value!.spectators = room.value!.spectators.filter(
+                        (s) => s.user.id != leftId
+                    );
+                } else {
+                    room.value!.spectators.push(spectator);
+                    spectatorMap.value[spectator.user.id] = spectator;
+                }
+
+                toast.error(
+                    `${spec.user.username} ${
+                        joined ? "started" : "stopped"
+                    } spectating`
+                );
+                delete spectatorMap.value[leftId];
+            }
+        );
 
         channel.value.bind(
             "updated",

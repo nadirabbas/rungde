@@ -38,7 +38,7 @@
             <div class="flex flex-col gap-2 mt-2">
                 <div
                     v-for="(reaction, id) in spectatorReactions"
-                    class="flex items-center justify-between gap-2 py-1 px-3 bg-black bg-opacity-40 rounded-full"
+                    :class="spectatorActionClass()"
                     :key="id"
                 >
                     <p class="text-sm font-medium text-white">
@@ -54,6 +54,18 @@
                         :height="25"
                     />
                 </div>
+
+                <div
+                    v-for="(_, specId) in speakerMap"
+                    :class="spectatorActionClass()"
+                    :key="specId"
+                >
+                    <p class="text-sm font-medium text-white">
+                        @{{ spectatorMap[specId].user.username }}
+                    </p>
+
+                    <MicrophoneIcon class="w-4 text-white" />
+                </div>
             </div>
         </MountedTeleport>
     </div>
@@ -62,6 +74,7 @@
 <script setup lang="ts">
 import { Vue3Lottie } from "vue3-lottie";
 import { useBus } from "../composables/useBus";
+import { MicrophoneIcon } from "heroicons-vue3/solid";
 import {
     PropType,
     onMounted,
@@ -81,6 +94,9 @@ import { v4 as uuid } from "uuid";
 import MountedTeleport from "./MountedTeleport.vue";
 import { useSoundSprite } from "../composables/useSoundSprite";
 
+const spectatorActionClass = (c) =>
+    `${c} flex items-center justify-between gap-2 py-1 px-3 bg-black bg-opacity-40 rounded-full`;
+
 const bus = useBus();
 
 const props = defineProps({
@@ -97,9 +113,10 @@ const props = defineProps({
         required: true,
     },
     isSpectating: Boolean,
+    spectatorMap: Object as PropType<Record<string, any>>,
 });
 
-const { channel, user, isSpectating } = toRefs(props);
+const { channel, user, isSpectating, spectatorMap } = toRefs(props);
 
 const isOpen = ref(false);
 
@@ -220,6 +237,17 @@ const spectatorReactions = reactive({});
 const removeSpecReaction = (id) => {
     delete spectatorReactions[id];
 };
+
+const speakerMap = ref<Record<string, any>>({});
+bus.on("speaking", (userId: any) => {
+    if (!spectatorMap?.value?.[userId]) return;
+    speakerMap.value[userId] = true;
+});
+
+bus.on("quiet", (userId: any) => {
+    if (!spectatorMap?.value?.[userId]) return;
+    delete speakerMap.value[userId];
+});
 
 onMounted(() => {
     channel.value.bind(

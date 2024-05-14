@@ -201,11 +201,10 @@ class RoomsController extends Controller
                 'room_id' => $room->id,
                 'user_id' => $user->id
             ]);
-            $fn();
-
             event(new RoomSpectatorEvent(
                 $room->id,
-                "{$user->username} started spectating."
+                $spectator->load('user'),
+                true
             ));
             return $spectator;
         }
@@ -244,9 +243,10 @@ class RoomsController extends Controller
             $user->roomSpectator->delete();
             event(new RoomSpectatorEvent(
                 $user->roomSpectator->room_id,
-                "{$user->username} stopped spectating."
+                null,
+                false,
+                $user->id
             ));
-            event(new RoomUpdatedEvent($user->roomSpectator->room->fresh()->withEventRelations()));
         }
 
         return [
@@ -314,9 +314,10 @@ class RoomsController extends Controller
         $spectator->delete();
         event(new RoomSpectatorEvent(
             $room->id,
-            "{$spectator->user->username} stopped spectating."
+            null,
+            false,
+            $spectator->user_id
         ));
-        event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
 
         return [
             'message' => 'Spectator has been kicked'

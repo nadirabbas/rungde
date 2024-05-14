@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\Room;
+use App\Models\RoomSpectator;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -14,10 +15,12 @@ class RoomSpectatorEvent implements ShouldBroadcastNow
 {
   use Dispatchable, InteractsWithSockets, SerializesModels;
 
-  public function __construct(public int $roomId, public string $msg)
+  public function __construct(public int $roomId, public ?RoomSpectator $spectator = null, public ?bool $joined = true, public $leftId = null)
   {
     $this->roomId = $roomId;
-    $this->msg = $msg;
+    $this->spectator = $spectator;
+    $this->joined = $joined;
+    $this->leftId = $leftId;
   }
 
   /**
