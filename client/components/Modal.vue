@@ -13,7 +13,7 @@
             >
                 <div
                     :class="{
-                        'w-full flex justify-center items-center relative': true,
+                        'w-full flex flex-col justify-center items-center relative': true,
                         'mb-6': !loading,
                     }"
                     v-if="!hideTitle"
@@ -36,6 +36,13 @@
                 </div>
 
                 <slot v-if="!loading" />
+
+                <p
+                    v-if="subtitle"
+                    class="leading-none text-xs text-gray-500 mt-2"
+                >
+                    {{ subtitle }}
+                </p>
             </div>
         </div>
     </TransitionFade>
@@ -48,6 +55,7 @@ const emit = defineEmits(["update:modelValue", "close"]);
 
 defineProps({
     title: String,
+    subtitle: String,
     loading: Boolean,
     modelValue: Boolean,
     bodyClass: String,

@@ -864,6 +864,11 @@ const initSocket = async () => {
             ({ joined, spectator, leftId }) => {
                 let spec = spectator;
                 if (leftId) {
+                    if (leftId == authStore.user?.id) {
+                        goHome();
+                        return;
+                    }
+
                     spec = spectatorMap.value[leftId];
                     room.value!.spectators = room.value!.spectators.filter(
                         (s) => s.user.id != leftId

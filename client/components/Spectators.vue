@@ -17,7 +17,15 @@
             >
         </button>
 
-        <Modal v-model="isOpen" title="Spectators">
+        <Modal
+            v-model="isOpen"
+            title="Spectators"
+            :subtitle="
+                room.user_id == authStore.user.id
+                    ? 'You can mute for yourself only, not for all.'
+                    : ''
+            "
+        >
             <div class="w-full min-w-[60vw]">
                 <div
                     v-for="s in room.spectators"
@@ -31,31 +39,36 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <button
-                            @click="toggleEmojiMute(s.user.id)"
-                            :class="
-                                spectatorActionClass(
-                                    `${muteEmojiMap[s.user.id] && 'opacity-50'}`
-                                )
-                            "
-                        >
-                            <MutableIcon :muted="muteEmojiMap[s.user.id]">
-                                <EmojiHappyIcon class="w-5" />
-                            </MutableIcon>
-                        </button>
+                        <template v-if="s.user.id != authStore.user.id">
+                            <button
+                                @click="toggleEmojiMute(s.user.id)"
+                                :class="
+                                    spectatorActionClass(
+                                        `${
+                                            muteEmojiMap[s.user.id] &&
+                                            'opacity-50'
+                                        }`
+                                    )
+                                "
+                            >
+                                <MutableIcon :muted="muteEmojiMap[s.user.id]">
+                                    <EmojiHappyIcon class="w-5" />
+                                </MutableIcon>
+                            </button>
 
-                        <button
-                            @click="toggleMute(s.user.id)"
-                            :class="
-                                spectatorActionClass(
-                                    `${muteMap[s.user.id] && 'opacity-50'}`
-                                )
-                            "
-                        >
-                            <MutableIcon :muted="muteMap[s.user.id]">
-                                <MicrophoneIcon class="w-5" />
-                            </MutableIcon>
-                        </button>
+                            <button
+                                @click="toggleMute(s.user.id)"
+                                :class="
+                                    spectatorActionClass(
+                                        `${muteMap[s.user.id] && 'opacity-50'}`
+                                    )
+                                "
+                            >
+                                <MutableIcon :muted="muteMap[s.user.id]">
+                                    <MicrophoneIcon class="w-5" />
+                                </MutableIcon>
+                            </button>
+                        </template>
 
                         <button
                             @click="kickSpectator(s.id)"
