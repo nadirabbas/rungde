@@ -127,16 +127,15 @@
 
         <div class="fixed top-5 right-5 flex flex-col items-end justify-end">
             <button
-                class="flex items-stretch justify-center h-8 border border-gray-500 rounded"
+                class="flex items-stretch justify-center h-8 gap-2 rounded"
                 @click="showTotals = true"
             >
-                <span :class="scoreContSmall(`rounded-l `)">
-                    {{ ourTeamWins }}
-                </span>
                 <span
                     :class="
                         scoreCont(
-                            `bg-green-600 ${glow === true && 'glow-animation'}`
+                            `bg-green-600 rounded ${
+                                glow === true && 'glow-animation'
+                            }`
                         )
                     "
                 >
@@ -145,14 +144,15 @@
                 <span
                     :class="
                         scoreCont(
-                            `bg-red-600  ${glow === false && 'glow-animation'}`
+                            `bg-red-600 rounded  ${
+                                glow === false && 'glow-animation'
+                            }`
                         )
                     "
                     >{{ glow === false ? "+" + sirWinDiff : theirScore }}</span
                 >
-                <span :class="scoreContSmall(`rounded-r`)">
-                    {{ theirTeamWins }}
-                </span>
+
+                <ChevronDownIcon class="w-4 text-white" />
             </button>
 
             <div id="spectator-reactions"></div>

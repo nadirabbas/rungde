@@ -350,15 +350,16 @@ class RoomsController extends Controller
             ], 404);
         }
 
-
+        $spectatorUserId = $spectator->user_id;
         if ($room->user_id === $user->id) {
             $room->update([
-                'user_id' => $spectator->user_id
+                'user_id' => $spectatorUserId
             ]);
         }
 
+
         $user->roomUser->update([
-            'user_id' => $spectator->user_id
+            'user_id' => $spectatorUserId
         ]);
 
         $spectator->update([
@@ -372,7 +373,7 @@ class RoomsController extends Controller
             $room->id,
             null,
             false,
-            $spectator->user_id,
+            $spectatorUserId,
             false
         ));
 
