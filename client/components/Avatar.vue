@@ -2,11 +2,11 @@
     <span
         :class="{
             'rounded-full aspect-square flex items-center justify-center': true,
-            'bg-white text-secondary': dark,
-            'rd-bg text-white': !dark,
+            'rd-bg text-white': dark,
+            'bg-white text-secondary': !dark,
         }"
         :style="{
-            backgroundImage: `url(${avatar}) center / cover`,
+            background: avatar ? `url(${avatar}) center / cover` : undefined,
             width: `${width}px`,
         }"
     >

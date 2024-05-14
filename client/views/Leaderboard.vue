@@ -32,7 +32,7 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <Avatar :avatar="u.avatar" dark />
+                    <Avatar :avatar="u.avatar" />
 
                     <span class="text-base text-white">@{{ u.username }}</span>
                 </div>
