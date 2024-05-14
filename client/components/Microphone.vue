@@ -3,7 +3,7 @@
         <div class="max-h-4">
             <MountedTeleport to="#vc" :disabled="!isSelf">
                 <UseMousePressed
-                    v-if="connected && !hidden"
+                    v-if="(connected || !isSelf) && !hidden"
                     v-slot="{ pressed }"
                 >
                     <div>
@@ -105,13 +105,13 @@ const unmute = () => {
 const isSpeaking = ref(false);
 
 bus.on("speaking", (uid) => {
-    if (uid === userId.value) {
+    if (uid == userId.value) {
         isSpeaking.value = true;
     }
 });
 
 bus.on("quiet", (uid) => {
-    if (uid === userId.value) {
+    if (uid == userId.value) {
         isSpeaking.value = false;
     }
 });

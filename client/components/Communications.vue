@@ -12,6 +12,7 @@
             :mute-emoji-map="muteEmojiMap"
             :channel="channel"
             :is-spectating="isSpectating"
+            :spectator-map="spectatorMap"
             v-if="channel"
         />
         <div id="c"></div>
@@ -37,6 +38,10 @@ const props = defineProps({
     },
     channel: {
         type: Object as PropType<Channel>,
+        required: true,
+    },
+    spectatorMap: {
+        type: Object,
         required: true,
     },
 });

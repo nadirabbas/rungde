@@ -58,30 +58,11 @@
                 <ChevronDownIcon class="ml-1 w-4" v-if="showMenu" />
             </span>
 
-            <div
-                @click.stop
-                v-if="generalStore.hasUserInteracted"
-                class="items-center flex"
-            >
-                <AudioChat
-                    v-if="isSelf && room && userId && render && !hideVoiceChat"
-                    :participants="room.participants"
-                    :room-id="room.id"
-                    :is-self="isSelf"
-                    :user-id="userId"
-                    @update:mute-map="$emit('update:mute-map', $event)"
-                    :mute-map="muteMap"
-                    @update:mute-emoji-map="
-                        $emit('update:mute-emoji-map', $event)
-                    "
-                    :mute-emoji-map="muteEmojiMap"
-                    @reinit="reinitAudioChat"
-                />
-
+            <div @click.stop v-if="!isSelf" class="items-center flex">
                 <Microphone
                     v-if="render && userId"
                     :user-id="userId"
-                    :is-self="isSpectating ? isSpectatorCard : isSelf"
+                    :is-self="false"
                     :hide-for-others="!!reactionSent"
                     v-model="isSpeaking"
                     :class="{
@@ -212,7 +193,7 @@ const openEmoji = () => {
 };
 
 const switchToPlayer = async () => {
-    generalStore.loading = true;
+    // generalStore.loading = true;
     try {
         await api.post("/room/switch-to-player", {
             position: position?.value,
@@ -220,15 +201,8 @@ const switchToPlayer = async () => {
     } catch (error) {
         console.error(error);
     }
-    generalStore.loading = false;
+    // generalStore.loading = false;
 };
-
-watch(isSpectating, (val) => {
-    render.value = false;
-    nextTick(() => {
-        render.value = true;
-    });
-});
 </script>
 
 <style lang="scss">

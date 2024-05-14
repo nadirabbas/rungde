@@ -15,12 +15,13 @@ class RoomSpectatorEvent implements ShouldBroadcastNow
 {
   use Dispatchable, InteractsWithSockets, SerializesModels;
 
-  public function __construct(public int $roomId, public ?RoomSpectator $spectator = null, public ?bool $joined = true, public $leftId = null)
+  public function __construct(public int $roomId, public ?RoomSpectator $spectator = null, public ?bool $joined = true, public $leftId = null, public $alert = true)
   {
     $this->roomId = $roomId;
     $this->spectator = $spectator;
     $this->joined = $joined;
     $this->leftId = $leftId;
+    $this->alert = $alert;
   }
 
   /**

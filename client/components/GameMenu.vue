@@ -26,7 +26,7 @@
                 v-if="!isSelf"
             >
                 <MutableIcon :muted="muteMap[user.user_id]">
-                    <MicrophoneIcon class="w-4" />
+                    <VolumeUpIcon class="w-4" />
                 </MutableIcon>
                 <span class="leading-none">{{
                     muteMap[user.user_id] ? "User muted" : "Mute"
@@ -112,7 +112,11 @@ import copy from "copy-to-clipboard";
 import { useToast } from "../composables/useToast";
 import { useBus } from "../composables/useBus";
 import MutableIcon from "./MutableIcon.vue";
-import { EmojiHappyIcon, MicrophoneIcon } from "heroicons-vue3/solid";
+import {
+    EmojiHappyIcon,
+    MicrophoneIcon,
+    VolumeUpIcon,
+} from "heroicons-vue3/solid";
 
 const emit = defineEmits(["close", "restart", "update:muteEmojiMap"]);
 

@@ -366,7 +366,30 @@
             v-model:mute-emoji-map="muteEmojiMap"
             :channel="channel"
             :is-spectating="isSpectating"
+            :spectator-map="spectatorMap"
         />
+
+        <!-- Audio chat -->
+        <div
+            @click.stop
+            v-if="generalStore.hasUserInteracted"
+            class="items-center flex"
+        >
+            <AudioChat
+                :participants="room.participants"
+                :room-id="room.id"
+                is-self
+                :user-id="authStore.user.id"
+                v-model:mute-map="muteMap"
+                v-model:mute-emoji-map="muteEmojiMap"
+            />
+
+            <Microphone
+                :user-id="authStore.user.id"
+                is-self
+                v-model="isSpeaking"
+            />
+        </div>
     </div>
 </template>
 
@@ -387,6 +410,8 @@ import Card from "../components/Card.vue";
 import Button from "../components/Button.vue";
 import Totals from "../components/Totals.vue";
 import Reactions from "../components/Reactions.vue";
+import AudioChat from "../components/AudioChat.vue";
+import Microphone from "../components/Microphone.vue";
 import {
     allCards,
     getHighCardPos,
@@ -415,6 +440,7 @@ const { dealer, setDeck } = useDealer();
 const toast = useToast();
 
 const router = useRouter();
+const isSpeaking = ref(false);
 const render = ref(false);
 
 const authStore = useAuthStore();
@@ -901,10 +927,10 @@ const initSocket = async () => {
         });
         channel.value.bind(
             "spectator-event",
-            ({ joined, spectator, leftId }) => {
+            ({ joined, spectator, leftId, alert }) => {
                 let spec = spectator;
                 if (leftId) {
-                    if (leftId == authStore.user?.id) {
+                    if (leftId == authStore.user?.id && alert) {
                         goHome();
                         return;
                     }
@@ -918,11 +944,13 @@ const initSocket = async () => {
                     spectatorMap.value[spectator.user.id] = spectator;
                 }
 
-                toast.error(
-                    `${spec.user.username} ${
-                        joined ? "started" : "stopped"
-                    } spectating`
-                );
+                if (alert) {
+                    toast.error(
+                        `${spec.user.username} ${
+                            joined ? "started" : "stopped"
+                        } spectating`
+                    );
+                }
                 delete spectatorMap.value[leftId];
             }
         );

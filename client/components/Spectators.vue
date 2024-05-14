@@ -11,8 +11,8 @@
                 :class="{
                     'bg-red-500 text-white font-bold rounded-full absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center text-sm': true,
                 }"
-                v-show="room.spectators.length"
-                >{{ room.spectators.length }}</span
+                v-show="spectators.length"
+                >{{ spectators.length }}</span
             >
         </button>
 
@@ -70,14 +70,14 @@
                     </div>
 
                     <div
-                        v-if="!room.spectators.length"
+                        v-if="!spectators.length"
                         class="flex items-center justify-center min-h-[100px] text-sm text-gray-600"
                     >
                         No spectators
                     </div>
 
                     <div
-                        v-for="s in room.spectators"
+                        v-for="s in spectators"
                         class="rd-bg p-2 rounded mb-2 flex justify-between"
                     >
                         <div class="flex items-center gap-2">
@@ -142,7 +142,7 @@
                                     "
                                 >
                                     <MutableIcon :muted="muteMap[s.user.id]">
-                                        <MicrophoneIcon class="w-5" />
+                                        <VolumeUpIcon class="w-5" />
                                     </MutableIcon>
                                 </button>
                             </template>
@@ -167,14 +167,16 @@
 </template>
 
 <script setup lang="ts">
-import { PropType, onMounted, onUnmounted, ref, toRefs } from "vue";
+import { PropType, computed, onMounted, onUnmounted, ref, toRefs } from "vue";
 import { Room, RoomUser, User, useAuthStore } from "../store/authStore";
 import {
     EmojiHappyIcon,
     EyeIcon,
     MicrophoneIcon,
+    SpeakerphoneIcon,
     SwitchHorizontalIcon,
     UserIcon,
+    VolumeUpIcon,
     XIcon,
 } from "heroicons-vue3/solid";
 import Modal from "./Modal.vue";
@@ -212,9 +214,15 @@ const props = defineProps({
         required: true,
     },
     isSpectating: Boolean,
+    spectatorMap: {
+        type: Object as PropType<Record<string, RoomUser>>,
+        required: true,
+    },
 });
 
-const { muteMap, muteEmojiMap, channel } = toRefs(props);
+const { muteMap, muteEmojiMap, channel, spectatorMap } = toRefs(props);
+
+const spectators = computed(() => Object.values(spectatorMap.value));
 
 const bus = useBus();
 

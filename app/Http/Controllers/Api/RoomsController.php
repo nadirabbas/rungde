@@ -30,7 +30,7 @@ class RoomsController extends Controller
 
         if ($user->roomSpectator) {
             return [
-                'room' => $user->roomSpectator->room->withEventRelations()
+                'room' => $user->roomSpectator->room->withEventRelations()->load('spectators')
             ];
         }
 
@@ -367,6 +367,23 @@ class RoomsController extends Controller
 
         event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
         event(new RoomToastEvent($room, "{$user->username} swapped places with {$spectator->user->username}"));
+
+        event(new RoomSpectatorEvent(
+            $room->id,
+            null,
+            false,
+            $spectator->user_id,
+            false
+        ));
+
+        // user joined spectators
+        event(new RoomSpectatorEvent(
+            $room->id,
+            $spectator->fresh()->load('user'),
+            true,
+            null,
+            false
+        ));
     }
 
     public function switchToSpectator(Request $request)
@@ -390,6 +407,13 @@ class RoomsController extends Controller
 
         event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
         event(new RoomToastEvent($room, "{$user->username} switched to spectator"));
+        event(new RoomSpectatorEvent(
+            $room->id,
+            $spectator->load('user'),
+            true,
+            null,
+            false
+        ));
 
         return [
             'message' => 'You are now a spectator'
@@ -422,6 +446,13 @@ class RoomsController extends Controller
         $this->joinRoom($room, $user, false, $request->position);
 
         event(new RoomToastEvent($room, "{$user->username} joined the game"));
+        event(new RoomSpectatorEvent(
+            $room->id,
+            null,
+            false,
+            $user->id,
+            false
+        ));
 
         return [
             'message' => 'You are now a room user'
