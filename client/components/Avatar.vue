@@ -1,16 +1,16 @@
 <template>
     <span
-        class="bg-white rounded-full aspect-square flex items-center justify-center"
+        :class="{
+            'rounded-full aspect-square flex items-center justify-center': true,
+            'bg-white text-secondary': dark,
+            'rd-bg text-white': !dark,
+        }"
         :style="{
-            background: `url(${avatar}) center / cover`,
+            backgroundImage: `url(${avatar}) center / cover`,
             width: `${width}px`,
         }"
     >
-        <UserIcon
-            v-show="!avatar"
-            class="text-secondary"
-            :style="`width: ${width / 1.5}px`"
-        />
+        <UserIcon v-show="!avatar" :style="`width: ${width / 1.5}px`" />
     </span>
 </template>
 
@@ -23,5 +23,6 @@ defineProps({
         type: Number,
         default: 40,
     },
+    dark: Boolean,
 });
 </script>

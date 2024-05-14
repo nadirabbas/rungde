@@ -53,10 +53,7 @@ import { useAuthStore } from "../store/authStore";
 const props = defineProps({
     fetchHistory: {
         type: Function as PropType<
-            (pagination?: {
-                page?: number;
-                only_self?: boolean;
-            }) => Promise<any>
+            (pagination?: { page?: number; only_self?: number }) => Promise<any>
         >,
         required: true,
     },
@@ -77,7 +74,7 @@ const fetchHistory = async () => {
     try {
         const res = await fetchHistoryFn.value({
             page: page.value,
-            only_self: showOnlySelf.value,
+            only_self: showOnlySelf.value ? 1 : 0,
         });
         history.value.push(...res.data);
         totalMatches.value = res.total;
