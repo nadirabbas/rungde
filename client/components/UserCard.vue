@@ -138,7 +138,7 @@
 import { ChevronDownIcon } from "heroicons-vue3/solid";
 import { EmojiHappyIcon } from "heroicons-vue3/solid";
 import UserCardScore from "./UserCardScore.vue";
-import { PropType, nextTick, ref, toRefs } from "vue";
+import { PropType, nextTick, ref, toRefs, watch } from "vue";
 import MountedTeleport from "./MountedTeleport.vue";
 import AudioChat from "./AudioChat.vue";
 import Microphone from "./Microphone.vue";
@@ -179,7 +179,7 @@ const props = defineProps({
     muteEmojiMap: null,
 });
 
-const { userId, position } = toRefs(props);
+const { userId, position, isSpectating } = toRefs(props);
 
 const isSpeaking = ref(false);
 const render = ref(true);
@@ -222,6 +222,13 @@ const switchToPlayer = async () => {
     }
     generalStore.loading = false;
 };
+
+watch(isSpectating, (val) => {
+    render.value = false;
+    nextTick(() => {
+        render.value = true;
+    });
+});
 </script>
 
 <style lang="scss">
