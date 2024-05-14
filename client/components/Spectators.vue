@@ -32,6 +32,19 @@
 
                     <div class="flex items-center gap-2">
                         <button
+                            @click="toggleEmojiMute(s.user.id)"
+                            :class="
+                                spectatorActionClass(
+                                    `${muteEmojiMap[s.user.id] && 'opacity-50'}`
+                                )
+                            "
+                        >
+                            <MutableIcon :muted="muteEmojiMap[s.user.id]">
+                                <EmojiHappyIcon class="w-5" />
+                            </MutableIcon>
+                        </button>
+
+                        <button
                             @click="toggleMute(s.user.id)"
                             :class="
                                 spectatorActionClass(
@@ -39,10 +52,9 @@
                                 )
                             "
                         >
-                            <MicrophoneMutable
-                                class="w-4"
-                                :muted="muteMap[s.user.id]"
-                            />
+                            <MutableIcon :muted="muteMap[s.user.id]">
+                                <MicrophoneIcon class="w-5" />
+                            </MutableIcon>
                         </button>
 
                         <button
@@ -50,7 +62,7 @@
                             v-if="room.user_id == authStore.user.id"
                             :class="spectatorActionClass()"
                         >
-                            <XIcon class="w-4 h-4" />
+                            <XIcon class="w-5" />
                         </button>
                     </div>
                 </div>
@@ -62,15 +74,20 @@
 <script setup lang="ts">
 import { PropType, ref, toRefs } from "vue";
 import { Room, useAuthStore } from "../store/authStore";
-import { EyeIcon, MicrophoneIcon, XIcon } from "heroicons-vue3/solid";
+import {
+    EmojiHappyIcon,
+    EyeIcon,
+    MicrophoneIcon,
+    XIcon,
+} from "heroicons-vue3/solid";
 import Modal from "./Modal.vue";
 import { api } from "../api";
 import Avatar from "./Avatar.vue";
 import { useBus } from "../composables/useBus";
-import MicrophoneMutable from "./MicrophoneMutable.vue";
+import MutableIcon from "./MutableIcon.vue";
 
 const spectatorActionClass = (c) =>
-    `${c} text-[#222] bg-white p-1 rounded-full`;
+    `${c} text-[#222] bg-white p-1.5 rounded-full`;
 
 const isOpen = ref(false);
 const authStore = useAuthStore();
@@ -84,13 +101,24 @@ const props = defineProps({
         type: Object as PropType<Record<string, boolean>>,
         required: true,
     },
+    muteEmojiMap: {
+        type: Object as PropType<Record<string, boolean>>,
+        required: true,
+    },
 });
 
-const { muteMap } = toRefs(props);
+const { muteMap, muteEmojiMap } = toRefs(props);
 
 const bus = useBus();
 const toggleMute = (userId: number) => {
     bus.emit(muteMap.value[userId] ? "unmute-user" : "mute-user", userId);
+};
+const emit = defineEmits(["update:muteEmojiMap"]);
+const toggleEmojiMute = (userId: number) => {
+    emit("update:muteEmojiMap", {
+        ...muteEmojiMap.value,
+        [userId]: !muteEmojiMap.value[userId],
+    });
 };
 
 const spectatorsBeingKicked = ref<Record<string, boolean>>({});

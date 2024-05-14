@@ -24,13 +24,14 @@
                                 hidden: !isSpeaking && !isSelf,
                             }"
                         >
-                            <MicrophoneMutable
-                                :class="{
-                                    'w-4': !isSelf,
-                                    'w-8 lg:w-4': isSelf,
-                                }"
-                                :muted="muted && isSelf"
-                            />
+                            <MutableIcon :muted="muted && isSelf">
+                                <MicrophoneIcon
+                                    :class="{
+                                        'w-4': !isSelf,
+                                        'w-8 lg:w-4': isSelf,
+                                    }"
+                                />
+                            </MutableIcon>
 
                             <span
                                 class="hidden lg:block text-sm ml-2 font-bold"
@@ -63,7 +64,7 @@ import MountedTeleport from "./MountedTeleport.vue";
 import { useMagicKeys } from "@vueuse/core";
 import { UseMousePressed } from "@vueuse/components";
 import PropWatcher from "./PropWatcher.vue";
-import MicrophoneMutable from "./MicrophoneMutable.vue";
+import MutableIcon from "./MutableIcon.vue";
 
 const bus = useBus();
 

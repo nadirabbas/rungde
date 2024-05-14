@@ -112,11 +112,16 @@ const props = defineProps({
         type: Object as PropType<User>,
         required: true,
     },
+    muteEmojiMap: {
+        type: Object as PropType<Record<string, any>>,
+        required: true,
+    },
     isSpectating: Boolean,
     spectatorMap: Object as PropType<Record<string, any>>,
 });
 
-const { channel, user, isSpectating, spectatorMap } = toRefs(props);
+const { channel, user, isSpectating, spectatorMap, muteEmojiMap } =
+    toRefs(props);
 
 const isOpen = ref(false);
 
@@ -253,7 +258,8 @@ onMounted(() => {
     channel.value.bind(
         "client-reaction",
         ({ user_id, reaction, username, isSpec }) => {
-            if (user_id === user.value.id) return;
+            if (user_id === user.value.id || muteEmojiMap.value[user_id])
+                return;
 
             if (isSpec) {
                 const reactionId = uuid();

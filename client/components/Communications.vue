@@ -8,6 +8,8 @@
             :room="room"
             @update:mute-map="$emit('update:mute-map', $event)"
             :mute-map="muteMap"
+            @update:mute-emoji-map="$emit('update:mute-emoji-map', $event)"
+            :mute-emoji-map="muteEmojiMap"
         />
         <div id="c"></div>
         <div id="em"></div>
@@ -20,6 +22,10 @@ import Spectators from "./Spectators.vue";
 const props = defineProps({
     room: null,
     muteMap: {
+        type: Object,
+        required: true,
+    },
+    muteEmojiMap: {
         type: Object,
         required: true,
     },

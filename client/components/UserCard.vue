@@ -72,6 +72,10 @@
                     :user-id="userId"
                     @update:mute-map="$emit('update:mute-map', $event)"
                     :mute-map="muteMap"
+                    @update:mute-emoji-map="
+                        $emit('update:mute-emoji-map', $event)
+                    "
+                    :mute-emoji-map="muteEmojiMap"
                     @reinit="reinitAudioChat"
                 />
 
@@ -170,6 +174,7 @@ const props = defineProps({
     hideVoiceChat: Boolean,
     isSpectating: Boolean,
     muteMap: null,
+    muteEmojiMap: null,
 });
 
 const { userId } = toRefs(props);
