@@ -2,7 +2,7 @@
     <span
         class="bg-white rounded-full aspect-square flex items-center justify-center"
         :style="{
-            background: `background: url(${avatar}) center / cover`,
+            background: `url(${avatar}) center / cover`,
             width: `${width}px`,
         }"
     >
