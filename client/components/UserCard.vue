@@ -70,6 +70,8 @@
                     :room-id="room.id"
                     :is-self="isSelf"
                     :user-id="userId"
+                    @update:mute-map="$emit('update:mute-map', $event)"
+                    :mute-map="muteMap"
                     @reinit="reinitAudioChat"
                 />
 
@@ -167,6 +169,7 @@ const props = defineProps({
     hideEmoji: Boolean,
     hideVoiceChat: Boolean,
     isSpectating: Boolean,
+    muteMap: null,
 });
 
 const { userId } = toRefs(props);

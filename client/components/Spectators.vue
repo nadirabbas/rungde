@@ -18,20 +18,41 @@
         </button>
 
         <Modal v-model="isOpen" title="Spectators">
-            <div class="w-full">
+            <div class="w-full min-w-[60vw]">
                 <div
                     v-for="s in room.spectators"
-                    class="rd-bg p-2 rounded mb-2 text-center relative"
+                    class="rd-bg p-2 rounded mb-2 flex justify-between"
                 >
-                    <p class="text-base text-white">@{{ s.user.username }}</p>
+                    <div class="flex items-center gap-2">
+                        <Avatar :avatar="s.user.avatar" :width="30" />
+                        <p class="text-base text-white">
+                            @{{ s.user.username }}
+                        </p>
+                    </div>
 
-                    <button
-                        @click="kickSpectator(s.id)"
-                        v-if="room.user_id == authStore.user.id"
-                        class="absolute top-1/2 -translate-y-1/2 right-3 text-white"
-                    >
-                        <XIcon class="w-4 h-4" />
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button
+                            @click="toggleMute(s.user.id)"
+                            :class="
+                                spectatorActionClass(
+                                    `${muteMap[s.user.id] && 'opacity-50'}`
+                                )
+                            "
+                        >
+                            <MicrophoneMutable
+                                class="w-4"
+                                :muted="muteMap[s.user.id]"
+                            />
+                        </button>
+
+                        <button
+                            @click="kickSpectator(s.id)"
+                            v-if="room.user_id == authStore.user.id"
+                            :class="spectatorActionClass()"
+                        >
+                            <XIcon class="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
             </div>
         </Modal>
@@ -39,11 +60,17 @@
 </template>
 
 <script setup lang="ts">
-import { PropType, ref } from "vue";
+import { PropType, ref, toRefs } from "vue";
 import { Room, useAuthStore } from "../store/authStore";
-import { EyeIcon, XIcon } from "heroicons-vue3/solid";
+import { EyeIcon, MicrophoneIcon, XIcon } from "heroicons-vue3/solid";
 import Modal from "./Modal.vue";
 import { api } from "../api";
+import Avatar from "./Avatar.vue";
+import { useBus } from "../composables/useBus";
+import MicrophoneMutable from "./MicrophoneMutable.vue";
+
+const spectatorActionClass = (c) =>
+    `${c} text-[#222] bg-white p-1 rounded-full`;
 
 const isOpen = ref(false);
 const authStore = useAuthStore();
@@ -53,7 +80,18 @@ const props = defineProps({
         type: Object as PropType<Room>,
         required: true,
     },
+    muteMap: {
+        type: Object as PropType<Record<string, boolean>>,
+        required: true,
+    },
 });
+
+const { muteMap } = toRefs(props);
+
+const bus = useBus();
+const toggleMute = (userId: number) => {
+    bus.emit(muteMap.value[userId] ? "unmute-user" : "mute-user", userId);
+};
 
 const spectatorsBeingKicked = ref<Record<string, boolean>>({});
 

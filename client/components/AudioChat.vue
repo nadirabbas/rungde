@@ -21,19 +21,23 @@ const props = defineProps({
         type: Number,
         required: true,
     },
+    muteMap: {
+        type: Object,
+        required: true,
+    },
 });
 
-const { roomId } = toRefs(props);
+const { roomId, muteMap } = toRefs(props);
 const authStore = useAuthStore();
 const tries = ref(0);
 const socket = ref<Socket | null>();
 const mediaStreamAudioWatchers = ref<Record<string, () => void>>({});
 const muteTimeouts = ref<Record<string, NodeJS.Timeout>>({});
 
-const init = async () => {
-    let consumers: Consumer[] = [];
-    let producer: Producer;
+const consumers = ref<Consumer[]>([]);
+const producer = ref<Producer>();
 
+const init = async () => {
     tries.value++;
     try {
         const device = new Device();
@@ -141,7 +145,7 @@ const init = async () => {
                     const audioTrack = stream.getAudioTracks()[0];
 
                     audioTrack.enabled = false;
-                    producer = await sendTr.produce({
+                    producer.value = await sendTr.produce({
                         track: audioTrack,
                     });
 
@@ -197,10 +201,16 @@ const init = async () => {
                         "consumers_created",
                         async ({ consumers: remoteConsumers }) => {
                             for (const obj of remoteConsumers) {
-                                const newConsumer = await recvTr.consume(
-                                    obj.consumer.consumerParameters
-                                );
-                                consumers.push(newConsumer);
+                                const newConsumer = await recvTr.consume({
+                                    ...obj.consumer.consumerParameters,
+                                    appData: {
+                                        userId: obj.userId,
+                                    },
+                                });
+                                if (muteMap.value[obj.userId]) {
+                                    newConsumer.pause();
+                                }
+                                consumers.value.push(newConsumer);
                                 playOutput(newConsumer.track, obj.userId);
                             }
                         }
@@ -209,9 +219,16 @@ const init = async () => {
                     socket.value?.on(
                         "consumer_created",
                         async ({ consumer: remoteConsumer, userId }) => {
-                            const consumer = await recvTr.consume(
-                                remoteConsumer.consumerParameters
-                            );
+                            const consumer = await recvTr.consume({
+                                ...remoteConsumer.consumerParameters,
+                                appData: {
+                                    userId,
+                                },
+                            });
+                            consumers.value.push(consumer);
+                            if (muteMap.value[userId]) {
+                                consumer.pause();
+                            }
                             playOutput(consumer.track, userId);
                         }
                     );
@@ -219,7 +236,7 @@ const init = async () => {
                     socket.value?.on(
                         "consumer_closed",
                         async ({ producerId, userId }) => {
-                            consumers = consumers.filter(
+                            consumers.value = consumers.value.filter(
                                 (c) => c.producerId !== producerId
                             );
 
@@ -262,4 +279,27 @@ onUnmounted(() => {
     socket.value?.removeAllListeners();
     socket.value?.disconnect();
 });
+
+const emit = defineEmits(["update:mute-map"]);
+
+const muteUser = (userId: number) => {
+    emit("update:mute-map", { ...muteMap.value, [userId]: true });
+    consumers.value.forEach((c) => {
+        if (c.appData.userId == userId) {
+            c.pause();
+        }
+    });
+};
+
+const unmuteUser = (userId: number) => {
+    emit("update:mute-map", { ...muteMap.value, [userId]: false });
+    consumers.value.forEach((c) => {
+        if (c.appData.userId == userId) {
+            c.resume();
+        }
+    });
+};
+
+bus.on("mute-user", (uid: any) => muteUser(uid));
+bus.on("unmute-user", (uid: any) => unmuteUser(uid));
 </script>

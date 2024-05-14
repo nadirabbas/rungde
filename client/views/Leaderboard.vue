@@ -32,19 +32,7 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <span
-                        class="bg-white rounded-full w-10 h-10 flex items-center justify-center"
-                        :style="
-                            u.avatar
-                                ? `background: url(${u.avatar}) center / cover`
-                                : undefined
-                        "
-                    >
-                        <UserIcon
-                            v-show="!u.avatar"
-                            class="w-6 text-secondary"
-                        />
-                    </span>
+                    <Avatar :avatar="u.avatar"" />
 
                     <span class="text-base text-white">@{{ u.username }}</span>
                 </div>
@@ -68,6 +56,7 @@ import MountedTeleport from "../components/MountedTeleport.vue";
 import { capital } from "case";
 import { api } from "../api";
 import { UserIcon } from "heroicons-vue3/solid";
+import Avatar from "../components/Avatar.vue";
 
 enum SortBy {
     GoonCourts = "goon_courts",

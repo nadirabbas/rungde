@@ -43,6 +43,7 @@
             is-self
             :user-id="authStore.user.id"
             is-spectating
+            v-model:mute-map="muteMap"
             v-if="isSpectating"
         />
 
@@ -63,6 +64,7 @@
             :show-clock="isTicking"
             :hide-emoji="isSpectating"
             :hide-voice-chat="isSpectating"
+            v-model:mute-map="muteMap"
         />
 
         <UserCard
@@ -340,7 +342,7 @@
             v-if="channel"
         />
 
-        <Communications :room="room" />
+        <Communications :room="room" v-model:mute-map="muteMap" />
     </div>
 </template>
 
@@ -541,6 +543,7 @@ const setParticipantById = (id, user) => {
 
 const isTicking = ref(false);
 const isWaitingForNextTurn = ref(false);
+const muteMap = ref<Record<string, boolean>>({});
 
 const setValues = async (r: Room, isEvent = true) => {
     const oldRoom = { ...room.value };
