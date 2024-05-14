@@ -310,14 +310,6 @@
             />
         </TransitionFade>
 
-        <div
-            class="fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 bg-black bg-opacity-95 rounded p-5 w-[70vw] h-[70vh] flex flex-col items-center justify-center text-white text-2xl"
-            v-if="roomClosed && !isHost"
-        >
-            <span class="mb-10">The room has been closed by the host.</span>
-            <Button class="rd-bg" @click="goHome">Leave room</Button>
-        </div>
-
         <GameMenu
             :user="openMenuFor"
             :is-self="openMenuFor?.user.id == authStore.user.id"
@@ -982,6 +974,7 @@ const initSocket = async () => {
 
                 if (closed) {
                     roomClosed.value = true;
+                    window.location.href = "/?room_closed=1";
                     return;
                 }
 

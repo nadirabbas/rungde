@@ -32,6 +32,7 @@ import { api } from "./api";
 import { useRoute, useRouter } from "vue-router";
 import BlankLayout from "./layouts/BlankLayout.vue";
 import { useWakeLock } from "@vueuse/core";
+import { useToast } from "./composables/useToast";
 
 const generalStore = useGeneralStore();
 const authStore = useAuthStore();
@@ -74,11 +75,16 @@ const verifyAuth = async () => {
 };
 
 const { request, release, isSupported } = useWakeLock();
+const toast = useToast();
 
 onMounted(async () => {
     verifyAuth();
     if (isSupported.value) {
         request("screen");
+    }
+
+    if (route.query.room_closed) {
+        toast.error("Room has been closed");
     }
 });
 
