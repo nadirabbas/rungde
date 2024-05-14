@@ -69,10 +69,18 @@
 
             <button
                 :class="buttonClass('rd-bg mb-2 text-white')"
-                @click="restartRoom"
+                @click="restartRoom()"
                 v-if="isHost && isSelf"
             >
                 Restart game
+            </button>
+
+            <button
+                :class="buttonClass('rd-bg mb-2 text-white')"
+                @click="restartRoom(true)"
+                v-if="isHost && isSelf"
+            >
+                Clear scores and restart
             </button>
 
             <button
@@ -188,9 +196,9 @@ const kickUser = async () => {
     });
 };
 
-const restartRoom = async () => {
+const restartRoom = async (resetScores = false) => {
     loading.value = true;
-    await props.restartFn();
+    await props.restartFn(resetScores);
     emit("close");
     loading.value = false;
 };
