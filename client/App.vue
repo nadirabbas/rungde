@@ -83,7 +83,8 @@ onMounted(async () => {
         request("screen");
     }
 
-    if (route.query.room_closed) {
+    const queryParams = new URLSearchParams(window.location.search);
+    if (queryParams.get("room_closed")) {
         toast.error("Room has been closed");
     }
 });
