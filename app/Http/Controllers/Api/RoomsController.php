@@ -72,6 +72,10 @@ class RoomsController extends Controller
         if ($delayedUpdateData && count($delayedUpdateData)) {
             sleep(2);
 
+            $room->update($delayedUpdateData);
+            collect($delayedUpdateData['room_users'])->each(fn ($users, $position) => $room->participants()->where('position', $position)->first()?->update($users));
+
+
             try {
                 if (isset($delayedUpdateData['ended_at']) && $delayedUpdateData['ended_at']) {
                     $winner_1_id = null;
@@ -149,9 +153,6 @@ class RoomsController extends Controller
                 Log::info($th->getMessage());
                 //throw $th;
             }
-
-            $room->update($delayedUpdateData);
-            collect($delayedUpdateData['room_users'])->each(fn ($users, $position) => $room->participants()->where('position', $position)->first()?->update($users));
 
             event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
         }
