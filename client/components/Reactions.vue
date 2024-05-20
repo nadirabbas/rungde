@@ -85,7 +85,7 @@ import {
     watchEffect,
 } from "vue";
 import { Room, User } from "../store/authStore";
-import { Channel } from "pusher-js";
+import { Channel } from "laravel-echo";
 import { XIcon } from "heroicons-vue3/solid";
 import { TransitionFade } from "@morev/vue-transitions";
 import { api } from "../api";
@@ -218,7 +218,7 @@ const sendReaction = async (reaction: string) => {
     loading.value = true;
 
     try {
-        channel.value.trigger("client-reaction", {
+        channel.value.whisper("client-reaction", {
             reaction,
             user_id: user.value.id,
             username: user.value.username,
@@ -255,7 +255,7 @@ bus.on("quiet", (userId: any) => {
 });
 
 onMounted(() => {
-    channel.value.bind(
+    channel.value.listenForWhisper(
         "client-reaction",
         ({ user_id, reaction, username, isSpec }) => {
             if (user_id === user.value.id || muteEmojiMap.value[user_id])

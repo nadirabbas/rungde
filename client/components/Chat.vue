@@ -116,7 +116,7 @@ import {
     watchEffect,
 } from "vue";
 import { Room } from "../store/authStore";
-import { Channel } from "pusher-js";
+import { Channel } from "laravel-echo";
 import Modal from "./Modal.vue";
 import { v4 } from "uuid";
 import { api } from "../api";
@@ -209,7 +209,7 @@ watchEffect(() => {
 });
 
 onMounted(() => {
-    channel.value.bind(
+    channel.value.listenForWhisper(
         "client-chat",
         ({ msg, username: un }: { msg: string; username: string }) => {
             const isSelf = un === username.value;
@@ -229,7 +229,7 @@ const send = async () => {
     loading.value = true;
 
     try {
-        channel.value.trigger("client-chat", {
+        channel.value.whisper("client-chat", {
             msg: message.value,
             username: username.value,
         });

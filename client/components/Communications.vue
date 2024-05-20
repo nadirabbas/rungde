@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import { PropType } from "vue";
 import Spectators from "./Spectators.vue";
-import { Channel } from "pusher-js";
+import { Channel } from "laravel-echo";
 
 const props = defineProps({
     room: null,

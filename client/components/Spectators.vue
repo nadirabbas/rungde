@@ -185,7 +185,7 @@ import Avatar from "./Avatar.vue";
 import { useBus } from "../composables/useBus";
 import MutableIcon from "./MutableIcon.vue";
 import SpectatorSwap from "./SpectatorSwap.vue";
-import { Channel } from "pusher-js";
+import { Channel } from "laravel-echo";
 
 const spectatorActionClass = (c) => `${c} p-1.5 rounded-full`;
 
@@ -258,7 +258,7 @@ const kickSpectator = async (spectatorId) => {
 };
 
 onMounted(() => {
-    channel.value.bind(
+    channel.value.listenForWhisper(
         "client-places-swapped",
         ({ involved }: { involved: number[] }) => {
             if (involved.includes(authStore.user?.id || 0)) {
@@ -269,7 +269,7 @@ onMounted(() => {
         }
     );
 
-    channel.value.bind(
+    channel.value.listenForWhisper(
         "client-swap",
         ({ user, forId }: { user: User; forId: number }) => {
             if (forId != authStore.user?.id) return;
@@ -278,7 +278,7 @@ onMounted(() => {
         }
     );
 
-    channel.value.bind(
+    channel.value.listenForWhisper(
         "client-swap-deny",
         ({ user, forId }: { user: User; forId: number }) => {
             if (forId != authStore.user?.id) return;
@@ -288,8 +288,8 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-    channel.value.unbind("client-swap");
-    channel.value.unbind("client-swap-deny");
+    channel.value.stopListeningForWhisper("client-swap");
+    channel.value.stopListeningForWhisper("client-swap-deny");
 });
 
 const switchToSpectator = async () => {

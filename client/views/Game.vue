@@ -423,7 +423,7 @@ import { useDealer } from "../composables/useDealer";
 import { TransitionFade } from "@morev/vue-transitions";
 
 import Chat from "../components/Chat.vue";
-import { Channel } from "pusher-js";
+import { Channel } from "laravel-echo";
 import { useToast } from "../composables/useToast";
 import { useGeneralStore } from "../store/generalStore";
 import { useSoundSprite } from "../composables/useSoundSprite";
@@ -905,14 +905,14 @@ const initSocket = async () => {
     loading.value = true;
 
     try {
-        channel.value = pusher.subscribe(`private-room.${room.value?.id}`);
-        channel.value.bind("userchanged", ({ roomUser }) => {
+        channel.value = pusher.private(`room.${room.value?.id}`);
+        channel.value.listen("userchanged", ({ roomUser }) => {
             setParticipantById(roomUser.user_id, roomUser);
         });
-        channel.value.bind("alert", ({ msg }) => {
+        channel.value.listen("alert", ({ msg }) => {
             toast.error(msg);
         });
-        channel.value.bind(
+        channel.value.listen(
             "spectator-event",
             ({ joined, spectator, leftId, alert }) => {
                 let spec = spectator;
@@ -942,7 +942,7 @@ const initSocket = async () => {
             }
         );
 
-        channel.value.bind(
+        channel.value.listen(
             "updated",
             ({
                 room: r,

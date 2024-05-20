@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import { PropType, onMounted, onUnmounted, ref, toRefs } from "vue";
 import { User, useAuthStore } from "../store/authStore";
-import { Channel } from "pusher-js";
+import { Channel } from "laravel-echo";
 import { CheckIcon, XIcon } from "heroicons-vue3/solid";
 import { api } from "../api";
 
@@ -68,14 +68,14 @@ const authStore = useAuthStore();
 const swapPlaces = () => {
     isRequested.value = true;
     if (incomingRequestBy?.value) {
-        channel.value.trigger("client-swap-accept", {
+        channel.value.whisper("client-swap-accept", {
             userId: incomingRequestBy?.value?.id,
             spectatorId: authStore.user?.id,
         });
         return;
     }
 
-    channel.value.trigger("client-swap", {
+    channel.value.whisper("client-swap", {
         user: authStore.user,
         forId: requestedFor?.value?.id,
     });
@@ -94,7 +94,7 @@ const swapAccepted = async ({
         await api.post("/room/swap-places", {
             spectator_id: spectatorId,
         });
-        channel.value.trigger("client-places-swapped", {
+        channel.value.whisper("client-places-swapped", {
             involved: [userId, spectatorId],
         });
         emit("close");
@@ -107,7 +107,7 @@ const swapAccepted = async ({
 
 const cancel = () => {
     if (incomingRequestBy?.value) {
-        channel.value.trigger("client-swap-deny", {
+        channel.value.whisper("client-swap-deny", {
             user: authStore.user,
             forId: incomingRequestBy?.value?.id,
         });
@@ -117,9 +117,9 @@ const cancel = () => {
 };
 
 onMounted(() => {
-    channel.value.bind("client-swap-accept", swapAccepted);
+    channel.value.listenForWhisper("client-swap-accept", swapAccepted);
 });
 onUnmounted(() => {
-    channel.value.unbind("client-swap-accept");
+    channel.value.stopListeningForWhisper("client-swap-accept");
 });
 </script>
