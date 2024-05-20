@@ -15,6 +15,7 @@
         "laravel/passport": "^12.2",
         "laravel/sanctum": "^3.3",
         "laravel/socialite": "^5.13",
+        "laravel/telescope": "^5.0",
         "laravel/tinker": "^2.8",
         "nadir2k/laravel-web-tinker": "dev-main",
         "predis/predis": "^2.2",
