@@ -32,6 +32,6 @@ class RoomUpdateJob implements ShouldQueue
         $room->update($this->data);
         collect($this->data['room_users'])->each(fn ($users, $position) => $room->participants()->where('position', $position)->first()?->update($users));
 
-        event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
+        dispatch_room($room);
     }
 }

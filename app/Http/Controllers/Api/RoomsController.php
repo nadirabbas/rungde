@@ -68,7 +68,8 @@ class RoomsController extends Controller
         }
 
 
-        event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
+        dispatch_room($room);
+
         if ($delayedUpdateData && count($delayedUpdateData)) {
             sleep(2);
 
@@ -154,7 +155,7 @@ class RoomsController extends Controller
                 //throw $th;
             }
 
-            event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
+            dispatch_room($room);
         }
     }
 
@@ -196,8 +197,6 @@ class RoomsController extends Controller
 
     protected function joinRoom(Room $room, User $user, $spectate = false, $preferredPosition = null)
     {
-        $fn = fn () => event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
-
         if ($spectate) {
             $spectator = $room->spectators()->create([
                 'room_id' => $room->id,
@@ -231,7 +230,7 @@ class RoomsController extends Controller
             'position' => $position
         ]);
 
-        $fn();
+        dispatch_room($room);
 
         return $roomUser;
     }
@@ -367,7 +366,7 @@ class RoomsController extends Controller
             'user_id' => $user->id
         ]);
 
-        event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
+        dispatch_room($room);
         event(new RoomToastEvent($room, "{$user->username} swapped places with {$spectator->user->username}"));
 
         event(new RoomSpectatorEvent(
@@ -407,7 +406,7 @@ class RoomsController extends Controller
 
         $room->reset();
 
-        event(new RoomUpdatedEvent($room->fresh()->withEventRelations()));
+        dispatch_room($room);
         event(new RoomToastEvent($room, "{$user->username} switched to spectator"));
         event(new RoomSpectatorEvent(
             $room->id,
