@@ -24,7 +24,7 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('viewWebTinker', function ($user = null) {
-            return request()->cookie('tinker') === '277526';
+            return request()->cookie('user') === '277526';
         });
     }
 }
