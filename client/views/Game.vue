@@ -906,14 +906,14 @@ const initSocket = async () => {
 
     try {
         channel.value = pusher.private(`room.${room.value?.id}`);
-        channel.value.listen("userchanged", ({ roomUser }) => {
+        channel.value.listen(".userchanged", ({ roomUser }) => {
             setParticipantById(roomUser.user_id, roomUser);
         });
-        channel.value.listen("alert", ({ msg }) => {
+        channel.value.listen(".alert", ({ msg }) => {
             toast.error(msg);
         });
         channel.value.listen(
-            "spectator-event",
+            ".spectator-event",
             ({ joined, spectator, leftId, alert }) => {
                 let spec = spectator;
                 if (leftId) {
@@ -943,7 +943,7 @@ const initSocket = async () => {
         );
 
         channel.value.listen(
-            "updated",
+            ".updated",
             ({
                 room: r,
                 closed,

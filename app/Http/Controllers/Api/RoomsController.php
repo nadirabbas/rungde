@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Events\RoomReactionEvent;
 use App\Events\RoomSpectatorEvent;
 use App\Events\RoomToastEvent;
-use App\Events\RoomUpdatedEvent;
-use App\Events\RoomUserChangedEvent;
 use App\Http\Controllers\Controller;
 use App\Jobs\RoomUpdateJob;
 use App\Models\MatchHistory;
@@ -241,7 +239,7 @@ class RoomsController extends Controller
         if ($user->room) {
             $roomUser = $user->room->participants()->where('user_id', $user->id)->first();
             $user->room->participants()->where('user_id', $request->user()->id)->delete();
-            event(new RoomUpdatedEvent($user->room->fresh()->withEventRelations(), false, $roomUser->position));
+            dispatch_room($user->room, false, $roomUser->position);
         }
 
         if ($user->roomSpectator) {
@@ -265,7 +263,7 @@ class RoomsController extends Controller
 
         if ($room) {
             $room->delete();
-            event(new RoomUpdatedEvent($room, true));
+            dispatch_room($room, true);
         }
 
         return [
@@ -281,7 +279,7 @@ class RoomsController extends Controller
         if ($room) {
             $roomUser = $room->participants()->where('position', $request->position)->first();
             $roomUser->delete();
-            event(new RoomUpdatedEvent($room->withEventRelations(), false, '', $roomUser->position));
+            dispatch_room($room, false, '', $roomUser->position);
         }
 
         return [
