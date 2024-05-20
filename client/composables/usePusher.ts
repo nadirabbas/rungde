@@ -5,7 +5,7 @@ export const usePusher = () => {
     const authStore = useAuthStore();
 
     return new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
-        cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+        cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || "ap2",
         wsHost: import.meta.env.VITE_PUSHER_HOST,
         wsPort: import.meta.env.VITE_PUSHER_PORT,
         wssPort: import.meta.env.VITE_PUSHER_PORT,
