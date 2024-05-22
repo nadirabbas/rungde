@@ -1336,41 +1336,8 @@ const theirCourts = computed(() => {
         : room.value.team_2_4_courts;
 });
 
-const { isFullscreen, isSupported, enter } = useFullscreen();
-const { isSupported: isOrientationSupported, lockOrientation } =
-    useScreenOrientation();
-
-const goFullscreen = () => {
-    if (
-        !isOrientationSupported.value ||
-        !isSupported.value ||
-        isFullscreen.value ||
-        !generalStore.hasUserInteracted
-    )
-        return;
-    enter();
-};
-
-watch(isFullscreen, (val) => {
-    if (!val) {
-        goFullscreen();
-    } else if (isOrientationSupported.value) {
-        lockOrientation("landscape-primary");
-    }
-});
-
-watch(
-    () => generalStore.hasUserInteracted,
-    (val) => {
-        if (val) {
-            goFullscreen();
-        }
-    }
-);
-
 onMounted(() => {
     verifyRoom();
-    goFullscreen();
 });
 
 const ourScore = computed(

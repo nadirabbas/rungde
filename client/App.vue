@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <FullscreenProvider>
         <div
             class="fixed w-full h-full left-0 top-0 flex items-center justify-center bg-white"
             v-show="generalStore.loading"
@@ -13,7 +13,7 @@
                 <router-view :key="layout" />
             </component>
         </div>
-    </div>
+    </FullscreenProvider>
 </template>
 
 <script setup lang="ts">
@@ -28,6 +28,7 @@ import { useRoute, useRouter } from "vue-router";
 import BlankLayout from "./layouts/BlankLayout.vue";
 import { useWakeLock } from "@vueuse/core";
 import { useToast } from "./composables/useToast";
+import FullscreenProvider from "./components/FullscreenProvider.vue";
 
 const generalStore = useGeneralStore();
 const authStore = useAuthStore();
