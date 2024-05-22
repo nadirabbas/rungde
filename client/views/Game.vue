@@ -1353,7 +1353,7 @@ const goFullscreen = () => {
 
 watch(isFullscreen, (val) => {
     if (!val) {
-        enter();
+        goFullscreen();
     } else if (isOrientationSupported.value) {
         lockOrientation("landscape-primary");
     }
