@@ -5,7 +5,7 @@
         <Logo class="fixed top-5 left-5 w-[100px]" />
         <Navbar class="fixed top-5 right-5" v-if="authStore.user" />
 
-        <div class="max-w-full min-w-[50%] lg:min-w-[400px]">
+        <div class="max-w-full min-w-[85%] md:min-w-[50%] lg:min-w-[400px]">
             <div class="flex items-center justify-between relative mb-5">
                 <div
                     id="back"

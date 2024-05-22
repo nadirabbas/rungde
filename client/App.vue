@@ -8,12 +8,7 @@
             <Spinner />
         </div>
 
-        <div
-            class="portrait-only w-full min-h-screen items-center justify-center"
-        >
-            <p class="text-2xl">Please rotate your device</p>
-        </div>
-        <div class="landscape-only">
+        <div class="landscapse-only">
             <component :is="layout" :key="layout">
                 <router-view :key="layout" />
             </component>

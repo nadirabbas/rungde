@@ -1,10 +1,10 @@
 <template>
     <div
-        class="w-full min-h-screen lg:flex-col rd-bg-pattern flex items-center justify-center gap-10"
+        class="w-full min-h-screen flex-col rd-bg-pattern flex items-center justify-center gap-10"
     >
         <Logo class="w-[200px]" />
 
-        <div class="w-[50%] lg:w-[400px] max-w-full">
+        <div class="min-w-[85%] md:min-w-[50%] lg:min-w-[400px] max-w-full">
             <slot />
         </div>
     </div>

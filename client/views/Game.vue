@@ -1,386 +1,418 @@
 <template>
-    <FullscreenLoader v-if="loading" />
-    <div
-        v-if="!loading && render"
-        :class="{
-            'min-h-screen w-full rd-bg-pattern game': true,
-            turn: isMyTurn,
-        }"
-    >
-        <div class="fixed left-5 top-5">
-            <Logo class="w-[70px] md:w-[150px]" v-if="!rung" />
-            <span class="flex bg-white px-2 py-1 rounded" v-else>
-                <div class="mr-2 font-medium">RUNG</div>
-                <img :src="`/cards/${rung}.svg`" class="w-5" />
-            </span>
-        </div>
-
-        <div class="fixed bottom-0 ml-5 transform" v-if="!isSpectating">
-            <Card
-                v-for="(card, i) in cards"
-                :card="card"
-                :key="card"
-                :class="{
-                    'absolute cursor-pointer -bottom-3': true,
-                    '-translate-y-[10vh]': clickedCard === card,
-                }"
-                :style="cards.includes(card) ? `left: ${i * 5.6}vw` : ''"
-                :width="12"
-                @mouseleave="cardUnhovered"
-                @click="playCard($event, card)"
-                :inactive="turnPos == me.position && !canPlayCard(card)"
-                :highlighted="card[0] === rung"
-                :hidden="!rung && rungSelector != me.position"
-            />
-        </div>
-
-        <template v-if="room">
-            <UserCard
-                name="Spectating"
-                class="fixed left-1/2 -translate-x-1/2 bottom-5"
-                show-menu
-                @click="openMenu(spectator)"
-                :room="room"
-                is-self
-                :user-id="authStore.user.id"
-                is-spectator-card
-                :is-spectating="isSpectating"
-                v-model:mute-map="muteMap"
-                v-model:mute-emoji-map="muteEmojiMap"
-                v-if="isSpectating"
-            />
-
-            <UserCard
-                :senior="isSenior(me)"
-                :name="me.user.username"
-                :position="me.position"
-                class="fixed right-5 bottom-5"
-                friend
-                :active="turnPos && turnPos == me.position && 'left'"
-                show-menu
-                @click="openMenu(me)"
-                :score="me?.sir_count"
-                :score-diff="turnPos == me?.position && sirWinDiff"
-                :room="room"
-                is-self
-                :user-id="me?.user.id"
-                :stream-id="me?.stream_id"
-                :show-clock="isTicking"
-                :hide-emoji="isSpectating"
-                :hide-voice-chat="isSpectating"
-                v-model:mute-map="muteMap"
-                v-model:mute-emoji-map="muteEmojiMap"
-                :is-spectating="isSpectating"
-            />
-
-            <UserCard
-                :senior="isSenior(teammate)"
-                :name="teammate?.user.username"
-                :position="teammate?.position || 3"
-                friend
-                class="fixed left-1/2 -translate-x-1/2 top-5"
-                :active="turnPos && turnPos == teammate?.position && 'left'"
-                :show-menu="!!teammate"
-                @click="openMenu(teammate)"
-                :score="teammate?.sir_count"
-                :score-diff="turnPos == teammate?.position && sirWinDiff"
-                :room="room"
-                :user-id="teammate?.user.id"
-                :stream-id="teammate?.stream_id"
-                is-teammate
-                :is-spectating="isSpectating"
-            />
-
-            <UserCard
-                :senior="isSenior(rightOpp)"
-                :name="rightOpp?.user.username"
-                :position="rightOpp?.position || 2"
-                class="fixed top-1/2 -translate-y-1/2 right-5"
-                :active="turnPos && turnPos == rightOpp?.position && 'left'"
-                :show-menu="!!rightOpp"
-                @click="openMenu(rightOpp)"
-                :score="rightOpp?.sir_count"
-                :score-diff="turnPos == rightOpp?.position && sirWinDiff"
-                :room="room"
-                :user-id="rightOpp?.user.id"
-                :stream-id="rightOpp?.stream_id"
-                :is-spectating="isSpectating"
-            />
-        </template>
-
-        <UserCard
-            :senior="isSenior(leftOpp)"
-            :name="leftOpp?.user.username"
-            :position="leftOpp?.position || 4"
-            class="fixed top-1/2 -translate-y-1/2 left-5"
-            :active="turnPos && turnPos == leftOpp?.position && 'right'"
-            :show-menu="!!leftOpp"
-            @click="openMenu(leftOpp)"
-            :score="leftOpp?.sir_count"
-            :score-diff="turnPos == leftOpp?.position && sirWinDiff"
-            :room="room"
-            is-left-opp
-            :user-id="leftOpp?.user.id"
-            :stream-id="leftOpp?.stream_id"
-            :is-spectating="isSpectating"
-        />
-
-        <div class="fixed top-5 right-5 flex flex-col items-end justify-end">
-            <button
-                class="flex items-stretch justify-center h-8 gap-2 rounded"
-                @click="showTotals = true"
-            >
-                <span
-                    :class="
-                        scoreCont(
-                            `bg-green-600 rounded ${
-                                glow === true && 'glow-animation'
-                            }`
-                        )
-                    "
-                >
-                    {{ glow === true ? "+" + sirWinDiff : ourScore }}
-                </span>
-                <span
-                    :class="
-                        scoreCont(
-                            `bg-red-600 rounded  ${
-                                glow === false && 'glow-animation'
-                            }`
-                        )
-                    "
-                    >{{ glow === false ? "+" + sirWinDiff : theirScore }}</span
-                >
-
-                <ChevronDownIcon class="w-4 text-white" />
-            </button>
-
-            <div id="spectator-reactions"></div>
-        </div>
-
-        <CardsOnTable
-            :cards="cardsOnTable"
-            :me="me"
-            :rung="rung"
-            :sirs="sirs"
-            :turn-rung="turnRung"
-        />
-
-        <div class="fixed left-[24vw] top-1/2 -translate-y-1/2" v-if="sirs">
-            <Card :width="8" card="back" />
+    <div>
+        <div class="landscape-only">
+            <FullscreenLoader v-if="loading" />
             <div
-                class="-top-2 -left-2 absolute rounded-full w-6 h-6 text-black font-black shadow-xl shadow-black flex items-center justify-center bg-yellow text-sm"
+                v-if="!loading && render"
+                :class="{
+                    'min-h-screen w-full rd-bg-pattern game': true,
+                    turn: isMyTurn,
+                }"
             >
-                {{ sirs }}
+                <div class="fixed left-5 top-5">
+                    <Logo class="w-[70px] md:w-[150px]" v-if="!rung" />
+                    <span class="flex bg-white px-2 py-1 rounded" v-else>
+                        <div class="mr-2 font-medium">RUNG</div>
+                        <img :src="`/cards/${rung}.svg`" class="w-5" />
+                    </span>
+                </div>
+
+                <div class="fixed bottom-0 ml-5 transform" v-if="!isSpectating">
+                    <Card
+                        v-for="(card, i) in cards"
+                        :card="card"
+                        :key="card"
+                        :class="{
+                            'absolute cursor-pointer -bottom-3': true,
+                            '-translate-y-[10vh]': clickedCard === card,
+                        }"
+                        :style="
+                            cards.includes(card) ? `left: ${i * 5.6}vw` : ''
+                        "
+                        :width="12"
+                        @mouseleave="cardUnhovered"
+                        @click="playCard($event, card)"
+                        :inactive="turnPos == me.position && !canPlayCard(card)"
+                        :highlighted="card[0] === rung"
+                        :hidden="!rung && rungSelector != me.position"
+                    />
+                </div>
+
+                <template v-if="room">
+                    <UserCard
+                        name="Spectating"
+                        class="fixed left-1/2 -translate-x-1/2 bottom-5"
+                        show-menu
+                        @click="openMenu(spectator)"
+                        :room="room"
+                        is-self
+                        :user-id="authStore.user.id"
+                        is-spectator-card
+                        :is-spectating="isSpectating"
+                        v-model:mute-map="muteMap"
+                        v-model:mute-emoji-map="muteEmojiMap"
+                        v-if="isSpectating"
+                    />
+
+                    <UserCard
+                        :senior="isSenior(me)"
+                        :name="me.user.username"
+                        :position="me.position"
+                        class="fixed right-5 bottom-5"
+                        friend
+                        :active="turnPos && turnPos == me.position && 'left'"
+                        show-menu
+                        @click="openMenu(me)"
+                        :score="me?.sir_count"
+                        :score-diff="turnPos == me?.position && sirWinDiff"
+                        :room="room"
+                        is-self
+                        :user-id="me?.user.id"
+                        :stream-id="me?.stream_id"
+                        :show-clock="isTicking"
+                        :hide-emoji="isSpectating"
+                        :hide-voice-chat="isSpectating"
+                        v-model:mute-map="muteMap"
+                        v-model:mute-emoji-map="muteEmojiMap"
+                        :is-spectating="isSpectating"
+                    />
+
+                    <UserCard
+                        :senior="isSenior(teammate)"
+                        :name="teammate?.user.username"
+                        :position="teammate?.position || 3"
+                        friend
+                        class="fixed left-1/2 -translate-x-1/2 top-5"
+                        :active="
+                            turnPos && turnPos == teammate?.position && 'left'
+                        "
+                        :show-menu="!!teammate"
+                        @click="openMenu(teammate)"
+                        :score="teammate?.sir_count"
+                        :score-diff="
+                            turnPos == teammate?.position && sirWinDiff
+                        "
+                        :room="room"
+                        :user-id="teammate?.user.id"
+                        :stream-id="teammate?.stream_id"
+                        is-teammate
+                        :is-spectating="isSpectating"
+                    />
+
+                    <UserCard
+                        :senior="isSenior(rightOpp)"
+                        :name="rightOpp?.user.username"
+                        :position="rightOpp?.position || 2"
+                        class="fixed top-1/2 -translate-y-1/2 right-5"
+                        :active="
+                            turnPos && turnPos == rightOpp?.position && 'left'
+                        "
+                        :show-menu="!!rightOpp"
+                        @click="openMenu(rightOpp)"
+                        :score="rightOpp?.sir_count"
+                        :score-diff="
+                            turnPos == rightOpp?.position && sirWinDiff
+                        "
+                        :room="room"
+                        :user-id="rightOpp?.user.id"
+                        :stream-id="rightOpp?.stream_id"
+                        :is-spectating="isSpectating"
+                    />
+                </template>
+
+                <UserCard
+                    :senior="isSenior(leftOpp)"
+                    :name="leftOpp?.user.username"
+                    :position="leftOpp?.position || 4"
+                    class="fixed top-1/2 -translate-y-1/2 left-5"
+                    :active="turnPos && turnPos == leftOpp?.position && 'right'"
+                    :show-menu="!!leftOpp"
+                    @click="openMenu(leftOpp)"
+                    :score="leftOpp?.sir_count"
+                    :score-diff="turnPos == leftOpp?.position && sirWinDiff"
+                    :room="room"
+                    is-left-opp
+                    :user-id="leftOpp?.user.id"
+                    :stream-id="leftOpp?.stream_id"
+                    :is-spectating="isSpectating"
+                />
+
+                <div
+                    class="fixed top-5 right-5 flex flex-col items-end justify-end"
+                >
+                    <button
+                        class="flex items-stretch justify-center h-8 gap-2 rounded"
+                        @click="showTotals = true"
+                    >
+                        <span
+                            :class="
+                                scoreCont(
+                                    `bg-green-600 rounded ${
+                                        glow === true && 'glow-animation'
+                                    }`
+                                )
+                            "
+                        >
+                            {{ glow === true ? "+" + sirWinDiff : ourScore }}
+                        </span>
+                        <span
+                            :class="
+                                scoreCont(
+                                    `bg-red-600 rounded  ${
+                                        glow === false && 'glow-animation'
+                                    }`
+                                )
+                            "
+                            >{{
+                                glow === false ? "+" + sirWinDiff : theirScore
+                            }}</span
+                        >
+
+                        <ChevronDownIcon class="w-4 text-white" />
+                    </button>
+
+                    <div id="spectator-reactions"></div>
+                </div>
+
+                <CardsOnTable
+                    :cards="cardsOnTable"
+                    :me="me"
+                    :rung="rung"
+                    :sirs="sirs"
+                    :turn-rung="turnRung"
+                />
+
+                <div
+                    class="fixed left-[24vw] top-1/2 -translate-y-1/2"
+                    v-if="sirs"
+                >
+                    <Card :width="8" card="back" />
+                    <div
+                        class="-top-2 -left-2 absolute rounded-full w-6 h-6 text-black font-black shadow-xl shadow-black flex items-center justify-center bg-yellow text-sm"
+                    >
+                        {{ sirs }}
+                    </div>
+                </div>
+
+                <div
+                    class="fixed left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2"
+                    v-if="!room.started_at || !room.rung || rungSelected"
+                >
+                    <template v-if="!room.started_at || roomPaused">
+                        <button
+                            class="flex flex-col"
+                            v-if="
+                                (!starting && room.participants.length !== 4) ||
+                                roomPaused
+                            "
+                            @click="copyCode"
+                        >
+                            <div
+                                class="bg-red-600 w-full text-sm flex justify-center items-center gap-2 text-center rounded-t text-white p-1"
+                            >
+                                <span>Join code</span>
+                            </div>
+                            <div
+                                class="bg-white flex items-center gap-1 text-dark rounded-b px-2 py-5"
+                            >
+                                <strong>{{ room.code }}</strong>
+                                <DuplicateIcon class="w-5" />
+                            </div>
+                        </button>
+
+                        <div class="font-medium text-white" v-else>
+                            Starting game...
+                        </div>
+                    </template>
+
+                    <template
+                        v-if="
+                            room.started_at &&
+                            !roomPaused &&
+                            (!room.rung || rungSelected)
+                        "
+                    >
+                        <div class="bg-white rounded p-2 min-w-[20vw]">
+                            <template v-if="!room.rung">
+                                <template
+                                    v-if="
+                                        me.position === rungSelector &&
+                                        !isSpectating
+                                    "
+                                >
+                                    <p
+                                        class="text-center font-medium text-sm mb-3"
+                                    >
+                                        Select rung
+                                    </p>
+
+                                    <div
+                                        class="grid gap-6 grid-cols-2 mb-3"
+                                        v-if="!rungToConfrim"
+                                    >
+                                        <button
+                                            v-for="s in suites"
+                                            :key="s"
+                                            @click="selectRung(s)"
+                                            class="flex items-center justify-center"
+                                        >
+                                            <img
+                                                :src="`/cards/${s}.svg`"
+                                                class="w-8 h-8"
+                                            />
+                                        </button>
+                                    </div>
+
+                                    <div
+                                        class="flex flex-col items-center justify-center"
+                                        v-else
+                                    >
+                                        <img
+                                            :src="`/cards/${rungToConfrim}.svg`"
+                                            class="w-8 h-8"
+                                        />
+                                        <div
+                                            class="flex items-stretch w-full gap-2 mt-6"
+                                        >
+                                            <button
+                                                class="rounded bg-red-600 text-white py-2 px-3"
+                                                @click="rungToConfrim = ''"
+                                            >
+                                                <XIcon class="w-4" />
+                                            </button>
+
+                                            <button
+                                                class="w-full flex-1 text-sm rounded px-3 py-2 rd-bg text-white"
+                                                @click="confirmRung"
+                                                :disabled="selectingRung"
+                                            >
+                                                {{
+                                                    selectingRung
+                                                        ? "Confirming..."
+                                                        : "Confirm"
+                                                }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <p
+                                    class="text-center font-medium text-sm text-dark"
+                                    v-else
+                                >
+                                    {{ rungSelectorUser?.user.username }} is
+                                    selecting rung...
+                                </p>
+                            </template>
+
+                            <template v-if="rungSelected">
+                                <p class="text-center font-medium text-sm mb-3">
+                                    Rung selected by
+                                    {{ rungSelectorUser?.user.username }}!
+                                </p>
+
+                                <div class="flex justify-center w-full">
+                                    <img
+                                        :src="`/cards/${room.rung}.svg`"
+                                        class="w-12 h-12 my-4"
+                                    />
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <TransitionFade>
+                    <Victory
+                        :victory="victory"
+                        :defeat="!victory"
+                        :goon-court="goonCourt"
+                        :court="court"
+                        :is-host="isHost"
+                        :restart-fn="resetRoom"
+                        v-if="victory !== null"
+                    />
+                </TransitionFade>
+
+                <GameMenu
+                    :user="openMenuFor"
+                    :is-self="openMenuFor?.user.id == authStore.user.id"
+                    :is-host="me.position == 1 && !isSpectating"
+                    @close="openMenuFor = null"
+                    :restart-fn="resetRoom"
+                    :model-value="!!openMenuFor"
+                    :mute-map="muteMap"
+                    v-model:mute-emoji-map="muteEmojiMap"
+                    :room="room"
+                />
+
+                <Totals
+                    :our-score="ourScore"
+                    :their-score="theirScore"
+                    :our-wins="ourTeamWins"
+                    :their-wins="theirTeamWins"
+                    :our-courts="ourCourts"
+                    :their-courts="theirCourts"
+                    :our-goon-courts="ourGoonCourts"
+                    :their-goon-courts="theirGoonCourts"
+                    v-model="showTotals"
+                    @close="showTotals = false"
+                />
+
+                <Chat
+                    v-if="room"
+                    :room="room"
+                    :channel="channel"
+                    :username="authStore.user.username"
+                />
+
+                <Reactions
+                    :room="room"
+                    :channel="channel"
+                    :user="authStore.user"
+                    :is-spectating="isSpectating"
+                    :spectator-map="spectatorMap"
+                    v-model:mute-emoji-map="muteEmojiMap"
+                    v-if="channel"
+                />
+
+                <Communications
+                    :room="room"
+                    v-model:mute-map="muteMap"
+                    v-model:mute-emoji-map="muteEmojiMap"
+                    :channel="channel"
+                    :is-spectating="isSpectating"
+                    :spectator-map="spectatorMap"
+                />
+
+                <!-- Audio chat -->
+                <div
+                    @click.stop
+                    v-if="generalStore.hasUserInteracted"
+                    class="items-center flex"
+                >
+                    <AudioChat
+                        :participants="room.participants"
+                        :room-id="room.id"
+                        is-self
+                        :user-id="authStore.user.id"
+                        v-model:mute-map="muteMap"
+                        v-model:mute-emoji-map="muteEmojiMap"
+                    />
+
+                    <Microphone
+                        :user-id="authStore.user.id"
+                        is-self
+                        v-model="isSpeaking"
+                    />
+                </div>
             </div>
         </div>
 
         <div
-            class="fixed left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2"
-            v-if="!room.started_at || !room.rung || rungSelected"
+            class="portrait-only w-full min-h-screen items-center justify-center"
         >
-            <template v-if="!room.started_at || roomPaused">
-                <button
-                    class="flex flex-col"
-                    v-if="
-                        (!starting && room.participants.length !== 4) ||
-                        roomPaused
-                    "
-                    @click="copyCode"
-                >
-                    <div
-                        class="bg-red-600 w-full text-sm flex justify-center items-center gap-2 text-center rounded-t text-white p-1"
-                    >
-                        <span>Join code</span>
-                    </div>
-                    <div
-                        class="bg-white flex items-center gap-1 text-dark rounded-b px-2 py-5"
-                    >
-                        <strong>{{ room.code }}</strong>
-                        <DuplicateIcon class="w-5" />
-                    </div>
-                </button>
-
-                <div class="font-medium text-white" v-else>
-                    Starting game...
-                </div>
-            </template>
-
-            <template
-                v-if="
-                    room.started_at &&
-                    !roomPaused &&
-                    (!room.rung || rungSelected)
-                "
-            >
-                <div class="bg-white rounded p-2 min-w-[20vw]">
-                    <template v-if="!room.rung">
-                        <template
-                            v-if="me.position === rungSelector && !isSpectating"
-                        >
-                            <p class="text-center font-medium text-sm mb-3">
-                                Select rung
-                            </p>
-
-                            <div
-                                class="grid gap-6 grid-cols-2 mb-3"
-                                v-if="!rungToConfrim"
-                            >
-                                <button
-                                    v-for="s in suites"
-                                    :key="s"
-                                    @click="selectRung(s)"
-                                    class="flex items-center justify-center"
-                                >
-                                    <img
-                                        :src="`/cards/${s}.svg`"
-                                        class="w-8 h-8"
-                                    />
-                                </button>
-                            </div>
-
-                            <div
-                                class="flex flex-col items-center justify-center"
-                                v-else
-                            >
-                                <img
-                                    :src="`/cards/${rungToConfrim}.svg`"
-                                    class="w-8 h-8"
-                                />
-                                <div
-                                    class="flex items-stretch w-full gap-2 mt-6"
-                                >
-                                    <button
-                                        class="rounded bg-red-600 text-white py-2 px-3"
-                                        @click="rungToConfrim = ''"
-                                    >
-                                        <XIcon class="w-4" />
-                                    </button>
-
-                                    <button
-                                        class="w-full flex-1 text-sm rounded px-3 py-2 rd-bg text-white"
-                                        @click="confirmRung"
-                                        :disabled="selectingRung"
-                                    >
-                                        {{
-                                            selectingRung
-                                                ? "Confirming..."
-                                                : "Confirm"
-                                        }}
-                                    </button>
-                                </div>
-                            </div>
-                        </template>
-
-                        <p
-                            class="text-center font-medium text-sm text-dark"
-                            v-else
-                        >
-                            {{ rungSelectorUser?.user.username }} is selecting
-                            rung...
-                        </p>
-                    </template>
-
-                    <template v-if="rungSelected">
-                        <p class="text-center font-medium text-sm mb-3">
-                            Rung selected by
-                            {{ rungSelectorUser?.user.username }}!
-                        </p>
-
-                        <div class="flex justify-center w-full">
-                            <img
-                                :src="`/cards/${room.rung}.svg`"
-                                class="w-12 h-12 my-4"
-                            />
-                        </div>
-                    </template>
-                </div>
-            </template>
-        </div>
-
-        <TransitionFade>
-            <Victory
-                :victory="victory"
-                :defeat="!victory"
-                :goon-court="goonCourt"
-                :court="court"
-                :is-host="isHost"
-                :restart-fn="resetRoom"
-                v-if="victory !== null"
-            />
-        </TransitionFade>
-
-        <GameMenu
-            :user="openMenuFor"
-            :is-self="openMenuFor?.user.id == authStore.user.id"
-            :is-host="me.position == 1 && !isSpectating"
-            @close="openMenuFor = null"
-            :restart-fn="resetRoom"
-            :model-value="!!openMenuFor"
-            :mute-map="muteMap"
-            v-model:mute-emoji-map="muteEmojiMap"
-            :room="room"
-        />
-
-        <Totals
-            :our-score="ourScore"
-            :their-score="theirScore"
-            :our-wins="ourTeamWins"
-            :their-wins="theirTeamWins"
-            :our-courts="ourCourts"
-            :their-courts="theirCourts"
-            :our-goon-courts="ourGoonCourts"
-            :their-goon-courts="theirGoonCourts"
-            v-model="showTotals"
-            @close="showTotals = false"
-        />
-
-        <Chat
-            v-if="room"
-            :room="room"
-            :channel="channel"
-            :username="authStore.user.username"
-        />
-
-        <Reactions
-            :room="room"
-            :channel="channel"
-            :user="authStore.user"
-            :is-spectating="isSpectating"
-            :spectator-map="spectatorMap"
-            v-model:mute-emoji-map="muteEmojiMap"
-            v-if="channel"
-        />
-
-        <Communications
-            :room="room"
-            v-model:mute-map="muteMap"
-            v-model:mute-emoji-map="muteEmojiMap"
-            :channel="channel"
-            :is-spectating="isSpectating"
-            :spectator-map="spectatorMap"
-        />
-
-        <!-- Audio chat -->
-        <div
-            @click.stop
-            v-if="generalStore.hasUserInteracted"
-            class="items-center flex"
-        >
-            <AudioChat
-                :participants="room.participants"
-                :room-id="room.id"
-                is-self
-                :user-id="authStore.user.id"
-                v-model:mute-map="muteMap"
-                v-model:mute-emoji-map="muteEmojiMap"
-            />
-
-            <Microphone
-                :user-id="authStore.user.id"
-                is-self
-                v-model="isSpeaking"
-            />
+            <p class="text-2xl">Please rotate your phone</p>
         </div>
     </div>
 </template>
@@ -427,6 +459,7 @@ import { Channel } from "laravel-echo";
 import { useToast } from "../composables/useToast";
 import { useGeneralStore } from "../store/generalStore";
 import { useSoundSprite } from "../composables/useSoundSprite";
+import { useFullscreen, useScreenOrientation } from "@vueuse/core";
 
 const { dealer, setDeck } = useDealer();
 const toast = useToast();
@@ -1303,7 +1336,28 @@ const theirCourts = computed(() => {
         : room.value.team_2_4_courts;
 });
 
-onMounted(verifyRoom);
+const { isFullscreen, isSupported, enter } = useFullscreen();
+const { isSupported: isOrientationSupported, lockOrientation } =
+    useScreenOrientation();
+
+const goFullscreen = () => {
+    if (!isSupported.value || isFullscreen.value) return;
+    enter();
+};
+
+watch(isFullscreen, (val) => {
+    if (!val) {
+        enter();
+    } else {
+        if (!isOrientationSupported.value) return;
+        lockOrientation("landscape-primary");
+    }
+});
+
+onMounted(() => {
+    verifyRoom();
+    goFullscreen();
+});
 
 const ourScore = computed(
     () => (teammate.value?.sir_count || 0) + (me.value?.sir_count || 0)
