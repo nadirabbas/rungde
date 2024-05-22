@@ -1341,7 +1341,12 @@ const { isSupported: isOrientationSupported, lockOrientation } =
     useScreenOrientation();
 
 const goFullscreen = () => {
-    if (!isSupported.value || isFullscreen.value) return;
+    if (
+        !isSupported.value ||
+        isFullscreen.value ||
+        !generalStore.hasUserInteracted
+    )
+        return;
     enter();
 };
 
@@ -1353,6 +1358,15 @@ watch(isFullscreen, (val) => {
         lockOrientation("landscape-primary");
     }
 });
+
+watch(
+    () => generalStore.hasUserInteracted,
+    (val) => {
+        if (val) {
+            goFullscreen();
+        }
+    }
+);
 
 onMounted(() => {
     verifyRoom();
