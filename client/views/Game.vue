@@ -1342,6 +1342,7 @@ const { isSupported: isOrientationSupported, lockOrientation } =
 
 const goFullscreen = () => {
     if (
+        !isOrientationSupported.value ||
         !isSupported.value ||
         isFullscreen.value ||
         !generalStore.hasUserInteracted
@@ -1353,8 +1354,7 @@ const goFullscreen = () => {
 watch(isFullscreen, (val) => {
     if (!val) {
         enter();
-    } else {
-        if (!isOrientationSupported.value) return;
+    } else if (isOrientationSupported.value) {
         lockOrientation("landscape-primary");
     }
 });
