@@ -18,6 +18,7 @@ export default defineConfig({
             manifest: {
                 id: '/',
                 scope: '/',
+                description: 'Court piece multiplayer!',
                 name: 'Rung de',
                 short_name: 'Rung de',
                 theme_color: '#004e92',

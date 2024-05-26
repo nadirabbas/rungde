@@ -10,9 +10,10 @@ export const usePusher = (): Echo => {
     if (window.Echo) return window.Echo;
 
     window.Echo = new Echo({
-        broadcaster: "reverb",
+        broadcaster: import.meta.env.VITE_BROADCASTER,
         key: import.meta.env.VITE_PUSHER_APP_KEY,
         wsHost: import.meta.env.VITE_PUSHER_HOST,
+        cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
         wsPort: import.meta.env.VITE_PUSHER_PORT,
         wssPort: import.meta.env.VITE_PUSHER_PORT,
         forceTLS: (import.meta.env.VITE_PUSHER_SCHEME || "http") === "https",
